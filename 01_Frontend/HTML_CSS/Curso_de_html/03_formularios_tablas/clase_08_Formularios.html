@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+
+    <!-- La etiqueta de form nos sirve para realizar ciertas acciones al recolectar inforacion del usuario -->
+    <!-- El atributo action nos sirve para indicar la url a la que se enviara la informacion del formulario -->
+    <!-- El atributo method nos sirve para indicar el metodo que se usara para enviar la informacion del formulario -->
+    <!-- Los metodos mas comunes son GET y POST -->
+    <!-- GET es cuando la informacion se envia a traves de la url -->
+    <!-- POST es cuando la informacion se envia a traves del cuerpo de la peticion -->
+
+    <form action="" method="">
+
+        <!-- El label nos sirve para indicar que tipo de informacion se espera en el input -->
+        <!-- El atributo for nos sirve para indicar que input se relaciona con el label mediante el id del input -->
+        <div>
+            <label for="nombre">Nombre</label>
+            <input type="text" id="nombre" name="nombre">
+        </div>
+
+        <div>
+            <label for="email">Email</label>
+            <input type="email" name="email" id="email">
+        </div>
+
+        <div>
+            <label for="password">Password</label>
+            <input type="password" name="password" id="password">
+        </div>
+
+        <div>
+            <label for="numero">Numero</label>
+            <input type="number" name="numero" id="numero">
+        </div>
+
+        <div>
+            <label for="mensaje">Mensaje</label>
+            <textarea name="mensaje" id="mensaje" cols="30" rows="10"></textarea>
+        </div>
+
+        <button type="submit">Enviar</button>
+
+
+
+
+    </form>
+
+</body>
+
+</html>

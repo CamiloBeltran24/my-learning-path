@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <!DOCTYPE html>
+    <html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Accesibilidad</title>
+    </head>
+
+    <body>
+
+        <!-- aria (Accessible Rich Internet Applications) es una especificación ( atributos ) que permite mejorar la accesibilidad de las páginas web.
+        Añade semantica a los elemetos HTML. especialmente agregando un contexto adicional para
+        los usuarios que utilizan lectores de pantalla. -->
+
+        <!-- Botón con ícono sin texto -->
+        <button aria-label="Cerrar ventana">✕</button>
+
+        <!-- Navegación sin título visible -->
+        <header>
+            <nav aria-label="Menú pricipal">
+                <a href="#inicio">Inicio</a>
+                <a href="#productos">Productos</a>
+            </nav>
+        </header>
+
+        <!-- Input cuando el label no es suficiente -->
+        <input type="search" aria-label="Buscador de productos" />
+
+        <!-- Campo con instrucciones -->
+        <label for="password">Contraseña:</label>
+        <input type="password" id="password" aria-describedby="password-help" />
+        <small id="password-help">Mínimo 8 caracteres, incluya números y letras</small>
+
+        <!-- Imagen compleja con descripción -->
+        <img src="grafico.jpg" alt="Ventas 2024" aria-describedby="grafica-descripcion" />
+        <p id="grafica-descripcion">Las ventas aumentraron un 40% en el Q1</p>
+
+        <!-- Región principal -->
+        <div role="main">
+            <h3>Contenido principal de la sección</h3>
+            <p>Aquí va el contenido más importante de esta sección</p>
+        </div>
+
+        <!-- Alertas importantes -->
+        <div role="alert">¡Tu sesión expirará en 5 minutos!</div>
+
+    </body>
+
+    </html>
+</body>
+
+</html>

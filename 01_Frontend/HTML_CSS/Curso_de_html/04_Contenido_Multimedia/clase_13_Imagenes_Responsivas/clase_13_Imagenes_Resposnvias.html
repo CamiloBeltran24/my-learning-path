@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imagenes Resposnivas</title>
+</head>
+
+<body>
+
+    <img src="IMG/hero-400.jpg" alt="Vista Panoramica" srcset="
+        IMG/hero-400.jpg 400w,
+        IMG/hero-800.jpg 800w,
+        IMG/hero-1200.jpg 1200w,
+        " sizes="(max-width: 600px) 100vw, (max-width: 1200px) 50vw, 33vw">
+
+    <picture>
+        <source media="(min-width: 768px)" srcset="IMG/banner-desktop-800x400.jpg">
+        <source media="(min-width: 480px)" srcset="IMG/banner-tablet-600x300.jpg">
+        <img src="IMG/banner-movil-400x200.jpg" alt="Banner">
+    </picture>
+
+    <img src="IMG/producto-600.jpg" alt="Producto Destacado"
+        srcset="IMG/producto-300.jpg 300w, IMG/producto-600.jpg 600w" sizes="(max-width: 600px) 100vw, 600px"
+        loading="lazy" decoding="async" width="600" height="400">
+
+</body>
+
+</html>

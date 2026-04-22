@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tipos de Inputs</title>
+
+    <style>
+        input {
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            display: block;
+        }
+
+        label {
+            display: block;
+            margin-top: 50px;
+        }
+
+        fieldset,
+        div {
+            margin: 50px 0;
+
+            label,
+            input {
+                display: inline;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+
+    <form action="">
+
+
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password" required placeholder="Contraseña" minlength="8"
+            maxlength="16">
+
+        <label for="edad">Edad</label>
+        <input type="number" name="edad" id="edad" min="1" max="90" step="5" value="10">
+
+        <label for="fecha">Fecha</label>
+        <input type="date" name="fecha" id="fecha" min="2024-01-01" max="2026-12-31">
+
+        <label for="hora">Hora</label>
+        <input type="time" name="hora" id="hora">
+
+        <label for="fecha_hora">Fecha y Hora</label>
+        <input type="datetime-local" name="fecha_hora" id="fecha_hora">
+
+        <label for="color">Color</label>
+        <input type="color" name="color" id="color">
+
+        <label for="rango">Rango</label>
+        <input type="range" name="rango" id="rango">
+
+        <label for="archivo">Archivo</label>
+        <input type="file" name="archivo" id="archivo">
+
+        <label for="imagen">Imagen</label>
+        <input type="image" src="" alt="" id="imagen">
+
+        <label for="oculto">Oculto</label>
+        <input type="hidden" name="oculto" id="oculto">
+
+        <label for="reset">Reset</label>
+        <input type="reset" name="reset" id="reset">
+
+        <label for="submit">Submit</label>
+        <input type="submit" name="submit" id="submit">
+
+        <label for="boton">Boton</label>
+        <input type="button" name="boton" id="boton" value="Botoncito">
+
+        <label for="url">Url</label>
+        <input type="url" name="url" id="url">
+
+        <label for="search">Search</label>
+        <input type="search" name="search" id="search">
+
+        <label for="tel">Tel</label>
+        <input type="tel" name="tel" id="tel" placeholder="1234567890" pattern="[0-9]{10}" required>
+
+        <label for="week">Week</label>
+        <input type="week" name="week" id="week">
+
+        <label for="month">Month</label>
+        <input type="month" name="month" id="month">
+
+
+        <fieldset>
+            <legend>Género</legend>
+
+            <label for="radio1">Masculino</label>
+            <input type="radio" name="genero" id="radio1" value="M">
+
+            <label for="radio2">Femenino</label>
+            <input type="radio" name="genero" id="radio2" value="F">
+
+        </fieldset>
+
+        <fieldset>
+            <legend>Intereses:</legend>
+            <input type="checkbox" name="checkbox1" id="checkbox1" value="deportes">
+            <label for="checkbox1">Deportes</label>
+            <input type="checkbox" name="checkbox2" id="checkbox2" value="musica">
+            <label for="checkbox2">Musica</label>
+            <input type="checkbox" name="checkbox3" id="checkbox3" value="tecnologia">
+            <label for="checkbox3">Tecnologia</label>
+            <input type="checkbox" name="checkbox4" id="checkbox4" value="cine">
+            <label for="checkbox4">Cine</label>
+        </fieldset>
+
+        <div>
+            <label for="pais">Pais</label>
+            <select name="pais" id="pais">
+                <option value="colombia">Colombia</option>
+                <option value="peru">Peru</option>
+                <option value="ecuador">Ecuador</option>
+                <option value="venezuela">Venezuela</option>
+                <option value="chile">Chile</option>
+                <option value="argentina">Argentina</option>
+                <option value="brasil">Brasil</option>
+                <option value="uruguay">Uruguay</option>
+                <option value="paraguay">Paraguay</option>
+                <option value="bolivia">Bolivia</option>
+            </select>
+        </div>
+
+
+        <button type="submit">Enviar</button>
+    </form>
+</body>
+
+</html>

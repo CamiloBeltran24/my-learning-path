@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Videos y Audio</title>
+</head>
+
+<body>
+    <!-- Controls nos permite tener los controles del video (play, pausa, volumen, etc) -->
+    <!-- Preload MEtadata nos permite precargar solo los metadatos del video antes de que el usuario le de play  -->
+    <!-- Preload Auto nos permite precargar todo el video antes de que el usuario le de play  -->
+    <!-- Preload None nos permite no precargar el video antes de que el usuario le de play  -->
+    <!-- Poster nos permite mostrar una imagen antes de que el video se reproduzca -->
+    <!-- Autoplay nos permite reproducir el video automaticamente -->
+    <!-- Loop nos permite reproducir el video en bucle -->
+    <!-- Muted nos permite silenciar el video -->
+
+    <video src="multimedia/video.mp4" controls width="600" height="400"></video>
+
+
+    <video controls width="800" height="400" poster="IMG/banner-desktop-800x400 (1).jpg" preload="metadata">
+        <source src="multimedia/video.mp4" type="video/mp4">
+        <source src="multimedia/video.mov" type="video/mov">
+        Tu navegador no soporta videos HTML5
+    </video>
+
+
+    <audio src="multimedia/audio.mp3" controls></audio>
+
+    <audio controls preload="auto">
+        <source src="multimedia/audio.mp3" type="audio/mpeg">
+        <source src="multimedia/audio.wav" type="audio/wav">
+        Tu navegador no soporta audio HTML5
+    </audio>
+
+
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/zuT2_6frrUo?si=DJ1IYmsOjaBCcUnd&start=101"
+        title="YouTube video player" frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</body>
+
+</html>
