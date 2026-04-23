@@ -30,3 +30,6 @@ Establece restricciones claras que el modelo debe seguir, tales como la extensi�
 Proporciona la información de fondo o los datos necesarios para que el modelo pueda personalizar y aterrizar su respuesta a tu situación específica.
 
 > **Ejemplo:** *"Mi producto es un Software as a Service (SaaS) que automatiza el proceso contable de las empresas."*
+
+**📄 Con contexto (Archivos adjuntos):**
+> *"Te adjunto un PDF con el reporte financiero de mi empresa. Basándote únicamente en esos datos, enumera los 3 gastos más grandes y propón cómo reducirlos."*

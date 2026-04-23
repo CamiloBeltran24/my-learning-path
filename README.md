@@ -23,14 +23,14 @@ La lógica de negocio, servidores, APIs y gestión de datos.
 * [Python](./02_Backend/Python/) *(Próximamente)*
 * [Node.js](./02_Backend/Node_JS/) *(Próximamente)*
 
-### 📱 [3. Mobile](./03_Mobile/)
-Desarrollo de aplicaciones nativas para smartphones.
-* [Swift e iOS](./03_Mobile/Swift_iOS/) *(Próximamente)*
-
-### 🛠️ [4. Herramientas y Arquitectura](./04_Herramientas/)
+### 🛠️ [3. Herramientas y Arquitectura](./03_Tools_and_Architecture/)
 Las tecnologías y metodologías que uso para construir software.
-* Git y GitHub
-* Bases de Datos
+* Git y GitHub *(Próximamente)*
+* Bases de Datos *(Próximamente)*
+
+### 🤖 [4. Inteligencia Artificial](./04_Artificial_Intelligence/)
+Todo lo relacionado con IA y uso efectivo de modelos de lenguaje.
+* [Prompt Engineering](./04_Artificial_Intelligence/Prompt_Engineering/)
 
 ---
-*Hecho con ☕ y 💻 por [Tu Nombre/Usuario]*
+*Hecho con ☕ y 💻 por Christian Camilo*
