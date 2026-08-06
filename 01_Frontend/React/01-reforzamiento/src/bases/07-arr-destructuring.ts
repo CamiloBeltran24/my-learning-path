@@ -9,7 +9,7 @@ const [, p2] = characterNames
 console.log(p2)
 
 const [, , p3] = characterNames
-console.log(trunks)
+console.log(p3)
 
 const returnsArrayFn = () => {
     return ["ABC", 123] as const
