@@ -9,6 +9,7 @@ Esta guía contiene los apuntes de estudio y conceptos clave aprendidos durante 
 - [Clase 02: Template Strings](#clase-02-template-strings)
 - [Clase 03: Objetos Literales, Interfaces y Copias (Superficial vs. Profunda)](#clase-03-objetos-literales-interfaces-y-copias-superficial-vs-profunda)
 - [Clase 04: Arreglos (Arrays)](#clase-04-arreglos-arrays)
+- [Clase 05: Funciones y Retornos](#clase-05-funciones-y-retornos)
 
 ---
 
@@ -202,4 +203,65 @@ console.log({ myArray, myArray2, myArreglo3 });
 
 > [!IMPORTANT]
 > **Relevancia en React:** Cuando manejamos listas en el estado de un componente de React (por ejemplo, al renderizar elementos con `.map()`), nunca debemos usar métodos como `.push()` sobre el arreglo original del estado. Siempre debemos generar un nuevo arreglo usando el operador spread (`[...original, nuevoElemento]`) o métodos no mutadores para asegurar que React detecte los cambios de estado y vuelva a renderizar la interfaz de forma correcta.
+
+---
+
+## Clase 05: Funciones y Retornos
+👉 [Ver código de la clase](./01-reforzamiento/src/bases/05-functions.ts)
+
+Las funciones en JavaScript y TypeScript son bloques de código fundamentales y reutilizables. En TypeScript, podemos estructurar su comportamiento de manera estricta definiendo los tipos de datos de entrada y de retorno.
+
+### 🔑 Conceptos Clave:
+
+1. **Funciones Tradicionales vs. Funciones de Flecha (Arrow Functions)**:
+   - **Funciones Tradicionales**: Se declaran con la palabra reservada `function`. Tienen su propio contexto para la palabra reservada `this`.
+   - **Arrow Functions**: Se declaran usando la sintaxis `() => {}`. Son más compactas, no tienen su propio `this` (lo heredan del contexto donde fueron creadas), y son el estándar preferido en el desarrollo de React.
+
+2. **Retorno Implícito**:
+   - Si una función de flecha ejecuta una sola expresión y devuelve su resultado, se pueden omitir las llaves `{}` y la palabra clave `return`.
+   - **Para retornar objetos literales de forma implícita**, se deben envolver las llaves del objeto entre paréntesis `({ ... })` para que el intérprete no las confunda con el cuerpo de la función.
+
+3. **Tipado estricto en TypeScript**:
+   - Se debe definir el tipo de los argumentos de la función `(arg: tipo)`.
+   - El tipo de retorno de la función se especifica después de los parámetros `: tipo`. Si la función no retorna nada, se utiliza `: void`.
+   - Es buena práctica tipar los retornos con **Interfaces** cuando se devuelven estructuras de datos complejas.
+
+4. **Funciones como Argumentos (Callbacks)**:
+   - Las funciones en JavaScript son ciudadanos de primera clase, lo que significa que se pueden pasar como argumentos a otras funciones (callbacks).
+   - Métodos como `.forEach()`, `.map()`, `.filter()`, etc., aceptan callbacks. Si un callback solo recibe un argumento y este se pasa directamente a otra función, se puede simplificar pasando la referencia de la función (por ejemplo, `forEach(console.log)`).
+
+---
+
+### 💻 Ejemplo Práctico:
+
+```typescript
+// 🏷️ Definición de Interfaz para tipar el retorno
+interface User {
+    uid: string;
+    username: string;
+}
+
+// 1. Función Tradicional Tipada
+function greet(name: string): string {
+    return `Hola soy ${name}`;
+}
+
+// 2. Arrow Function Tipada
+const greet2 = (name: string): string => {
+    return `Hola ${name}`;
+};
+
+// 3. Arrow Function con Retorno Implícito de Objeto
+const getUser3 = (): User => ({
+    uid: 'ABC-123',
+    username: 'Elpapi_21',
+});
+
+// 4. Callback simplificado pasándole la referencia directa de console.log
+const myNumbers: number[] = [1, 2, 3, 4, 5];
+myNumbers.forEach(console.log); 
+```
+
+> [!IMPORTANT]
+> **Relevancia en React:** En React moderno, la inmensa mayoría de componentes son componentes funcionales (funciones que retornan JSX). Además, las arrow functions son esenciales para manejar eventos (como `onClick={() => handleAction()}`), y pasar funciones callback como *props* es el mecanismo principal para que un componente hijo notifique o envíe datos a su componente padre.
 
