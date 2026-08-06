@@ -10,6 +10,7 @@ Esta guía contiene los apuntes de estudio y conceptos clave aprendidos durante 
 - [Clase 03: Objetos Literales, Interfaces y Copias (Superficial vs. Profunda)](#clase-03-objetos-literales-interfaces-y-copias-superficial-vs-profunda)
 - [Clase 04: Arreglos (Arrays)](#clase-04-arreglos-arrays)
 - [Clase 05: Funciones y Retornos](#clase-05-funciones-y-retornos)
+- [Clase 06: Desestructuración de Objetos](#clase-06-desestructuración-de-objetos)
 
 ---
 
@@ -264,4 +265,75 @@ myNumbers.forEach(console.log);
 
 > [!IMPORTANT]
 > **Relevancia en React:** En React moderno, la inmensa mayoría de componentes son componentes funcionales (funciones que retornan JSX). Además, las arrow functions son esenciales para manejar eventos (como `onClick={() => handleAction()}`), y pasar funciones callback como *props* es el mecanismo principal para que un componente hijo notifique o envíe datos a su componente padre.
+
+---
+
+## Clase 06: Desestructuración de Objetos
+👉 [Ver código de la clase](./01-reforzamiento/src/bases/06-obj-destructuring.ts)
+
+La desestructuración de objetos en JavaScript y TypeScript permite extraer valores de propiedades de un objeto y asignarlos directamente a variables utilizando una sintaxis mucho más limpia y concisa.
+
+### 🔑 Conceptos Clave:
+
+1. **Desestructuración Básica y Renombrado**:
+   - Podemos extraer las propiedades directamente usando llaves: `const { name, age } = person`.
+   - Si deseamos que la variable tenga un nombre diferente al de la propiedad del objeto para evitar colisiones de nombres o mejorar el contexto, usamos dos puntos: `const { name: nuevoNombre } = person`.
+
+2. **Desestructuración en Parámetros de Funciones**:
+   - En lugar de recibir un objeto completo y desestructurarlo dentro de la función, podemos hacerlo directamente en la firma de la función: `const miFuncion = ({ name, age }: Hero) => {}`. Esto facilita la lectura del contrato de la función.
+
+3. **Propiedades Opcionales y Valores por Defecto**:
+   - En TypeScript, las interfaces pueden definir propiedades opcionales usando `?` (ej. `rank?: string`).
+   - Al desestructurar, podemos asignar un valor por defecto en caso de que la propiedad sea `undefined`: `const useContext = ({ rank = 'No Rank' }) => {}`.
+
+4. **Desestructuración Anidada**:
+   - Aunque es posible realizar desestructuraciones anidadas complejas en una sola línea (ej. `const { user: { name } } = context`), esto suele hacer que el código sea difícil de leer y mantener.
+   - **Buena práctica:** Es preferible realizar la desestructuración en pasos separados, extrayendo primero el objeto anidado y luego las propiedades que necesitamos de él.
+
+---
+
+### 💻 Ejemplo Práctico:
+
+```typescript
+interface Hero {
+    name: string;
+    age: number;
+    key: string;
+    rank?: string; // Propiedad opcional
+}
+
+const person: Hero = {
+    name: 'Tony',
+    age: 45,
+    key: 'Ironman',
+};
+
+// 1. Desestructuración básica con renombrado de variables
+const { name: ironmanName, age: ironmanAge, key } = person;
+console.log({ ironmanName, ironmanAge, key });
+
+// 2. Desestructuración en la firma del método
+const useContext = ({ name, age, key, rank = 'Recruit' }: Hero) => {
+    return {
+        keyName: key,
+        user: {
+            name,
+            age
+        },
+        userRank: rank
+    };
+};
+
+// 3. Desestructuración limpia paso a paso (evitando anidaciones complejas)
+const { keyName, user, userRank } = useContext(person);
+const { name } = user;
+const { age } = user;
+
+console.log({ keyName, name, age, userRank });
+```
+
+> [!IMPORTANT]
+> **Relevancia en React:** La desestructuración de objetos es una de las características más utilizadas en React. Se emplea de forma masiva para:
+> - Extraer las **Props** en la firma del componente (ej. `const Button = ({ label, onClick }) => {}`).
+> - Extraer los valores devueltos por hooks, como `const { state, error } = useMyCustomHook()`.
 

@@ -19,6 +19,9 @@ function getUser() {
     }
 }
 
+console.log(getUser());
+
+
 // const getUser2 = () => {
 //     return {
 //         uid: 'ABC-123',
@@ -31,6 +34,9 @@ const getUser3 = () => ({
     uid: 'ABC-123',
     username: 'Elpapi_21',
 })
+
+console.log(getUser3);
+
 
 interface User {
     uid: string,
