@@ -11,6 +11,7 @@ Esta guía contiene los apuntes de estudio y conceptos clave aprendidos durante 
 - [Clase 04: Arreglos (Arrays)](#clase-04-arreglos-arrays)
 - [Clase 05: Funciones y Retornos](#clase-05-funciones-y-retornos)
 - [Clase 06: Desestructuración de Objetos](#clase-06-desestructuración-de-objetos)
+- [Clase 07: Desestructuración de Arreglos (Arrays)](#clase-07-desestructuración-de-arreglos-arrays)
 
 ---
 
@@ -336,4 +337,69 @@ console.log({ keyName, name, age, userRank });
 > **Relevancia en React:** La desestructuración de objetos es una de las características más utilizadas en React. Se emplea de forma masiva para:
 > - Extraer las **Props** en la firma del componente (ej. `const Button = ({ label, onClick }) => {}`).
 > - Extraer los valores devueltos por hooks, como `const { state, error } = useMyCustomHook()`.
+
+---
+
+## Clase 07: Desestructuración de Arreglos (Arrays)
+👉 [Ver código de la clase](./01-reforzamiento/src/bases/07-arr-destructuring.ts)
+
+La desestructuración de arreglos en JavaScript y TypeScript permite extraer elementos de un arreglo y asignarlos a variables individuales basándose en su **posición ordenada** (índice) dentro de la colección.
+
+### 🔑 Conceptos Clave:
+
+1. **Posición e Índices**:
+   - A diferencia de los objetos (donde los valores se extraen por su nombre de clave), en los arreglos la asignación se hace estrictamente por su orden posicional: `const [ primerElemento, segundoElemento ] = miArreglo`.
+
+2. **Ignorar/Omitir Elementos**:
+   - Si no estamos interesados en los primeros elementos del arreglo y deseamos saltar a una posición específica, podemos dejar los espacios vacíos separados por comas: `const [ , , tercerElemento ] = miArreglo`.
+
+3. **Tipado estricto con Tuplas (`as const`)**:
+   - En TypeScript, las funciones que devuelven arreglos con tipos mixtos (ej. `[string, (val: string) => void]`) suelen ser inferidas como arreglos generales `(string | Function)[]`.
+   - Para resolver esto y tener un tipado estricto posicional, podemos usar `as const` al final de la expresión de retorno. Esto le indica al compilador de TypeScript que trate el arreglo como una **tupla de solo lectura** (`readonly`), lo que preserva el tipo específico de cada posición del arreglo.
+
+---
+
+### 💻 Ejemplo Práctico:
+
+```typescript
+const characterNames = ['Goku', 'Vegueta', 'Trunks'];
+
+// 1. Extraer elementos por posición ordenada
+const [ goku, vegueta, trunks ] = characterNames;
+console.log(goku, vegueta, trunks); // Goku Vegueta Trunks
+
+// 2. Extraer ignorando elementos anteriores mediante comas
+const [, p2] = characterNames; // Ignora el índice 0, extrae el índice 1
+console.log(p2); // Vegueta
+
+const [, , p3] = characterNames; // Ignora los índices 0 y 1, extrae el 2
+console.log(p3); // Trunks
+
+// 3. Retorno de tuplas tipadas con 'as const'
+const returnsArrayFn = () => {
+    return ["ABC", 123] as const; // Define una tupla de lectura estricta
+};
+
+const [letters, numbers] = returnsArrayFn();
+console.log(letters, numbers); // ABC 123
+console.log(numbers + 100); // Permitido porque 'numbers' se infiere como tipo number (gracias a 'as const')
+
+// 4. Implementación de una simulación de useState
+const useState = (name: string) => {
+    return [
+        name,
+        (newValue: string) => {
+            console.log(newValue);
+        }
+    ] as const;
+};
+
+const [ name, setName ] = useState('Goku');
+console.log(name); // Goku
+setName('Vegueta'); // Imprime: Vegueta
+```
+
+> [!IMPORTANT]
+> **Relevancia en React:** La desestructuración de arreglos es la base de uno de los hooks más esenciales de React: `useState`. Al llamar a `useState('valor')`, React nos devuelve un arreglo con exactamente dos elementos: el valor del estado en la posición `0`, y la función para actualizarlo en la posición `1`. La desestructuración nos permite nombrarlos de manera libre y limpia:
+> `const [ count, setCount ] = useState(0);`
 
