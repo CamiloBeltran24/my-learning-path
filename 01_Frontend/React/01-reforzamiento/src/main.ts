@@ -6,9 +6,18 @@ import './style.css'
 // import './bases/05-functions'
 // import './bases/06-obj-destructuring'
 // import './bases/07-arr-destructuring'
-import './bases/08-imp-exp';
+
+// import { Owner } from './data/heroes.data';
+// import { getHeroByOwner } from './bases/08-imp-exp';
+
+// import './bases/08-imp-exp';
+
+import "./bases/09-promises";
+
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div>
     <h1>Reforzamiento de JavaScript y TypeScript</h1>
   </div>
 `
+
+// console.log( getHeroByOwner(Owner.DC) )

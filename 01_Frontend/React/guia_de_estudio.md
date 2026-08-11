@@ -13,6 +13,7 @@ Esta guía contiene los apuntes de estudio, explicaciones detalladas y conceptos
 - [Clase 06: Desestructuración de Objetos (Object Destructuring)](#clase-06-desestructuraci%C3%B3n-de-objetos-object-destructuring)
 - [Clase 07: Desestructuración de Arreglos (Arrays) y Tuplas](#clase-07-desestructuraci%C3%B3n-de-arreglos-arrays-y-tuplas)
 - [Clase 08: Importaciones, Exportaciones y Métodos de Arreglos con Enums](#clase-08-importaciones-exportaciones-y-m%C3%A9todos-de-arreglos-con-enums)
+- [Clase 09: Promesas (Promises)](#clase-09-promesas-promises)
 
 ---
 
@@ -430,7 +431,7 @@ En esta clase organizamos la lógica separando los datos del código que los pro
 
 ### 📂 La Analogía del Menú y la Cocina
 *   **Módulos (Import/Export)**: Es como separar la despensa de la cocina. No guardas los ingredientes crudos encima de la estufa. Tienes un cuarto de despensa separado (`heroes.data.ts`) y cuando la cocina (`08-imp-exp.ts`) necesita tomates, va y los **importa**.
-*   **Enums (El menú con opciones fijas)**: Imagina un restaurante donde solo puedes pedir Coca-Cola, Fanta o Agua. En lugar de dejar que el cliente escriba a mano *"Coka-Cola"*, *"CocaCola"* o *"coke"* (lo cual generaría errores en el sistema), le das un menú de opciones fijas y pre-validadas.
+*   **Enums (El menú con opciones fijas)**: Imagina un restaurante donde solo puedes pedir Coca-Cola, Fanta o Agua. En lugar de dejar que el cliente escriba a mano *"Coke"* de formas inconsistentes, le das un menú de opciones fijas y pre-validadas.
 
 ---
 
@@ -438,15 +439,15 @@ En esta clase organizamos la lógica separando los datos del código que los pro
 
 1.  **Exportaciones Nombradas (`export`)**: Permiten exportar múltiples variables o funciones de un archivo. Al importarlas, debes llamarlas por su nombre exacto dentro de llaves: `import { heroes } from './path'`.
 2.  **Exportación por Defecto (`export default`)**: Es el elemento principal que exporta un archivo. Solo puede haber uno por archivo y se importa sin llaves, pudiendo renombrarse libremente.
-3.  **Métodos de Arreglo para Búsquedas**:
-    *   **`.find()`**: Busca y devuelve **el primer** elemento que coincida con la condición. Si no encuentra nada, devuelve `undefined`.
-    *   **`.filter()`**: Busca y devuelve **un nuevo arreglo** con todos los elementos que coincidan. Si no coincide ninguno, devuelve un arreglo vacío `[]`.
-4.  **Enums en TypeScript**:
+3.  **Enums en TypeScript**:
     *   A diferencia de las interfaces, los `enum` **sí generan código JavaScript real** cuando se compila la aplicación.
     *   **Detalle de Configuración:** En proyectos modernos con Vite y TypeScript, el compilador puede dar errores si intentas usar enums con configuraciones estrictas de borrado de sintaxis. Para permitir su uso, debes tener en tu archivo `tsconfig.json`:
         ```json
         "erasableSyntaxOnly": false
         ```
+4.  **Enfoque Imperativo vs. Enfoque Declarativo**:
+    *   **Imperativo (Cómo hacer las cosas)**: Le especificas al computador cada paso exacto y detallado para lograr el objetivo. Requiere que declares variables mutables y gestiones bucles manualmente.
+    *   **Declarativo (Qué hacer)**: Le dices al computador qué resultado quieres obtener y dejas que los métodos de JavaScript hagan el trabajo sucio. No muta datos y es el enfoque estándar preferido en React.
 
 ---
 
@@ -463,7 +464,7 @@ export interface Hero {
 // 🏷️ Definición del Enum (Lista cerrada de creadores de cómics)
 export enum Owner {
     DC = 'DC',
-    Marvel = 'MArvel' // Nótese el valor asignado con el error ortográfico intencional
+    Marvel = 'Marvel' // El valor original corregido
 }
 
 // Exportación nombrada de la constante 'heroes'
@@ -481,22 +482,103 @@ export default heroes;
 
 #### 🛠️ Archivo de Lógica (`src/bases/08-imp-exp.ts`):
 ```typescript
-// 📥 Importación combinada: 
-// - heroes (Por defecto, sin llaves, renombrado si se desea)
-// - Owner y Hero (Exportaciones nombradas, dentro de llaves)
 import heroes, { Owner, type Hero } from "../data/heroes.data";
 
-// 🔍 Buscar un único héroe por ID usando .find()
+// 🔍 Buscar un único héroe por ID usando .find() (Método Declarativo)
 const getHeroById = (id: number): Hero | undefined => {
     return heroes.find( (hero) => hero.id === id );
 };
 
-// 🔍 Filtrar múltiples héroes por propietario usando .filter()
-const getHeroesByOwner = (owner: Owner): Hero[] => {
+// ==========================================
+// ⚔️ TAREA: IMPERATIVO vs DECLARATIVO
+// ==========================================
+
+// 1. Solución Imperativa (Mi Solución):
+// Creamos una lista mutable temporal y recorremos uno por uno agregando los elementos.
+// Estamos diciéndole a JS el paso a paso ("cómo hacerlo").
+export const getHeroByOwner = (owner: Owner) : Hero[] => {
+    console.log(owner);
+    let newHeroes: Hero[] = []; // Arreglo mutable intermedio
+
+    heroes.forEach( (hero) => {
+        if(hero.owner === owner) {
+            newHeroes.push(hero); // Mutación manual del arreglo
+        }
+    });
+
+    return newHeroes;
+}
+
+// 2. Solución Declarativa (Solución del Profesor):
+// Usamos el método .filter(). Solo definimos qué queremos lograr (filtrar por el owner).
+// Es mucho más corta, limpia y no muta ninguna variable intermedia. ¡La preferida en React!
+export const getHeroesByOwner = (owner: Owner) => {
     return heroes.filter( (hero) => hero.owner === owner );
-};
+}
 
 console.log( getHeroById(4) ); // Devuelve el objeto de Flash
-console.log( getHeroesByOwner(Owner.DC) ); // Devuelve una lista con Batman, Superman y Flash
-console.log( getHeroesByOwner(Owner.Marvel) ); // Devuelve una lista con Spiderman y Wolverine
+console.log( getHeroesByOwner(Owner.DC) ); // Devuelve [Batman, Superman, Flash]
 ```
+
+> [!NOTE]
+> **Por qué preferir la Declaratividad en React:** Al evitar mutar variables internas y delegar la lógica a métodos funcionales como `.filter()`, `.map()`, o `.find()`, hacemos que nuestro código sea menos propenso a efectos secundarios y más fácil de depurar en arquitecturas de datos inmutables como la de React.
+
+---
+
+## Clase 09: Promesas (Promises)
+👉 [Ver código de la clase](./01-reforzamiento/src/bases/09-promises.ts)
+
+Las promesas son objetos que representan una operación asíncrona. Nos permiten ejecutar código que toma tiempo en completarse (como traer información del servidor) sin congelar la aplicación en el navegador.
+
+### 🤝 La Analogía de la Promesa Financiera
+Imagina que un amigo te pide $100 pesos prestados y te dice: *"Te prometo que te los devolveré en 2 días"*.
+1.  **Estado Pendiente (Pending)**: Desde que le prestas el dinero hasta que pasan los 2 días, la promesa está en el aire. No sabes si te pagará o no.
+2.  **Estado Resuelto (Fulfilled/Resolved - `.then()`)**: Dos días después, tu amigo llega con el dinero. La promesa se cumplió con éxito. Tú recibes el dinero y haces cosas con él (ej: comprar un café).
+3.  **Estado Rechazado (Rejected - `.catch()`)**: Tu amigo regresa sin dinero y te dice: *"Lo siento, perdí mi cartera"*. La promesa falló. Debes manejar este problema (ej: enojarte o perdonar la deuda).
+4.  **Estado Finalizado (Finally - `.finally()`)**: Pase lo que pase (si te devolvió el dinero o no), tú debes seguir con tu día a día (ej: ir a trabajar).
+
+---
+
+### 🔑 Conceptos Clave:
+
+1.  **Asincronía**: JavaScript ejecuta el código línea por línea. Sin embargo, cuando se topa con una operación asíncrona (como `setTimeout` o una llamada a base de datos), la manda a una "lista de espera" (Event Loop) para que se procese en segundo plano y no bloquee el resto del programa.
+2.  **Genéricos en Promesas (`Promise<Tipo>`)**: En TypeScript, definimos el tipo de dato que va a retornar la promesa cuando sea exitosa usando la sintaxis angular `<Tipo>`. Esto permite que el argumento del método `.then()` esté correctamente tipado.
+3.  **Estructura de Consumo**:
+    *   **`.then(callback)`**: Se ejecuta cuando la promesa se resuelve exitosamente.
+    *   **`.catch(callback)`**: Se ejecuta cuando la promesa falla o es rechazada.
+    *   **`.finally(callback)`**: Se ejecuta siempre al final, independientemente del éxito o fracaso de la promesa.
+
+---
+
+### 💻 Código de la Clase Ilustrado:
+```typescript
+// 1. Creación de la promesa
+// Indicamos con <number> que cuando la promesa se resuelva, devolverá un número.
+const myPromise = new Promise<number>((resolve, reject) => {
+    setTimeout(() => {
+        // resolve(100); // Si la promesa es exitosa, devolvemos 100
+        
+        // Simulamos un rechazo de la promesa
+        reject('Mi amigo se perdió con el dinero'); 
+    }, 2000); // Se ejecutará después de 2 segundos (2000 milisegundos)
+});
+
+// 2. Consumo de la promesa
+myPromise
+    .then((miMoney) => {
+        // miMoney es de tipo number gracias al tipado genérico <number>
+        console.log(`Tengo mi dinero: $${miMoney}`);
+    })
+    .catch((reason) => {
+        // reason contiene el texto enviado en el reject()
+        console.warn(reason); // Imprime la advertencia: 'Mi amigo se perdió con el dinero'
+    })
+    .finally(() => {
+        // Se ejecuta siempre, ideal para limpiar cargadores o pantallas de carga
+        console.log('Sigo con mi vida :)');
+    });
+```
+
+> [!IMPORTANT]
+> **Relevancia en React:** Cuando realizamos peticiones HTTP (por ejemplo, fetching de APIs usando `fetch()` o `axios`), estamos interactuando directamente con promesas. Es común usar el bloque `.finally()` para apagar estados de carga del tipo `setIsLoading(false)`, de modo que la animación de carga se detenga sin importar si la petición HTTP fue exitosa o falló.
+
