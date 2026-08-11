@@ -5,8 +5,8 @@ import './style.css'
 // import './bases/04-arrays'
 // import './bases/05-functions'
 // import './bases/06-obj-destructuring'
-import './bases/07-arr-destructuring'
-
+// import './bases/07-arr-destructuring'
+import './bases/08-imp-exp';
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div>
     <h1>Reforzamiento de JavaScript y TypeScript</h1>
