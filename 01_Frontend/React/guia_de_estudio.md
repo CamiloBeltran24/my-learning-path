@@ -14,6 +14,7 @@ Esta guía contiene los apuntes de estudio, explicaciones detalladas y conceptos
 - [Clase 07: Desestructuración de Arreglos (Arrays) y Tuplas](#clase-07-desestructuraci%C3%B3n-de-arreglos-arrays-y-tuplas)
 - [Clase 08: Importaciones, Exportaciones y Métodos de Arreglos con Enums](#clase-08-importaciones-exportaciones-y-m%C3%A9todos-de-arreglos-con-enums)
 - [Clase 09: Promesas (Promises)](#clase-09-promesas-promises)
+- [Clase 10: Fetch API](#clase-10-fetch-api)
 
 ---
 
@@ -581,4 +582,126 @@ myPromise
 
 > [!IMPORTANT]
 > **Relevancia en React:** Cuando realizamos peticiones HTTP (por ejemplo, fetching de APIs usando `fetch()` o `axios`), estamos interactuando directamente con promesas. Es común usar el bloque `.finally()` para apagar estados de carga del tipo `setIsLoading(false)`, de modo que la animación de carga se detenga sin importar si la petición HTTP fue exitosa o falló.
+
+---
+
+## Clase 10: Fetch API
+👉 [Ver código de la clase](./01-reforzamiento/src/bases/10-fetch-api.ts)
+
+La **Fetch API** es una interfaz nativa de los navegadores modernos que nos permite realizar peticiones HTTP (traer información de bases de datos, APIs de terceros, etc.) de forma asíncrona usando promesas.
+
+---
+
+### 📦 La Analogía del Cartero y el Paquete Sellado
+Para entender por qué `fetch` funciona como lo hace, imagina que quieres comprar un libro en una tienda online:
+
+1. **La Petición (`fetch`)**: Envías una orden de compra por internet. El cartero (`fetch`) viaja a la bodega de la tienda (el servidor o API).
+2. **El Primer `.then()` (El Paquete Sellado - `Response`)**: El cartero vuelve sumamente rápido y te entrega una **caja de cartón sellada** (el objeto `Response`). Esta caja tiene una etiqueta de envío por fuera que te dice si la entrega fue exitosa o no (el código de estado HTTP, por ejemplo, `200 OK` o `404 Not Found`). Sin embargo, **aún no puedes ver ni leer el libro** porque la caja sigue cerrada.
+3. **El Segundo `.then()` (Desempacar el Contenido - `response.json()`)**: Para poder leer el libro, necesitas abrir la caja y sacar el contenido. Esta acción de "desempacar" y traducir el contenido de texto plano JSON a un objeto que JavaScript entienda (`response.json()`) toma un pequeño momento. Por lo tanto, ¡es otra promesa! Una vez abierta la caja, finalmente tienes los datos reales en tus manos (`data`) para usarlos en tu programa.
+
+---
+
+### 🔑 Conceptos Clave:
+
+1. **¿Por qué son necesarios dos `.then()`?**:
+   - El primer `.then()` recibe la cabecera de la respuesta HTTP tan pronto como el servidor responde. En este punto, el cuerpo de los datos (que puede ser muy pesado, como imágenes o listas largas) todavía podría estar transmitiéndose.
+   - Para esperar a que se complete la descarga y parsear el contenido a formato JSON, llamamos a `response.json()`, lo cual genera una **segunda promesa**.
+   
+2. **Encadenamiento de Promesas (Promise Chaining)**:
+   - Evita el **Promise Hell** (anidar promesas una dentro de otra, lo cual hace el código difícil de leer).
+   - En JavaScript, si un `.then()` retorna una promesa (como `response.json()`), puedes enganchar el siguiente `.then()` inmediatamente abajo, al mismo nivel. El resultado resuelto de la promesa retornada será el argumento del siguiente `.then()`.
+
+3. **Tipado de la Respuesta (`TypeScript`)**:
+   - Cuando trabajamos con TypeScript, es fundamental tipar los datos que recibimos de la API para tener autocompletado y evitar errores de escritura (por ejemplo, escribir mal la propiedad de un objeto).
+   - En el código de la clase, esto lo logramos desestructurando el resultado y asignando el tipo `{ data }: GiphyRandomResponse`.
+
+---
+
+### 💻 Código de la Clase Ilustrado:
+
+#### ❌ La Forma Anidada (Evitar - Produce código espagueti)
+```typescript
+const API_KEY = "b2niNO6mLP7izOfU6vrYV3XDOxmYBUAo";
+
+// ⚠️ No hagas esto. Anidar un .then dentro de otro recrea el Callback Hell.
+fetch(`https://api.giphy.com/v1/gifs/random?api_key=${API_KEY}`)
+    .then((response) => {
+        response.json().then((data) => {
+            console.log(data); // El código se empieza a mover hacia la derecha
+        });
+    });
+```
+
+#### 🚀 La Forma Correcta: Encadenamiento de Promesas (Promise Chaining)
+```typescript
+import type { GiphyRandomResponse } from "../data/giphy.response";
+
+const API_KEY = "b2niNO6mLP7izOfU6vrYV3XDOxmYBUAo";
+
+// 1. Iniciamos la petición HTTP (Retorna una promesa con el Response)
+const myRequest = fetch(`https://api.giphy.com/v1/gifs/random?api_key=${API_KEY}&tag=&rating=g`);
+
+// Función auxiliar para insertar una imagen en la pantalla
+const createImageUrl = (imageUrl: string) => {
+    const imageElement = document.createElement('img');
+    imageElement.src = imageUrl;
+    document.body.append(imageElement);
+};
+
+// Consumo limpio y encadenado
+myRequest
+    .then((response) => {
+        // Retornamos la promesa que convierte la respuesta a JSON
+        return response.json(); 
+    })
+    .then(({ data }: GiphyRandomResponse) => {
+        // Recibimos los datos convertidos y tipados. Extraemos la URL del GIF
+        const imageUrl = data.images.original.url;
+        
+        // Creamos y agregamos la imagen al HTML
+        createImageUrl(imageUrl);
+    })
+    .catch((error) => {
+        // Atrapa cualquier error ocurrido en la petición o en la conversión a JSON
+        console.error('Ocurrió un error:', error);
+    });
+```
+
+---
+
+### ⚛️ Relevancia en React
+
+En React, realizar peticiones HTTP directamente en el cuerpo de un componente es una **mala práctica** porque se ejecutaría en cada ciclo de renderizado, provocando peticiones infinitas y bloqueos de rendimiento.
+
+En su lugar, Fetch API se utiliza combinada con:
+1. **`useEffect`**: Para realizar la petición únicamente cuando el componente se monta por primera vez en la pantalla.
+2. **`useState`**: Para almacenar los datos recibidos (por ejemplo, la URL del GIF) en el estado del componente. Cuando el estado cambia con la respuesta de la API, React redibuja la pantalla con la nueva información de manera automática.
+
+**Ejemplo conceptual en React:**
+```jsx
+import { useState, useEffect } from 'react';
+
+const GifApp = () => {
+    const [gifUrl, setGifUrl] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        fetch(`https://api.giphy.com/v1/gifs/random?api_key=TU_API_KEY`)
+            .then(res => res.json())
+            .then(({ data }) => {
+                setGifUrl(data.images.original.url);
+            })
+            .catch(err => console.error(err))
+            .finally(() => setIsLoading(false)); // Apaga el cargador sin importar si tuvo éxito o falló
+    }, []); // Arreglo de dependencias vacío = solo se ejecuta al montar
+
+    if (isLoading) return <p>Cargando GIF...</p>;
+
+    return (
+        <div>
+            <img src={gifUrl} alt="Random Gif" />
+        </div>
+    );
+};
+```
 

@@ -16,7 +16,7 @@ Navega por las diferentes tecnologías haciendo clic en las categorías (la estr
 Todo lo relacionado con las interfaces de usuario, la web estática y dinámica.
 * [Apuntes de HTML y CSS](./01_Frontend/HTML_CSS/) 
 * [Javascript](./01_Frontend/Javascript/) *(Próximamente)*
-* [React JS](./01_Frontend/React/) *(Próximamente)*
+* [React JS](./01_Frontend/React/) - [Guía de Estudio](./01_Frontend/React/guia_de_estudio.md)
 
 ### ⚙️ [2. Backend](./02_Backend/)
 La lógica de negocio, servidores, APIs y gestión de datos.
