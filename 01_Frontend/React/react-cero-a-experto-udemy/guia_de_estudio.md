@@ -5,6 +5,8 @@ Esta guía contiene los apuntes de estudio, explicaciones detalladas y conceptos
 ---
 
 ## 📂 Índice de Clases
+
+### 🛠️ Reforzamiento de TypeScript
 - [Clase 01: Variables y Constantes (`let` & `const`) y Métodos de Strings](#clase-01-variables-y-constantes-let--const-y-m%C3%A9todos-de-strings)
 - [Clase 02: Template Strings (Plantillas de Texto)](#clase-02-template-strings-plantillas-de-texto)
 - [Clase 03: Objetos Literales, Interfaces y Copias (Superficial vs. Profunda)](#clase-03-objetos-literales-interfaces-y-copias-superficial-vs-profunda)
@@ -16,6 +18,9 @@ Esta guía contiene los apuntes de estudio, explicaciones detalladas y conceptos
 - [Clase 09: Promesas (Promises)](#clase-09-promesas-promises)
 - [Clase 10: Fetch API](#clase-10-fetch-api)
 - [Clase 11: Async / Await](#clase-11-async-await)
+
+### ⚛️ Fundamentos de React
+*(Por empezar)*
 
 ---
 
