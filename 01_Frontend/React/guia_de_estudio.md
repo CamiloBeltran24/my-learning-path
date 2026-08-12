@@ -15,6 +15,7 @@ Esta guía contiene los apuntes de estudio, explicaciones detalladas y conceptos
 - [Clase 08: Importaciones, Exportaciones y Métodos de Arreglos con Enums](#clase-08-importaciones-exportaciones-y-m%C3%A9todos-de-arreglos-con-enums)
 - [Clase 09: Promesas (Promises)](#clase-09-promesas-promises)
 - [Clase 10: Fetch API](#clase-10-fetch-api)
+- [Clase 11: Async / Await](#clase-11-async-await)
 
 ---
 
@@ -704,4 +705,131 @@ const GifApp = () => {
     );
 };
 ```
+
+---
+
+## Clase 11: Async / Await
+👉 [Ver código de la clase](./01-reforzamiento/src/bases/11-async-await.ts)
+
+La combinación de las palabras clave `async` y `await` es una mejora de sintaxis (conocida como *syntactic sugar*) introducida en JavaScript para facilitar el trabajo con **promesas**, permitiéndonos escribir código asíncrono que se lee casi exactamente como si fuera síncrono.
+
+---
+
+### 📦 La Analogía del Cajero de Supermercado
+Para entender la diferencia entre promesas clásicas y `async/await`, imagina que vas a hacer tus compras:
+
+*   **Con Promesas Clásicas (`.then()`)**: Llegas a la caja de cobro, colocas tus productos y el cajero te dice: *"Esto va a tardar un poco. Ve a la sala de espera y te llamo cuando esté listo (el callback del `.then`)"*. Tú te vas a sentar y tienes que estar pendiente de cuándo te llaman. Esto puede volverse complejo cuando tienes que encadenar múltiples trámites seguidos (el cartero, la caja, el empaque...).
+*   **Con `async / await`**:
+    *   **`async` (El súper poder de esperar)**: Al declarar una función con `async`, colocas un cartel en la puerta que dice: *"Dentro de esta función ocurren cosas asíncronas y tengo el poder de pausar la ejecución en ciertos puntos"*.
+    *   **`await` (La espera en la caja)**: Colocar la palabra `await` antes de una promesa es como si te quedaras parado frente al cajero esperando a que termine su proceso de cobro. **La ejecución del código dentro de tu función se detiene** de forma no bloqueante en esa línea exacta hasta que el cajero te entrega el recibo (la promesa se resuelve). En cuanto la entrega termina, continúas con la siguiente línea de código inmediatamente abajo.
+    *   **No bloquea el navegador**: Aunque tu función esté "esperando" en esa línea de código, el navegador no se congela. JavaScript sigue atendiendo a otros clientes y procesos del sitio web en segundo plano de manera normal.
+
+---
+
+### 🔑 Conceptos Clave para Juniors y Principiantes:
+
+1.  **Regla de Oro: Pareja Inseparable 🤝**:
+    *   Solo puedes usar el operador `await` dentro de funciones que tengan la palabra clave `async` al inicio de su declaración. Si intentas poner `await` en una función normal, TypeScript detectará un error y tu código no compilará.
+2.  **Las funciones `async` siempre devuelven una Promesa 🎁**:
+    *   Toda función con `async` está obligada a retornar una promesa. Incluso si en tu código escribes `return "Hola Mundo";`, JavaScript lo envolverá automáticamente dentro de una promesa que se resuelve con ese texto (`Promise<string>`).
+    *   Por esta razón, al llamar a una función `async` desde fuera, debes usar `.then()` o usar `await` dentro de otra función asíncrona.
+3.  **Manejo de Errores con `try / catch` 🛡️**:
+    *   En las promesas tradicionales usábamos el método `.catch()`. Con `async/await` no hay un método `.catch()` directo en el flujo lineal.
+    *   Para atrapar errores (por ejemplo, si te quedas sin conexión a internet), debes envolver tu código en un bloque `try {} catch (error) {}`. Si algo falla dentro del `try`, el programa saltará de inmediato al bloque `catch` para que puedas controlar el error sin que la aplicación se caiga.
+
+---
+
+### 💻 Código de la Clase Ilustrado:
+
+Vamos a ver cómo simplificamos la petición de Giphy que creamos en la clase anterior:
+
+#### 📜 Código Paso a Paso:
+```typescript
+import type { GiphyRandomResponse } from "../data/giphy.response";
+
+const API_KEY = "b2niNO6mLP7izOfU6vrYV3XDOxmYBUAo";
+
+// Función auxiliar para renderizar la imagen en el DOM
+const createImageUrl = (imageUrl: string) => {
+    const imageElement = document.createElement('img');
+    imageElement.src = imageUrl;
+    document.body.append(imageElement);
+};
+
+// 1. Declaramos la función asíncrona indicando que retornará un Promise<string>
+const getRandomGifUrl = async (): Promise<string> => {
+    
+    // try/catch para controlar cualquier fallo de red o parseo de datos
+    try {
+        // 2. Hacemos el fetch y ESPERAMOS a que el servidor responda
+        const response = await fetch(`https://api.giphy.com/v1/gifs/random?api_key=${API_KEY}&tag=&rating=g`);
+        
+        // 3. ESPERAMOS a que finalice la descarga del cuerpo JSON y lo desestructuramos
+        const { data }: GiphyRandomResponse = await response.json();
+
+        // 4. Retornamos la URL. Aunque aquí retornamos un string plano, 
+        // al estar dentro de una función 'async', automáticamente devuelve un Promise<string>
+        return data.images.original.url;
+        
+    } catch (error) {
+        console.error('Error al obtener el GIF:', error);
+        throw new Error('No se pudo obtener el GIF');
+    }
+};
+
+// 5. Consumo de la función: como devuelve una promesa, la resolvemos usando .then()
+getRandomGifUrl()
+    .then(createImageUrl)
+    .catch(error => console.error('Error en el flujo principal:', error));
+```
+
+---
+
+### ⚛️ Relevancia en React
+
+En el desarrollo diario con React, `async/await` es el estándar preferido para hacer llamadas a APIs porque hace que el código de carga sea mucho más limpio que usar encadenamiento de `.then()`.
+
+Aquí puedes ver cómo reescribiríamos el componente de la clase anterior de forma mucho más legible:
+
+```jsx
+import { useState, useEffect } from 'react';
+
+const GifApp = () => {
+    const [gifUrl, setGifUrl] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
+    const [hasError, setHasError] = useState(false);
+
+    useEffect(() => {
+        // En useEffect no se puede poner 'async' directamente en la función de callback.
+        // Se debe crear una función asíncrona interna y llamarla de inmediato:
+        const fetchGif = async () => {
+            try {
+                const response = await fetch(`https://api.giphy.com/v1/gifs/random?api_key=TU_API_KEY`);
+                const { data } = await response.json();
+                setGifUrl(data.images.original.url);
+            } catch (error) {
+                console.error(error);
+                setHasError(true);
+            } finally {
+                setIsLoading(false); // Se ejecuta tanto si sale bien como si hay error
+            }
+        };
+
+        fetchGif();
+    }, []); // Solo se ejecuta al montar el componente
+
+    if (isLoading) return <p>Cargando GIF...</p>;
+    if (hasError) return <p>Hubo un error cargando el GIF.</p>;
+
+    return (
+        <div>
+            <img src={gifUrl} alt="Random Gif" />
+        </div>
+    );
+};
+```
+
+> [!TIP]
+> **Consejo de React:** Nota que no puedes declarar el callback del hook `useEffect` como asíncrono directamente (por ejemplo: `useEffect(async () => { ... })`). Esto se debe a que React espera que `useEffect` retorne o bien nada (`undefined`) o bien una función de limpieza (*cleanup function*). Como las funciones `async` siempre devuelven una promesa, React daría un error. Por eso la práctica recomendada es crear una función asíncrona dentro del hook y mandarla llamar, como hicimos en `const fetchGif = async () => { ... }`.
+
 
