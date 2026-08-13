@@ -24,6 +24,7 @@ Esta guía contiene los apuntes de estudio, explicaciones detalladas y conceptos
 - [Clase 13: Creando nuestro primer Componente y tipos de Exportaciones](#clase-13-creando-nuestro-primer-componente-y-tipos-de-exportaciones)
 - [Clase 14: Variables en React (Dentro vs. Fuera del Componente)](#clase-14-variables-en-react-dentro-vs-fuera-del-componente)
 - [Clase 15: Agregar Estilos en React y CSSProperties](#clase-15-agregar-estilos-en-react-y-cssproperties)
+- [Clase 16: Creación del Componente ItemCounter y Envío de Props](#clase-16-creaci%C3%B3n-del-componente-itemcounter-y-env%C3%ADo-de-props)
 
 ---
 
@@ -1202,4 +1203,113 @@ export const MyAwesomeApp = () => {
 > [!TIP]
 > **Rendimiento e Inmutabilidad en Estilos:**
 > Al igual que con las variables estáticas, si defines un objeto de estilos directamente en línea `style={{ ... }}` dentro del JSX, React tendrá que crear un nuevo objeto en memoria en cada renderizado. Para optimizar el rendimiento, si los estilos son estáticos, defínelos **fuera del componente** (como `const cardStyles: CSSProperties = { ... }`). Si los estilos dependen de alguna variable del componente, entonces sí decláralos dentro o usa estilos en línea variables.
+
+---
+
+## Clase 16: Creación del Componente ItemCounter y Envío de Props
+👉 Ver código de la clase: [ItemCounter.tsx](./02-first-steps/src/shopping-cart/ItemCounter.tsx) | [main.tsx](./02-first-steps/src/main.tsx)
+
+En esta clase aprendimos a crear un componente reutilizable llamado `ItemCounter` y cómo pasarle información dinámica desde un componente padre utilizando **Props (Propiedades)**, además de tiparlas adecuadamente con TypeScript.
+
+### ☕ La Analogía de la Cafetería y los Pedidos Personalizados (Props)
+* **El Vaso del Café (El Componente - `ItemCounter`):** Es una estructura predefinida que tiene una forma, una tapa y un espacio. Todos los vasos se fabrican igual en serie.
+* **Los Detalles del Pedido (Las Props - `productName`, `quantity`):** Al pedir un café, le indicas al barista: *"Quiero un Capuchino Mediano"* o *"Un Espresso Chico"*. El barista escribe esos detalles en el vaso. El vaso (Componente) recibe y usa esas instrucciones (Props) para saber exactamente qué servir y qué mostrar al cliente. Sin estas instrucciones, todos los vasos serían idénticos e impersonales.
+
+---
+
+### 🔑 Conceptos Clave:
+
+1. **¿Qué son las Props?**:
+   Son los parámetros que reciben los componentes de React para personalizar su comportamiento o contenido. Las props viajan en una sola dirección: **de padre a hijo (flujo de datos unidireccional)** y son estrictamente de **solo lectura** (inmutables) para el componente que las recibe.
+
+2. **TypeScript e Interfaces para Props (`interface Props`)**:
+   Para asegurar que el componente reciba exactamente los datos que necesita, definimos un contrato en TypeScript. Si intentamos pasar un tipo de dato incorrecto o si olvidamos una propiedad obligatoria, el compilador nos avisará de inmediato.
+   - Usar `?` en el tipo (ej: `quantity?: number`) indica que la propiedad es opcional.
+
+3. **Desestructuración de Props**:
+   En lugar de acceder a los datos mediante un objeto genérico `props` (ej: `props.productName`), es una buena práctica desestructurar las propiedades directamente en la firma de la función:
+   ```typescript
+   export const ItemCounter = ({ productName, quantity }: Props) => { ... }
+   ```
+
+4. **Props como Estado Inicial**:
+   Si una prop sirve para establecer el valor inicial de una variable que cambiará a lo largo del tiempo (como el contador), la pasamos al hook `useState` para inicializar el estado local:
+   ```typescript
+   const [count, setCount] = useState(quantity);
+   ```
+
+5. **Reusabilidad de Componentes**:
+   Podemos renderizar múltiples instancias del mismo componente en la interfaz con diferentes valores de props:
+   ```tsx
+   <ItemCounter productName="Nintendo Switch 2" quantity={1} />
+   <ItemCounter productName="Pro Controller" quantity={2} />
+   ```
+
+---
+
+### 💻 Código de la Clase Ilustrado:
+
+#### 🛠️ Componente Hijo ([src/shopping-cart/ItemCounter.tsx](./02-first-steps/src/shopping-cart/ItemCounter.tsx)):
+```typescript
+import { useState } from "react";
+
+// 1. Definimos la interfaz para tipar las props que el componente espera recibir
+interface Props {
+  productName: string;
+  quantity?: number; // Propiedad opcional
+}
+
+// 2. Desestructuramos las props directamente en los parámetros de la función
+export const ItemCounter = ({ productName, quantity }: Props) => {
+  // 3. Inicializamos nuestro estado local usando la prop 'quantity' como valor inicial
+  const [count, setCount] = useState(quantity);
+
+  return (
+    <section
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+      }}
+    >
+      <span
+        style={{
+          width: 200,
+        }}
+      >
+        {productName}
+      </span>
+      <button> -1 </button>
+      <span> {count} </span>
+      <button> +1 </button>
+    </section>
+  );
+};
+```
+
+#### 🏛️ Componente Padre / Punto de Entrada ([src/main.tsx](./02-first-steps/src/main.tsx)):
+```typescript
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { FirstStepsApp } from "./FirstStepsApp";
+import { ItemCounter } from "./shopping-cart/ItemCounter";
+
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
+    <FirstStepsApp />
+
+    {/* 4. Enviamos diferentes props a cada instancia del componente ItemCounter */}
+    <ItemCounter productName="Nintendo Switch 2" quantity={1} />
+    <ItemCounter productName="Celda Brave of the wild" quantity={1} />
+    <ItemCounter productName="Pro Controller" quantity={2} />
+  </StrictMode>,
+);
+```
+
+---
+
+> [!IMPORTANT]
+> **Las Props son de Solo Lectura:**
+> Un componente hijo nunca debe alterar sus `props` directamente. Si necesitas cambiar un valor en respuesta a una interacción del usuario, debes usar un estado local (`useState`) o recibir una función Callback desde el padre para notificar el cambio.
+
 
