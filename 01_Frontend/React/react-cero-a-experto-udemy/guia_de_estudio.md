@@ -20,7 +20,10 @@ Esta guía contiene los apuntes de estudio, explicaciones detalladas y conceptos
 - [Clase 11: Async / Await](#clase-11-async-await)
 
 ### ⚛️ Fundamentos de React
-*(Por empezar)*
+- [Clase 12: Primeros Pasos en React - ¿Cómo funciona React?](#clase-12-primeros-pasos-en-react---c%C3%B3mo-funciona-react)
+- [Clase 13: Creando nuestro primer Componente y tipos de Exportaciones](#clase-13-creando-nuestro-primer-componente-y-tipos-de-exportaciones)
+
+
 
 ---
 
@@ -836,5 +839,192 @@ const GifApp = () => {
 
 > [!TIP]
 > **Consejo de React:** Nota que no puedes declarar el callback del hook `useEffect` como asíncrono directamente (por ejemplo: `useEffect(async () => { ... })`). Esto se debe a que React espera que `useEffect` retorne o bien nada (`undefined`) o bien una función de limpieza (*cleanup function*). Como las funciones `async` siempre devuelven una promesa, React daría un error. Por eso la práctica recomendada es crear una función asíncrona dentro del hook y mandarla llamar, como hicimos en `const fetchGif = async () => { ... }`.
+
+---
+
+## Clase 12: Primeros Pasos en React - ¿Cómo funciona React?
+👉 [Ver index.html](./02-first-steps/index.html) | [Ver main.tsx](./02-first-steps/src/main.tsx) | [Ver App.tsx](./02-first-steps/src/App.tsx)
+
+React es una librería de JavaScript para construir interfaces de usuario interactivas basadas en componentes. En lugar de manipular el DOM del navegador directamente de forma lenta, React utiliza un enfoque declarativo y un **Virtual DOM** para realizar actualizaciones ultra rápidas de la interfaz.
+
+### 🏛️ La Analogía del Director de Teatro y la Maqueta (Virtual DOM)
+Imagina que el DOM real de tu navegador es un **gran escenario de teatro físico** con escenografía pesada. Cambiar algo directamente en el escenario físico (como mover un piano de un lado a otro o pintar una pared de rojo) requiere mucho esfuerzo, tiempo y es propenso a cometer accidentes o dañar otras partes (manipulación directa del DOM).
+
+*   **React** es como un **diseñador de producción meticuloso** que trabaja en una **maqueta a escala (el Virtual DOM)** en su oficina.
+*   Cuando quieres hacer un cambio, el diseñador no corre al escenario real. Primero realiza el cambio en su maqueta de plástico (estado/props actualizados).
+*   Luego, compara la maqueta vieja con la maqueta nueva (*reconciliation* / algoritmo de *diffing*) para ver **exactamente qué cambió** (por ejemplo: *"Ah, solo hay que mover esta silla 2 cm a la derecha y no tocar nada más"*).
+*   Finalmente, le da instrucciones precisas al equipo técnico (**React DOM**) para que hagan **únicamente** ese cambio mínimo en el escenario real del teatro.
+
+---
+
+### 🔑 Conceptos Clave de la Estructura Inicial:
+
+1.  **El Punto de Montaje (`index.html`)**: El navegador carga un archivo HTML casi vacío con un contenedor especial: `<div id="root"></div>`. Este es el "lienzo" o "escenario" en blanco donde React va a dibujar toda la aplicación.
+2.  **El Puente de Conexión (`main.tsx`)**: Es el punto de entrada de JavaScript. Utiliza `createRoot` de `react-dom/client` para tomar el elemento `#root` del HTML y decirle a React: *"Toma el control de este espacio"*.
+    -   `StrictMode`: Es una herramienta que ayuda a identificar problemas potenciales en el código durante el desarrollo (ejecutando renderizados dobles, detectando efectos secundarios inesperados, etc.).
+3.  **Los Componentes (`App.tsx`)**: Son las piezas de construcción de nuestra interfaz (como bloques de Lego). Un componente de React es simplemente una función de JavaScript/TypeScript que retorna JSX y su nombre **siempre debe empezar con mayúscula**.
+4.  **JSX (JavaScript XML)**: Es una extensión de sintaxis que nos permite escribir código estructurado como HTML directamente dentro de nuestro código de JavaScript. Tras bambalinas, herramientas como Vite compilan este JSX a llamadas de funciones de React estándar (`React.createElement`).
+5.  **Fragmentos (`<> ... </>`)**: En React, un componente debe retornar un único elemento padre. Si no queremos agregar etiquetas `<div>` innecesarias al DOM que arruinen nuestro diseño o estructura CSS, usamos fragmentos vacíos `<> ... </>`.
+
+---
+
+### 💻 Código de la Clase Ilustrado:
+
+Para entender el flujo, veamos cómo se conectan las tres piezas principales de tu código actual:
+
+#### 1. El Escenario ([index.html](./02-first-steps/index.html))
+```html
+<!-- ... -->
+<body>
+  <!-- Aquí es donde React renderizará toda nuestra interfaz -->
+  <div id="root"></div>
+  
+  <!-- Cargamos el script principal de nuestra aplicación -->
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+<!-- ... -->
+```
+
+#### 2. El Conector ([src/main.tsx](./02-first-steps/src/main.tsx))
+```typescript
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import './index.css';
+import App from './App.tsx';
+
+// 1. Buscamos el div con id 'root' en el HTML.
+// El signo '!' al final le dice a TypeScript que estamos seguros de que este elemento existe.
+const rootElement = document.getElementById('root')!;
+
+// 2. Creamos la raíz de React en ese elemento y renderizamos nuestro componente <App />
+createRoot(rootElement).render(
+  <StrictMode>
+    <App />
+  </StrictMode>
+);
+```
+
+#### 3. El Bloque de Construcción ([src/App.tsx](./02-first-steps/src/App.tsx))
+```typescript
+import './App.css';
+
+// Un componente funcional de React. ¡Debe comenzar con mayúscula!
+function App() {
+  return (
+    // Fragmento para agrupar múltiples elementos sin añadir un contenedor innecesario en el HTML final
+    <>
+      <h1>Hola Mundo</h1>
+      <p>Hola soy Christian soy un parrafo</p>
+    </>
+  );
+}
+
+export default App;
+```
+
+---
+
+> [!NOTE]
+> **Buena práctica en React:** Siempre mantén tus componentes enfocados en hacer una sola cosa (Principio de Responsabilidad Única). Si el contenido dentro de tu `App.tsx` empieza a crecer mucho, es momento de dividirlo en componentes más pequeños dentro de una carpeta llamada `components/`.
+
+---
+
+## Clase 13: Creando nuestro primer Componente y tipos de Exportaciones
+👉 [Ver FirstStepsApp.tsx](./02-first-steps/src/FirstStepsApp.tsx) | [Ver MyAwesomeApp.tsx](./02-first-steps/src/MyAwesomeApp.tsx) | [Ver main.tsx](./02-first-steps/src/main.tsx)
+
+En React, los componentes son las piezas fundamentales de la interfaz. Piensa en ellos como piezas de Lego que creas una vez y puedes reutilizar en cualquier parte de tu aplicación.
+
+### 🧱 La Analogía del Molde de Galletas (Componente) y la Galleta (Elemento)
+*   **El Componente (El Molde):** Es la definición de la estructura (por ejemplo: un molde con forma de estrella que dice que cada galleta tendrá puntas, un color y chispas). En código, este molde es la función de JavaScript/TypeScript (como `MyAwesomeApp` o `FirstStepsApp`).
+*   **El Elemento (La Galleta):** Es lo que obtienes cuando usas el molde y lo metes a hornear. En código, se representa cuando pones el componente dentro de las etiquetas JSX: `<MyAwesomeApp />`. Puedes crear tantas galletas (instancias) como quieras a partir de un solo molde.
+
+---
+
+### 🔑 Conceptos Clave:
+
+1.  **Sintaxis del Componente:**
+    *   **Función Tradicional:**
+        ```typescript
+        export function FirstStepsApp() {
+            return ( ... );
+        }
+        ```
+    *   **Función Flecha (Arrow Function):** Muy popular en React moderno porque es corta, limpia y se acopla excelente con TypeScript.
+        ```typescript
+        export const MyAwesomeApp = () => {
+            return ( ... );
+        }
+        ```
+2.  **Exportación Nombrada (Named Export) vs. Exportación por Defecto (Default Export):**
+    *   **Exportación por Defecto (`export default App`):**
+        *   *Cómo se exporta:* `export default App;` al final del archivo.
+        *   *Cómo se importa:* `import App from './App';` (puedes cambiarle el nombre al importarlo, ej: `import MiAppPrincipal from './App'`).
+        *   *Detalle:* Solo puede haber una exportación por defecto por archivo.
+    *   **Exportación Nombrada (`export const MyAwesomeApp`):**
+        *   *Cómo se exporta:* Anteponiendo la palabra `export` al declarar la función/constante.
+        *   *Cómo se importa:* Usando llaves `{}` y obligatoriamente con el nombre exacto: `import { MyAwesomeApp } from './MyAwesomeApp'`.
+        *   *Ventaja:* Evita errores de nombres (TypeScript te avisará de inmediato si el nombre no coincide) y facilita la auto-importación en el editor. **Es la práctica más recomendada en proyectos modernos.**
+
+---
+
+### 💻 Código de la Clase Ilustrado:
+
+Así es como estructuraste tus componentes y los consumiste en el punto de entrada:
+
+#### 1. Componente con Función Tradicional ([src/FirstStepsApp.tsx](./02-first-steps/src/FirstStepsApp.tsx))
+```typescript
+// Exportación Nombrada (Named Export)
+export function FirstStepsApp() {
+    return (
+        <>
+            <h1>Hola Desde Main</h1>
+            <p>Hola esto es un parrafo</p>
+            <button>Click me</button>
+            <div>
+                <h2>Hola dentro de un div</h2>
+            </div>
+        </>
+    );
+}
+```
+
+#### 2. Componente con Función Flecha ([src/MyAwesomeApp.tsx](./02-first-steps/src/MyAwesomeApp.tsx))
+```typescript
+// Exportación Nombrada usando Arrow Function (Muy moderno y limpio)
+export const MyAwesomeApp = () => {
+    return (
+        <>
+            <h1>Christian Camilo</h1>
+            <h3>Beltrán</h3>
+        </>
+    );
+};
+```
+
+#### 3. Consumo e Importación en el Punto de Entrada ([src/main.tsx](./02-first-steps/src/main.tsx))
+```typescript
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+
+// Al usar exportaciones nombradas, es OBLIGATORIO usar las llaves '{}'
+import { FirstStepsApp } from './FirstStepsApp';
+import { MyAwesomeApp } from './MyAwesomeApp';
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    {/* Comentado para no renderizarlo actualmente */}
+    {/* <FirstStepsApp/> */}
+
+    {/* Renderizamos nuestro nuevo componente MyAwesomeApp */}
+    <MyAwesomeApp/>
+  </StrictMode>,
+);
+```
+
+---
+
+> [!TIP]
+> **Consejo del Editor (VS Code / Curso):** Cuando usas exportaciones nombradas, tu editor de código te sugerirá automáticamente la importación correcta a medida que escribes la etiqueta del componente (por ejemplo, al escribir `<MyAw...` autocompletará la importación con las llaves `{ MyAwesomeApp }`). Esto ahorra mucho tiempo y previene errores de tipeo.
+
 
 
