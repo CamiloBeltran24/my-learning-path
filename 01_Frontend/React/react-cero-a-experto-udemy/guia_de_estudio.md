@@ -22,8 +22,7 @@ Esta guía contiene los apuntes de estudio, explicaciones detalladas y conceptos
 ### ⚛️ Fundamentos de React
 - [Clase 12: Primeros Pasos en React - ¿Cómo funciona React?](#clase-12-primeros-pasos-en-react---c%C3%B3mo-funciona-react)
 - [Clase 13: Creando nuestro primer Componente y tipos de Exportaciones](#clase-13-creando-nuestro-primer-componente-y-tipos-de-exportaciones)
-
-
+- [Clase 14: Variables en React (Dentro vs. Fuera del Componente)](#clase-14-variables-en-react-dentro-vs-fuera-del-componente)
 
 ---
 
@@ -1026,5 +1025,82 @@ createRoot(document.getElementById('root')!).render(
 > [!TIP]
 > **Consejo del Editor (VS Code / Curso):** Cuando usas exportaciones nombradas, tu editor de código te sugerirá automáticamente la importación correcta a medida que escribes la etiqueta del componente (por ejemplo, al escribir `<MyAw...` autocompletará la importación con las llaves `{ MyAwesomeApp }`). Esto ahorra mucho tiempo y previene errores de tipeo.
 
+---
 
+## Clase 14: Variables en React (Dentro vs. Fuera del Componente)
+👉 [Ver código de la clase](./02-first-steps/src/MyAwesomeApp.tsx)
 
+En React, podemos usar expresiones de JavaScript/TypeScript directamente en nuestro JSX envolviéndolas entre llaves `{}`. Sin embargo, un aspecto crucial para el rendimiento y la organización del código es decidir dónde declarar nuestras variables estáticas (aquellas que no cambian ni dependen del estado o de las props del componente).
+
+### 🏢 La Analogía de la Planta de Ensamblaje (Componente) y el Almacén Externo
+Imagina que un componente es como una **planta de ensamblaje (fábrica)** que fabrica juguetes y se activa cada vez que hay que pintar o rediseñar algo (el renderizado).
+
+*   **Variables dentro del Componente (Fabricar las herramientas en cada turno):**
+    Si colocas tus variables dentro del componente, es como si al inicio de cada jornada de ensamblaje la fábrica tuviera que comprar, fabricar y desechar los destornilladores, martillos y moldes (`const firstName`, `const address`, etc.) para luego tirarlos a la basura al final del turno. En el siguiente renderizado, tiene que volver a fabricarlos de nuevo. ¡Un desperdicio enorme de recursos (memoria)!
+*   **Variables fuera del Componente (El Almacén Central Permanente):**
+    Si declaras las variables fuera del componente (a nivel de archivo/módulo), es como tener un almacén central al lado de la fábrica. Las herramientas se fabrican **una sola vez** cuando se abre el almacén (se carga el módulo) y quedan ahí disponibles para que la fábrica las use en cualquier momento, sin importar cuántos turnos o ensamblajes haga la fábrica.
+
+---
+
+### 🔑 Conceptos Clave:
+
+1. **El Ciclo de Renderizado:**
+   Cada vez que el estado (`state`) o las propiedades (`props`) de un componente cambian, la función del componente se ejecuta desde el principio hasta el final para calcular el nuevo JSX.
+2. **Reasignación y Limpieza de Memoria (Garbage Collection):**
+   Si declaras variables u objetos dentro de la función:
+   - Se vuelven a crear en memoria (nueva dirección de referencia) en **cada renderizado**.
+   - El recolector de basura de JavaScript (Garbage Collector) tiene que trabajar más limpiando las variables viejas que ya no se usan.
+   - Para datos estáticos como strings, arreglos estáticos u objetos de configuración, declararlos fuera ahorra este procesamiento.
+3. **Expresiones en JSX:**
+   Dentro de las llaves `{}` en JSX puedes colocar cualquier expresión válida de JavaScript (operaciones matemáticas como `{2 + 2}`, operadores ternarios `{isActive ? 'Activo' : 'Inactivo'}`, llamadas a métodos como `{favoriteGames.join(', ')}`), pero **no puedes renderizar objetos de forma directa** (por ejemplo, `{address}`). Si intentas renderizar un objeto directamente, React lanzará un error. Para depurarlo o mostrarlo temporalmente, puedes usar `{JSON.stringify(address)}`.
+
+---
+
+### 💻 Código de la Clase Ilustrado:
+
+#### 🚀 Práctica Recomendada: Variables fuera del componente ([src/MyAwesomeApp.tsx](./02-first-steps/src/MyAwesomeApp.tsx))
+```typescript
+// 1. Estas variables se crean una sola vez en memoria cuando se carga el módulo.
+// No se vuelven a crear en cada render.
+const firstName = "Christian Camilo";
+const lastName = "Beltrán";
+
+const favoriteGames = [
+  "GTA V",
+  "FC 26",
+  "Fortnite",
+  "Forza Horizon 6",
+  "Red Dead Redemption",
+];
+const isActive = true;
+
+const address = {
+  zipCode: "ABC-123",
+  country: "Colombia",
+};
+
+export const MyAwesomeApp = () => {
+  // 2. El componente puede hacer render 100 veces, pero las variables de arriba
+  // no se volverán a procesar.
+  return (
+    <>
+      <h1> {firstName} </h1>
+      <h3> {lastName} </h3>
+      {/* Expresiones válidas */}
+      <p> {favoriteGames.join(", ")} </p>
+      <p> {2 + 2} </p>
+
+      {/* Operadores condicionales */}
+      <h2>{isActive ? "Activo" : "No Activo"}</h2>
+
+      {/* Serialización de objetos (no se pueden renderizar directamente como {address}) */}
+      <p>{JSON.stringify(address)}</p>
+    </>
+  );
+};
+```
+
+> [!IMPORTANT]
+> **Regla General:**
+> - **Fuera del componente:** Declara aquí toda constante, objeto, arreglo o función que **no dependa de las props o del estado** del componente y que no necesite cambiar su valor durante la vida de la aplicación.
+> - **Dentro del componente:** Declara aquí las variables que dependan de propiedades del componente (`props`), de estados (`useState`), o funciones de manejo de eventos (como un `onClick`) que necesitan interactuar con el estado del componente.
