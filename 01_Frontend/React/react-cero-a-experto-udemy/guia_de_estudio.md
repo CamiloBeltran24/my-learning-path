@@ -25,6 +25,13 @@ Esta guía contiene los apuntes de estudio, explicaciones detalladas y conceptos
 - [Clase 14: Variables en React (Dentro vs. Fuera del Componente)](#clase-14-variables-en-react-dentro-vs-fuera-del-componente)
 - [Clase 15: Agregar Estilos en React y CSSProperties](#clase-15-agregar-estilos-en-react-y-cssproperties)
 - [Clase 16: Creación del Componente ItemCounter y Envío de Props](#clase-16-creaci%C3%B3n-del-componente-itemcounter-y-env%C3%ADo-de-props)
+- [Clase 17: Mostrar Elementos Listados y Uso de .map() en Arreglos](#clase-17-mostrar-elementos-listados-y-uso-de-map-en-arreglos)
+- [Clase 18: Eventos en Botones y Elementos HTML](#clase-18-eventos-en-botones-y-elementos-html)
+- [Clase 19: Hooks en React - useState](#clase-19-hooks-en-react---usestate)
+- [Clase 20: Archivos CSS y CSS Modules en React](#clase-20-archivos-css-y-css-modules-en-react)
+
+### 🧪 Pruebas Automáticas - Unit Testing
+*(Próximamente)*
 
 ---
 
@@ -1116,9 +1123,53 @@ En React, la forma de aplicar estilos en línea (inline styles) cambia respecto 
 
 ### 🎨 La Analogía de la Ficha Técnica de Diseño
 Imagina que vas con un sastre a mandar a hacer un traje.
-*   **En HTML clásico (Instrucciones escritas en un papel):** Le das una nota escrita que dice: `"color: rojo; esquinas: redondeadas 10px; espaciado: 10px;"`. Si cometes un error ortográfico en la nota, el sastre se confunde y tu traje sale mal.
-*   **En React (Ficha técnica estructurada):** Le entregas un formulario digital estructurado (un objeto JS) con casillas predefinidas. En lugar de usar guiones, las propiedades se escriben usando formato camelCase (`backgroundColor` en lugar de `background-color`, `borderRadius` en lugar de `border-radius`).
-*   **Con `CSSProperties` (El Validador Inteligente):** Es un asistente de diseño que revisa tu formulario digital *antes* de entregárselo al sastre. Si escribes mal un campo (como `backgorundColor`), el asistente resalta el error en rojo y te dice exactamente qué campos son válidos y qué valores aceptan.
+*   **En HTML clásico (Instrucciones en papel arrugado):** Le entregas una nota a mano que dice: `"color: rojo; esquinas: redondeadas 10px; espaciado: 10px;"`. Si cometes un error ortográfico en la nota (ej: escribir `"colro: rojo"`), el sastre no entiende tu letra, ignora esa instrucción y el traje sale sin color. **El navegador hace lo mismo en HTML tradicional si escribes mal una propiedad CSS: simplemente la ignora de forma silenciosa sin avisarte.**
+*   **En React (Ficha técnica digital):** Le entregas un formulario digital estructurado (un objeto JS) con casillas predefinidas. En lugar de usar guiones, las propiedades se escriben usando formato camelCase (`backgroundColor` en lugar de `background-color`, `borderRadius` en lugar de `border-radius`).
+*   **Con `CSSProperties` (El Inspector de Calidad de la Ficha Técnica):** Es un software de validación que revisa tu formulario digital *antes* de enviárselo al sastre. Si cometes un error (como escribir `backgorundColor` o poner un valor inválido como `display: "bloque"`), el inspector hace sonar una alarma (error de TypeScript en rojo) y no te deja avanzar hasta que lo corrijas.
+
+---
+
+### 🔍 ¿Qué es `CSSProperties` y cuál es su Propósito Real?
+
+`CSSProperties` es una **interfaz de TypeScript** provista por la librería de React. Su propósito principal es **convertir errores de diseño CSS silenciosos en errores de compilación ruidosos**.
+
+#### 🎯 Los 3 Propósitos Fundamentales de `CSSProperties`:
+
+#### 1. Seguridad contra Errores de Escritura (Evitar Bugs Silenciosos)
+Normalmente, si creas un objeto de estilos en JavaScript plano, no hay nada que te proteja de cometer errores tipográficos en los nombres de las propiedades.
+* **❌ Objeto de JS normal (Sin protección):**
+  ```typescript
+  const cardStyle = {
+    backGroundColor: 'blue', // ⚠️ Error tipográfico: la 'G' mayúscula es incorrecta, debería ser 'backgroundColor'.
+    pading: 10,             // ⚠️ Error tipográfico: falta una 'd' en padding.
+  };
+  // HTML resultante: <div style="back-ground-color: blue; pading: 10px;"></div>
+  // ¡El navegador simplemente ignora ambas propiedades y el componente se ve roto sin ningún aviso de error!
+  ```
+* **✔️ Con `CSSProperties` (Protegido por TypeScript):**
+  ```typescript
+  import type { CSSProperties } from 'react';
+
+  const cardStyle: CSSProperties = {
+    backGroundColor: 'blue', // ❌ ERROR de TS: 'backGroundColor' no existe en el tipo 'CSSProperties'. ¿Quisiste decir 'backgroundColor'?
+    pading: 10,             // ❌ ERROR de TS: 'pading' no existe en el tipo 'CSSProperties'.
+  };
+  // Tu editor te marcará el código en rojo de inmediato, impidiendo que envíes estilos rotos a producción.
+  ```
+
+#### 2. Validación de Valores CSS Permitidos
+`CSSProperties` no solo valida los nombres de las propiedades, sino que también conoce qué **valores** son válidos para cada propiedad CSS en particular.
+```typescript
+const containerStyle: CSSProperties = {
+  display: 'block-inline',  // ❌ ERROR de TS: El tipo '"block-inline"' no es asignable al tipo 'Display'. ¿Quisiste decir '"inline-block"'?
+  flexDirection: 'column',  // ✔️ Correcto: 'column' es uno de los valores permitidos para flexDirection.
+};
+```
+
+#### 3. Experiencia de Desarrollo Premium (Autocompletado e Intellisense)
+Al declarar que un objeto es del tipo `CSSProperties`, tu editor de código (como VS Code) te ofrecerá autocompletado inteligente mientras escribes:
+* Si escribes `flexD...` y presionas `Ctrl + Espacio`, te sugerirá `flexDirection`.
+* Si te paras sobre la propiedad `justifyContent`, te mostrará una descripción emergente detallada de MDN Web Docs explicando qué hace esa propiedad y qué navegadores la soportan.
 
 ---
 
@@ -1130,12 +1181,7 @@ Imagina que vas con un sastre a mandar a hacer un traje.
 2.  **Valores Numéricos Automáticos**:
     *   Para propiedades que aceptan valores en píxeles (como `padding`, `margin`, `borderRadius`, `fontSize`), puedes pasar simplemente un número (`10`) en lugar de un string con la unidad (`"10px"`). React agregará automáticamente la unidad `"px"` al renderizar.
 3.  **Tipado con `CSSProperties`**:
-    *   Importando `CSSProperties` desde la librería de `'react'`, podemos definir el tipo de nuestros objetos de diseño:
-        ```typescript
-        import type { CSSProperties } from 'react';
-        const misEstilos: CSSProperties = { ... };
-        ```
-    *   Esto es ideal cuando declaramos estilos fuera del componente para evitar recrearlos en memoria en cada render, ya que nos da autocompletado y validación de tipos en TypeScript.
+    *   Importando `CSSProperties` desde la librería de `'react'`, definimos el tipo de nuestros objetos de diseño para habilitar la validación y autocompletado descritos arriba. Esto es ideal cuando declaramos estilos fuera del componente para evitar recrearlos en memoria en cada render.
 4.  **Estilos Condicionales con `undefined`**:
     *   Si queremos aplicar estilos solo bajo cierta condición (por ejemplo, si un elemento está activo), podemos usar un operador ternario para decidir si pasamos el objeto de estilos o `undefined`:
         ```typescript
@@ -1311,5 +1357,452 @@ createRoot(document.getElementById("root")!).render(
 > [!IMPORTANT]
 > **Las Props son de Solo Lectura:**
 > Un componente hijo nunca debe alterar sus `props` directamente. Si necesitas cambiar un valor en respuesta a una interacción del usuario, debes usar un estado local (`useState`) o recibir una función Callback desde el padre para notificar el cambio.
+
+---
+
+## Clase 17: Mostrar Elementos Listados y Uso de `.map()` en Arreglos
+👉 Ver código de la clase: [FirstStepsApp.tsx](./02-first-steps/src/FirstStepsApp.tsx)
+
+En esta clase aprendimos a renderizar listas de elementos dinámicamente en React utilizando el método `.map()`, comprendimos la importancia de la propiedad `key` para la optimización del DOM y analizamos los errores más comunes de sintaxis al retornar elementos JSX en bucles.
+
+### 📰 La Analogía de la Imprenta de Periódicos (Renderizado de Listas)
+Imagina que trabajas en una imprenta y te dan una lista con los nombres de 10 productos que se van a vender. Si quieres imprimir una tarjeta para cada uno:
+* **Enfoque manual (Duplicar código):** Escribirías el código de diseño de la tarjeta 10 veces, una por una, cambiando solo el nombre del artículo. Si la lista cambia, tendrías que reescribir todo el periódico.
+* **Enfoque automático (El Rodillo / `.map()`):** Creas una máquina con un rodillo grabador (el componente). Le pasas la lista de datos a la máquina y, a medida que avanza, el rodillo imprime automáticamente cada producto con el formato exacto.
+* **El Código de Barras (La `key`):** Para que la imprenta organice la bodega y sepa exactamente qué artículo se imprimió en qué posición (por si hay que modificar uno solo en el futuro sin reimprimir todo el lote), le pega un **código de barras único** a cada tarjeta.
+
+---
+
+### 🔑 Conceptos Clave:
+
+1. **Transformación de Datos a JSX con `.map()`**:
+   En React, no podemos utilizar bucles imperativos como `for` o `while` directamente dentro de las llaves `{}` de JSX porque no retornan una expresión evaluable en un solo valor. En su lugar, el estándar declarativo es usar el método `.map()`, que toma cada objeto del arreglo de datos y lo transforma en un elemento JSX.
+
+2. **La Propiedad Obligatoria `key`**:
+   Cada elemento que se renderiza dentro de un arreglo en React **debe tener un atributo `key` único** en su etiqueta contenedora de primer nivel (ej: `<ItemCounter key={productName} ... />`).
+   * **¿Por qué?** React usa esta `key` para asociar los datos del modelo con los elementos del DOM real. Si un elemento cambia de posición, se agrega o se elimina, React solo re-renderiza ese elemento en específico en lugar de volver a dibujar toda la lista completa.
+   * **⚠️ Regla de Oro:** Evita usar el `index` de la iteración (`map((item, index) => ... key={index})`) si la lista es dinámica (puede cambiar de orden, filtrarse o eliminarse), ya que puede generar problemas con el estado interno de los componentes hijos y causar bugs visuales extraños.
+
+3. **El Error Común del Retorno Implícito**:
+   Cuando usamos funciones de flecha (Arrow Functions) dentro de `.map()`, debemos tener mucho cuidado con el uso de llaves `{}`:
+   * **❌ Error (Llaves `{}` sin `return`):** Si abres llaves en la función flecha, JavaScript espera que uses la palabra clave `return`. Si la omites, la función retornará `undefined` por defecto y **nada se dibujará en la pantalla**.
+     ```tsx
+     {itemsInCart.map(({ productName, quantity }) => {
+       // ❌ ¡Error! Falta la palabra 'return'
+       <ItemCounter productName={productName} quantity={quantity} />
+     })}
+     ```
+   * **✔️ Correcto (Con `return` explícito):**
+     ```tsx
+     {itemsInCart.map(({ productName, quantity }) => {
+       return <ItemCounter productName={productName} quantity={quantity} />;
+     })}
+     ```
+   * **🚀 Correcto e Implícito (Con Paréntesis `()`):** Es la sintaxis más limpia y recomendada. Los paréntesis le indican a JavaScript que devuelva directamente la expresión que contienen sin necesidad de escribir la palabra `return`.
+     ```tsx
+     {itemsInCart.map(({ productName, quantity }) => (
+       <ItemCounter productName={productName} quantity={quantity} />
+     ))}
+     ```
+
+---
+
+### 💻 Código de la Clase Ilustrado:
+
+#### 🛠️ Componente de Lista ([src/FirstStepsApp.tsx](./02-first-steps/src/FirstStepsApp.tsx)):
+```typescript
+import { ItemCounter } from "./shopping-cart/ItemCounter";
+
+interface ItemInCart {
+  productName: string;
+  quantity: number;
+}
+
+// 1. Datos estáticos definidos fuera del componente (no se recrean en cada renderizado)
+const itemsInCart: ItemInCart[] = [
+  { productName: "Nintendo Switch 2", quantity: 1 },
+  { productName: "Pro Controller", quantity: 3 },
+  { productName: "Super Smash", quantity: 8 },
+];
+
+export function FirstStepsApp() {
+  return (
+    <>
+      <h1>Carrito de Compras</h1>
+
+      {/* 2. Mapeamos la lista de objetos convirtiéndolos en componentes ItemCounter */}
+      {/* 3. Usamos paréntesis () para retornar implícitamente el JSX */}
+      {itemsInCart.map(({ productName, quantity }) => (
+        // 4. Asignamos una 'key' única a cada componente (en este caso el productName es único)
+        <ItemCounter 
+          key={productName} 
+          productName={productName} 
+          quantity={quantity} 
+        />
+      ))}
+    </>
+  );
+}
+```
+
+---
+
+> [!WARNING]
+> **Consola Limpia:**
+> Si olvidas colocar la propiedad `key` en tus elementos listados, React seguirá funcionando pero mostrará una advertencia en la consola del navegador: `Warning: Each child in a list should have a unique "key" prop.` Mantén siempre tu consola limpia de advertencias para evitar problemas silenciosos de rendimiento.
+
+---
+
+## Clase 18: Eventos en Botones y Elementos HTML
+👉 Ver código de la clase: [ItemCounter.tsx](./02-first-steps/src/shopping-cart/ItemCounter.tsx)
+
+En esta clase aprendimos cómo manejar las interacciones del usuario en React utilizando el sistema de eventos, su sintaxis adaptada (camelCase), y cómo pasar argumentos o referencias a funciones controladoras (event handlers) de forma correcta.
+
+### 🛎️ La Analogía del Timbre de Recepción (Controladores de Eventos)
+Imagina que estás en la recepción de un hotel y hay un timbre de metal sobre el mostrador. 
+* **El Elemento HTML (`<button>`):** Es el timbre físico.
+* **El Evento (`onClick`):** Es la acción física de presionar el timbre con tu mano.
+* **La Función Controladora (`handleClick`):** Es la instrucción que tiene el recepcionista: *"Cuando el timbre suene, sal de la oficina, saluda al cliente y regístralo"*. 
+Si el timbre estuviera roto (sin `onClick`), los clientes podrían presionarlo pero nada pasaría. Si no hay instrucción (función) asignada al timbre, el recepcionista nunca sabría que tiene que salir.
+
+---
+
+### 🔑 Conceptos Clave:
+
+1. **Sintaxis camelCase**:
+   A diferencia del HTML nativo donde los eventos se escriben en minúsculas (ej: `onclick`, `onchange`), en React se utiliza la sintaxis **camelCase** obligatoriamente (`onClick`, `onChange`, `onSubmit`).
+
+2. **Pasar la Función como Referencia**:
+   Para registrar el evento, pasamos la función por su nombre (referencia) **sin los paréntesis**:
+   * **✔️ Correcto (Referencia):** `onClick={handleClick}`. React guardará la instrucción y la ejecutará únicamente cuando ocurra el clic.
+   * **❌ Incorrecto (Ejecución inmediata):** `onClick={handleClick()}`. Esto ejecutará la función en el instante en que el componente se dibuje (durante la fase de renderizado) y no cuando el usuario haga clic.
+
+3. **El Objeto del Evento (`SyntheticEvent`)**:
+   Por defecto, React pasa automáticamente un objeto de evento como primer argumento a la función controladora. Este es un envoltorio propio de React llamado `SyntheticEvent`, que garantiza que los eventos funcionen de forma idéntica en cualquier navegador (Chrome, Safari, Firefox).
+   ```typescript
+   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+     console.log(event); // Contiene detalles del clic, posición, etc.
+   };
+   ```
+
+4. **Pasar Parámetros a las Funciones de Eventos**:
+   Si necesitas pasar información personalizada a la función (por ejemplo, el nombre del producto), debes envolver la llamada dentro de una **función flecha anónima**:
+   * **Sintaxis:** `onClick={() => handleClick(productName)}`.
+   * De esta forma, React registra la función anónima como referencia, y cuando el usuario hace clic, ejecuta esa función anónima, la cual a su vez llama a `handleClick` con el parámetro deseado.
+
+---
+
+### 💻 Código de la Clase Ilustrado:
+
+#### 🛠️ Componente con Control de Eventos ([src/shopping-cart/ItemCounter.tsx](./02-first-steps/src/shopping-cart/ItemCounter.tsx)):
+```typescript
+interface Props {
+  productName: string;
+  quantity?: number;
+}
+
+export const ItemCounter = ({ productName, quantity }: Props) => {
+  
+  // 1. Declaramos la función controladora del evento (Event Handler)
+  // Por buena práctica, se suele anteponer 'handle' o 'on' a su nombre.
+  const handleClick = () => {
+    console.log(`Click en ${productName}`);
+  };
+
+  return (
+    <section
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+      }}
+    >
+      <span style={{ width: 200 }}>
+        {productName}
+      </span>
+      
+      {/* Botón de decrementar (sin evento asignado actualmente) */}
+      <button> -1 </button>
+      
+      <span> {quantity} </span>
+      
+      {/* 2. Asignamos la referencia de la función handleClick al evento onClick */}
+      <button onClick={handleClick}> +1 </button>
+    </section>
+  );
+};
+```
+
+---
+
+> [!TIP]
+> **Funciones dentro del Componente:**
+> A diferencia de las constantes estáticas que colocamos fuera del componente, las funciones que manejan eventos (`handleClick`) se declaran **dentro del componente** porque necesitan acceder a las props (`productName`) o al estado interno del componente para realizar su trabajo.
+
+---
+
+## Clase 19: Hooks en React - `useState`
+👉 Ver código de la clase: [ItemCounter.tsx](./02-first-steps/src/shopping-cart/ItemCounter.tsx)
+
+En esta clase aprendimos qué son los **Hooks** y cómo implementar el más famoso y fundamental: `useState`. Vimos cómo darle memoria local a un componente funcional para que recuerde datos y actualice la pantalla automáticamente ante cualquier interacción del usuario.
+
+---
+
+### ❓ ¿Por qué necesitamos Hooks? (La Analogía del Pez Dory)
+Un componente funcional de React es, al final del día, una **función simple de JavaScript**. 
+* Las funciones normales en JavaScript son como el pez **Dory** de la película *Buscando a Nemo*: se ejecutan, hacen su trabajo, olvidan todo lo que pasó y se apagan.
+* Si declaras una variable tradicional dentro de un componente (`let counter = 1;`) y la incrementas con un clic, React no sabrá que cambió y, aunque volviera a dibujar la pantalla, tu variable volvería a crearse desde cero (`counter = 1`).
+* **La solución son los Hooks (Ganchos):** Son cables especiales que conectan (o enganchan) nuestro componente funcional con el "banco de memoria a largo plazo" de React. De esta forma, el componente puede recordar valores a través del tiempo sin perder la memoria en cada parpadeo (re-renderizado).
+
+---
+
+### 💡 La Analogía del Marcador de Puntuación Digital (useState)
+Imagina que estás en un partido de tenis y tienes un **marcador de puntuación digital** en el estadio.
+* **El Valor Inicial (`initialState`):** Al empezar el juego, configuras el marcador en `1` (el valor inicial).
+* **La Pantalla LED (`count`):** Es la pantalla gigante que todos ven. Es de **solo lectura** para el público. No puedes meter tu mano dentro de los focos LED para pintar un número nuevo.
+* **El Control Remoto (`setCount`):** Es el único dispositivo que tiene el poder de alterar los números de la pantalla. Si el árbitro presiona el botón `+1` en el control remoto, este manda una señal, el sistema de React lo procesa y la pantalla LED dibuja instantáneamente el nuevo número (`2`).
+
+---
+
+### 🔬 Desglose Paso a Paso de la Sintaxis:
+Cuando escribes esta línea de código:
+```typescript
+const [count, setCount] = useState(quantity);
+```
+Estás haciendo tres cosas mágicas:
+
+1. **`useState(quantity)`**: 
+   Le dices a React: *"Quiero reservar una casilla de memoria y meterle el valor inicial de `quantity`"*.
+2. **`[count, setCount]` (Desestructuración de Arreglos)**: 
+   `useState` siempre nos devuelve una pareja de cosas en un arreglo: `[elValorActual, laFuncionControladora]`. En lugar de obtener el arreglo completo y acceder como `res[0]` y `res[1]`, usamos los corchetes a la izquierda para "desempacar" y ponerles nombres personalizados directamente:
+   * **`count`**: Es la variable que guarda el valor actual (la pantalla LED).
+   * **`setCount`**: Es la función controladora para modificar el valor (el control remoto).
+3. **¿Por qué `const` si el estado cambia?**: 
+   Esta es la mayor confusión. Si `count` cambia, ¿por qué es una constante (`const`) en lugar de `let`?
+   * **La explicación:** En React, el valor de `count` **nunca cambia mientras el componente se está ejecutando**. Durante esa ejecución específica, `count` es inmutable y vale, por ejemplo, `1`. Cuando usas `setCount(2)`, no estás modificando la variable `count` actual. Le estás diciendo a React: *"Destruye este render y vuelve a ejecutar la función desde el principio, pero esta vez dame un count que valga 2"*. En la nueva ejecución, `count` vuelve a ser una constante, pero ahora vale `2`.
+
+---
+
+### 🔄 El Ciclo de Vida de la Reactividad (¿Cómo fluye la información?)
+
+Para entender cómo React actualiza la interfaz, sigue este mapa de lo que ocurre tras bambalinas cuando el usuario presiona el botón `+1`:
+
+```mermaid
+graph TD
+    A["1. El usuario hace clic en el botón '+1'"] --> B["2. Se dispara el evento onClick"]
+    B --> C["3. Se ejecuta la función handleAdd"]
+    C --> D["4. handleAdd llama a setCount(count + 1)"]
+    D --> E["5. React guarda el nuevo valor en memoria y apaga el render viejo"]
+    E --> F["6. React vuelve a ejecutar la función del componente ItemCounter()"]
+    F --> G["7. useState() detecta que hay un nuevo valor en memoria y count ahora vale 2"]
+    G --> H["8. La función retorna el nuevo JSX con el número 2"]
+    H --> I["9. React actualiza el navegador a la velocidad de la luz"]
+```
+
+---
+
+### 💻 Código de la Clase Ilustrado y Explicado:
+
+#### 🛠️ El Componente Hijo ([src/shopping-cart/ItemCounter.tsx](./02-first-steps/src/shopping-cart/ItemCounter.tsx)):
+```typescript
+import { useState } from "react";
+
+interface Props {
+  productName: string;
+  quantity?: number;
+}
+
+// 1. Asignamos un valor por defecto (quantity = 1) en la firma del componente
+export const ItemCounter = ({ productName, quantity = 1 }: Props) => {
+  
+  // 2. Conectamos con la memoria de React. 'count' guardará el número, 'setCount' lo modificará.
+  const [count, setCount] = useState(quantity);
+
+  // 3. Función controladora para sumar
+  const handleAdd = () => {
+    setCount(count + 1); // Usamos el control remoto para pedirle a React que actualice count a count + 1
+  };
+
+  // 4. Función controladora para restar con validación
+  const handleSubstract = () => {
+    if (count === 1) return; // Evitamos que la cantidad sea menor a 1 (salida temprana)
+    setCount(count - 1); // Disminuimos la cantidad en 1
+  };
+
+  return (
+    <section
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+      }}
+    >
+      <span style={{ width: 200 }}>
+        {productName}
+      </span>
+      
+      {/* 5. Vinculamos el evento onClick a la función handleSubstract */}
+      <button onClick={handleSubstract}> -1 </button>
+      
+      {/* 6. Mostramos el estado actual 'count' en la pantalla */}
+      <span> {count} </span>
+      
+      {/* 7. Vinculamos el evento onClick a la función handleAdd */}
+      <button onClick={handleAdd}> +1 </button>
+    </section>
+  );
+};
+```
+
+---
+
+### ⚠️ Trampas Comunes para Principiantes (¡Para no perder la cabeza!):
+
+#### 1. La Trampa de la Asincronía (¿Por qué mi `console.log` muestra el valor viejo?)
+Si escribes este código en tu función:
+```typescript
+const handleAdd = () => {
+  setCount(count + 1);
+  console.log(count); // ❌ ¡Aquí verás el valor anterior, no el nuevo!
+};
+```
+* **¿Por qué pasa esto?** `setCount` no cambia la variable inmediatamente en la línea siguiente. Es como meter una carta en el buzón pidiendo mudarte de casa; no te mudas en el milisegundo en que la carta cae en el buzón. Devés esperar a que la función termine y React haga el re-render.
+* **La solución:** Si necesitas usar el nuevo valor de inmediato dentro de la misma función, calcúlalo primero en una variable intermedia:
+  ```typescript
+  const nextValue = count + 1;
+  setCount(nextValue);
+  console.log(nextValue); // ✔️ Ahora sí tienes el valor correcto e inmediato
+  ```
+
+#### 2. Llamar a los Hooks Condicionalmente (El orden importa)
+Nunca metas un `useState` dentro de un bloque `if` o un ciclo:
+```typescript
+// ❌ ¡ERROR GRAVE! React se romperá
+if (isActive) {
+  const [count, setCount] = useState(0);
+}
+```
+* **¿Por qué pasa esto?** React no sabe los nombres de tus variables de estado. Solo sabe el **orden** en el que se declaran en el código (ej: *"Hook 1 es para contador, Hook 2 es para tema..."*). Si metes un hook en un `if` que a veces no se ejecuta, el orden de los hooks se desfasa por completo en el siguiente render, causando errores graves en la aplicación.
+
+---
+
+> [!IMPORTANT]
+> **El Estado es Inmutable:**
+> Nunca hagas `count = count + 1` directamente en tu código. React no detecta las mutaciones directas a variables. La única forma de cambiar un estado y hacer que la pantalla se actualice es invocando la función actualizadora del Hook (en este caso, `setCount`).
+
+---
+
+## Clase 20: Archivos CSS y CSS Modules en React
+👉 Ver código de la clase: [ItemCounter.tsx](./02-first-steps/src/shopping-cart/ItemCounter.tsx) | [ItemCounter.css](./02-first-steps/src/shopping-cart/ItemCounter.css) | [ItemCounter.module.css](./02-first-steps/src/shopping-cart/ItemCounter.module.css)
+
+En esta clase aprendimos cómo aplicar estilos a nuestros componentes de React de manera limpia y modular, comparando la importación de CSS tradicional (global) con el uso de **CSS Modules** para encapsular estilos localmente y evitar colisiones de diseño.
+
+### 👔 La Analogía del Estilista y los Uniformes (CSS Global vs. CSS Modules)
+* **CSS Tradicional (`import "./ItemCounter.css"`)**: Es como dictar una regla general para toda la empresa: *"Todos los botones de todos los departamentos deben ser de color azul"*. Es muy fácil y rápido de aplicar, pero si mañana en el departamento de contabilidad necesitas un botón rojo con la misma clase, se generará una **colisión de estilos** y el botón se pintará azul por error.
+* **CSS Modules (`import styles from "./ItemCounter.module.css"`)**: Es como diseñar uniformes personalizados con etiquetas de código de barras únicas. En tu archivo escribes la clase `.item-text`, pero tras bambalinas, herramientas como Vite la renombran automáticamente a algo único en toda la aplicación (ej: `_item-text_abc123`). De esta manera, el estilo queda encapsulado localmente y es imposible que afecte a otros componentes del proyecto.
+
+---
+
+### 🔑 Conceptos Clave:
+
+1. **CSS Tradicional (Estilos Globales)**:
+   * Se importa directamente: `import "./ItemCounter.css";`.
+   * Se aplica usando texto plano en el atributo HTML: `className="item-row"`.
+   * **Riesgo:** Sus reglas se inyectan de forma global en el navegador, lo que significa que si otra clase tiene el mismo nombre en cualquier otra parte de la aplicación, sus estilos se cruzarán.
+
+2. **CSS Modules (Estilos Encapsulados)**:
+   * El archivo debe terminar con la extensión `.module.css` (ej: `ItemCounter.module.css`).
+   * Se importa como un objeto de JavaScript: `import styles from "./ItemCounter.module.css";`.
+   * Se aplica inyectando la clase desde el objeto `styles`: `className={styles["item-text"]}` o `className={styles.itemText}`.
+   * **Ventaja:** Vite genera clases con nombres únicos en el HTML final del navegador, eliminando por completo las colisiones.
+
+3. **Sintaxis de Llaves y Corchetes**:
+   * Si el nombre de tu clase CSS contiene guiones (ej: `.item-text`), debes usar la sintaxis de corchetes de JavaScript para acceder a ella: `styles["item-text"]`.
+   * Si la clase se escribe en camelCase (ej: `.itemText`), puedes acceder usando la notación de punto tradicional: `styles.itemText`.
+
+---
+
+### 💻 Código de la Clase Ilustrado:
+
+#### 1. Archivo CSS Tradicional ([src/shopping-cart/ItemCounter.css](./02-first-steps/src/shopping-cart/ItemCounter.css)):
+```css
+.item-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+```
+
+#### 2. Archivo CSS Module ([src/shopping-cart/ItemCounter.module.css](./02-first-steps/src/shopping-cart/ItemCounter.module.css)):
+```css
+.item-text {
+  width: 200px;
+}
+
+.red {
+  color: red;
+}
+```
+
+#### 3. Componente React utilizando ambos estilos ([src/shopping-cart/ItemCounter.tsx](./02-first-steps/src/shopping-cart/ItemCounter.tsx)):
+```typescript
+import { useState } from "react";
+
+// Importación de CSS Tradicional (Global)
+import "./ItemCounter.css";
+
+// Importación de CSS Module (Local/Encapsulado)
+import styles from "./ItemCounter.module.css";
+
+interface Props {
+  productName: string;
+  quantity?: number;
+}
+
+export const ItemCounter = ({ productName, quantity = 1 }: Props) => {
+  const [count, setCount] = useState(quantity);
+
+  const handleAdd = () => setCount(count + 1);
+  const handleSubstract = () => {
+    if (count === 1) return;
+    setCount(count - 1);
+  };
+
+  return (
+    // Aplicamos clase global
+    <section className="item-row">
+      
+      {/* Aplicamos clase local del CSS Module y estilo condicional */}
+      <span
+        className={styles["item-text"]}
+        style={{ color: count === 1 ? "red" : "black" }}
+      >
+        {productName}
+      </span>
+      
+      <button onClick={handleSubstract}> -1 </button>
+      <span> {count} </span>
+      <button onClick={handleAdd}> +1 </button>
+    </section>
+  );
+};
+```
+
+---
+
+> [!TIP]
+> **¿Cuándo usar cada uno?**
+> * Usa **CSS Tradicional** (`index.css` o `App.css`) para definir estilos globales de la aplicación, como tipografías, variables de color CSS, y estilos para etiquetas base (`body`, `h1`, `a`).
+> * Usa **CSS Modules** para dar estilo a componentes individuales reutilizables. Esto asegura que el diseño de tu componente sea robusto y autónomo.
+
+---
+
+# 🧪 Sección: Pruebas Automáticas - Unit Testing
+En esta sección documentaremos los fundamentos de las pruebas automatizadas, pruebas de integración y pruebas unitarias en React (utilizando herramientas como Jest, Vitest, React Testing Library, etc.).
+
+
+
+
 
 
