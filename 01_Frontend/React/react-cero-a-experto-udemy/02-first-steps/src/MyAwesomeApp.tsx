@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 const firstName = "Christian Camilo";
 const lastName = "Beltrán";
 
@@ -15,6 +17,12 @@ const address = {
   country: "Colombia",
 };
 
+const myStyles: CSSProperties = {
+  backgroundColor: "red",
+  borderRadius: 10,
+  padding: 10,
+};
+
 export const MyAwesomeApp = () => {
   return (
     <>
@@ -25,7 +33,17 @@ export const MyAwesomeApp = () => {
 
       <h2>{isActive ? "Activo" : "No Activo"}</h2>
 
-      <p>{JSON.stringify(address)}</p>
+      <p
+        // style={{
+        //   backgroundColor: "red",
+        //   borderRadius: 10,
+        //   padding: 10,
+        // }}
+        // style = {undefined}
+        style={myStyles}
+      >
+        {JSON.stringify(address)}
+      </p>
     </>
   );
 };

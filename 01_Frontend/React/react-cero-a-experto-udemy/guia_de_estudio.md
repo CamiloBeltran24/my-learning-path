@@ -23,6 +23,7 @@ Esta guía contiene los apuntes de estudio, explicaciones detalladas y conceptos
 - [Clase 12: Primeros Pasos en React - ¿Cómo funciona React?](#clase-12-primeros-pasos-en-react---c%C3%B3mo-funciona-react)
 - [Clase 13: Creando nuestro primer Componente y tipos de Exportaciones](#clase-13-creando-nuestro-primer-componente-y-tipos-de-exportaciones)
 - [Clase 14: Variables en React (Dentro vs. Fuera del Componente)](#clase-14-variables-en-react-dentro-vs-fuera-del-componente)
+- [Clase 15: Agregar Estilos en React y CSSProperties](#clase-15-agregar-estilos-en-react-y-cssproperties)
 
 ---
 
@@ -1104,3 +1105,101 @@ export const MyAwesomeApp = () => {
 > **Regla General:**
 > - **Fuera del componente:** Declara aquí toda constante, objeto, arreglo o función que **no dependa de las props o del estado** del componente y que no necesite cambiar su valor durante la vida de la aplicación.
 > - **Dentro del componente:** Declara aquí las variables que dependan de propiedades del componente (`props`), de estados (`useState`), o funciones de manejo de eventos (como un `onClick`) que necesitan interactuar con el estado del componente.
+
+---
+
+## Clase 15: Agregar Estilos en React y CSSProperties
+👉 [Ver código de la clase](./02-first-steps/src/MyAwesomeApp.tsx)
+
+En React, la forma de aplicar estilos en línea (inline styles) cambia respecto al HTML tradicional. En lugar de pasar una cadena de texto, pasamos un objeto de JavaScript. Además, al usar TypeScript, podemos tipar estos estilos para tener una experiencia de desarrollo mucho más segura y robusta.
+
+### 🎨 La Analogía de la Ficha Técnica de Diseño
+Imagina que vas con un sastre a mandar a hacer un traje.
+*   **En HTML clásico (Instrucciones escritas en un papel):** Le das una nota escrita que dice: `"color: rojo; esquinas: redondeadas 10px; espaciado: 10px;"`. Si cometes un error ortográfico en la nota, el sastre se confunde y tu traje sale mal.
+*   **En React (Ficha técnica estructurada):** Le entregas un formulario digital estructurado (un objeto JS) con casillas predefinidas. En lugar de usar guiones, las propiedades se escriben usando formato camelCase (`backgroundColor` en lugar de `background-color`, `borderRadius` en lugar de `border-radius`).
+*   **Con `CSSProperties` (El Validador Inteligente):** Es un asistente de diseño que revisa tu formulario digital *antes* de entregárselo al sastre. Si escribes mal un campo (como `backgorundColor`), el asistente resalta el error en rojo y te dice exactamente qué campos son válidos y qué valores aceptan.
+
+---
+
+### 🔑 Conceptos Clave:
+
+1.  **Doble Llave en Estilos Inline (`style={{ ... }}`)**:
+    *   La primera llave `{}` le indica a React: *"¡Atención!, aquí adentro voy a escribir código de JavaScript en lugar de un string estático"*.
+    *   La segunda llave `{}` define el **objeto literal** de JavaScript que contiene las propiedades CSS (ej: `{ color: 'blue' }`).
+2.  **Valores Numéricos Automáticos**:
+    *   Para propiedades que aceptan valores en píxeles (como `padding`, `margin`, `borderRadius`, `fontSize`), puedes pasar simplemente un número (`10`) en lugar de un string con la unidad (`"10px"`). React agregará automáticamente la unidad `"px"` al renderizar.
+3.  **Tipado con `CSSProperties`**:
+    *   Importando `CSSProperties` desde la librería de `'react'`, podemos definir el tipo de nuestros objetos de diseño:
+        ```typescript
+        import type { CSSProperties } from 'react';
+        const misEstilos: CSSProperties = { ... };
+        ```
+    *   Esto es ideal cuando declaramos estilos fuera del componente para evitar recrearlos en memoria en cada render, ya que nos da autocompletado y validación de tipos en TypeScript.
+4.  **Estilos Condicionales con `undefined`**:
+    *   Si queremos aplicar estilos solo bajo cierta condición (por ejemplo, si un elemento está activo), podemos usar un operador ternario para decidir si pasamos el objeto de estilos o `undefined`:
+        ```typescript
+        style={ isActive ? misEstilos : undefined }
+        ```
+    *   **¿Cómo se comporta React con `undefined`?** React es inteligente y, al recibir `undefined`, **elimina por completo** el atributo `style` del HTML final en el navegador, en lugar de renderizar texto basura como `style="undefined"` o un atributo vacío `style=""`.
+    *   **Comparación del HTML final generado en el navegador:**
+        *   **Si `isActive` es `true`:**
+            ```html
+            <p style="background-color: red; border-radius: 10px; padding: 10px;">Texto</p>
+            ```
+        *   **Si `isActive` es `false` (usando `undefined` como respaldo):**
+            ```html
+            <p>Texto</p> <!-- ¡HTML 100% limpio sin atributo style! -->
+            ```
+        *   **Evita usar objetos vacíos `{}` de respaldo (`isActive ? misEstilos : {}`):**
+            Si usas `{}` de respaldo, el HTML resultante mantendrá un atributo vacío innecesario:
+            ```html
+            <p style="">Texto</p> <!-- Suciedad en el DOM -->
+            ```
+
+---
+
+### 💻 Código de la Clase Ilustrado:
+
+Así es como estructuramos y aplicamos estilos utilizando TypeScript y `CSSProperties` en nuestro componente:
+
+```typescript
+import type { CSSProperties } from 'react';
+
+// 1. Declaramos el objeto de estilos fuera del componente (Práctica Recomendada)
+// Usamos CSSProperties para habilitar el autocompletado y validación de TypeScript
+const cardStyles: CSSProperties = {
+  backgroundColor: 'red',
+  borderRadius: 10,  // Equivalente a '10px'
+  padding: 10,       // Equivalente a '10px'
+};
+
+const address = {
+  zipCode: "ABC-123",
+  country: "Colombia",
+};
+
+export const MyAwesomeApp = () => {
+  return (
+    <>
+      {/* 2. Aplicación de estilos inline directos usando doble llave (Comentado en clase) */}
+      {/* 
+      <p style={{ backgroundColor: 'red', borderRadius: 10, padding: 10 }}>
+        {JSON.stringify(address)}
+      </p> 
+      */}
+
+      {/* 3. Aplicación de un objeto de estilos estructurado y tipado */}
+      <p style={cardStyles}>
+        {JSON.stringify(address)}
+      </p>
+    </>
+  );
+};
+```
+
+---
+
+> [!TIP]
+> **Rendimiento e Inmutabilidad en Estilos:**
+> Al igual que con las variables estáticas, si defines un objeto de estilos directamente en línea `style={{ ... }}` dentro del JSX, React tendrá que crear un nuevo objeto en memoria en cada renderizado. Para optimizar el rendimiento, si los estilos son estáticos, defínelos **fuera del componente** (como `const cardStyles: CSSProperties = { ... }`). Si los estilos dependen de alguna variable del componente, entonces sí decláralos dentro o usa estilos en línea variables.
+
