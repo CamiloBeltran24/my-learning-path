@@ -27,7 +27,7 @@ export const MyAwesomeApp = () => {
   return (
     <>
       <h1> {firstName} </h1>
-      <h3> {lastName} </h3>
+      <h3 data-testid="first-name-title"> {lastName} </h3>
       <p> {favoriteGames.join(", ")} </p>
       <p> {2 + 2} </p>
 

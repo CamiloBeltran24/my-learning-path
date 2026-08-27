@@ -31,7 +31,9 @@ Esta guía contiene los apuntes de estudio, explicaciones detalladas y conceptos
 - [Clase 20: Archivos CSS y CSS Modules en React](#clase-20-archivos-css-y-css-modules-en-react)
 
 ### 🧪 Pruebas Automáticas - Unit Testing
-*(Próximamente)*
+- [Clase 21: Mis Primeras Pruebas Unitarias con Vitest](#clase-21-mis-primeras-pruebas-unitarias-con-vitest)
+- [Clase 22: Agrupar Pruebas Similares (describe)](#clase-22-agrupar-pruebas-similares-describe)
+- [Clase 23: Pruebas sobre Componentes (React Testing Library)](#clase-23-pruebas-sobre-componentes-react-testing-library)
 
 ---
 
@@ -1800,6 +1802,384 @@ export const ItemCounter = ({ productName, quantity = 1 }: Props) => {
 
 # 🧪 Sección: Pruebas Automáticas - Unit Testing
 En esta sección documentaremos los fundamentos de las pruebas automatizadas, pruebas de integración y pruebas unitarias en React (utilizando herramientas como Jest, Vitest, React Testing Library, etc.).
+
+---
+
+## Clase 21: Mis Primeras Pruebas Unitarias con Vitest
+👉 Ver código de la clase: [math.helper.ts](./02-first-steps/src/helpers/math.helper.ts) | [math.helper.test.ts](./02-first-steps/src/helpers/math.helper.test.ts)
+
+En esta clase dimos nuestros primeros pasos en el mundo del Testing Automatizado. Configuramos **Vitest** en el proyecto, aprendimos la importancia de escribir pruebas unitarias y estudiamos el patrón clásico **AAA (Arrange, Act, Assert)** para estructurar pruebas legibles y profesionales.
+
+### 🧪 La Analogía de la Fábrica de Juguetes (Unit Testing)
+Imagina que eres dueño de una **fábrica de carros de juguete**. 
+* **El Enfoque Manual:** Una vez armado el carro completo, lo pones en el piso, lo empujas y ves si rueda bien. Si no rueda, tienes que desarmar todo el carro completo para adivinar qué parte falló (si las ruedas, los ejes, el motor o el chasis). Esto consume mucho tiempo y esfuerzo.
+* **El Enfoque del Unit Testing (Pruebas Unitarias):** Antes de ensamblar el carro, tienes una pequeña máquina especial para probar **cada pieza individual por separado** (*en aislamiento*). Pruebas si la rueda gira sola, si el eje resiste peso por sí mismo, etc. Si la rueda pasa la prueba, sabes con absoluta certeza que esa "unidad" de código funciona de manera independiente. Si algo falla más adelante, sabrás exactamente qué pieza culpar.
+
+---
+
+### 🔑 Conceptos Clave:
+
+1. **¿Qué es una Prueba Unitaria (Unit Test)?**:
+   Es una prueba automatizada que valida el correcto funcionamiento de una **unidad de código pequeña** (habitualmente una única función, método o clase) de manera completamente aislada, sin interactuar con bases de datos, APIs externas o el DOM completo del navegador.
+
+2. **¿Por qué usar Vitest en lugar de Jest?**:
+   * **Vitest** es un framework de testing ultra rápido diseñado específicamente para trabajar en conjunto con **Vite**.
+   * No requiere complejas configuraciones de Babel o compiladores externos para entender TypeScript y JSX, ya que utiliza el mismo pipeline de compilación de Vite tras bambalinas.
+   * Ejecuta las pruebas en paralelo a la velocidad de la luz y tiene un modo interactivo de recarga en caliente (*Hot Module Replacement*) asombroso.
+
+3. **El Patrón AAA (Las Tres Columnas de una Prueba)**:
+   Cualquier prueba unitaria profesional, sin importar el lenguaje o framework, debe estar dividida en tres pasos claros:
+   * 1. **Arrange (Organizar/Preparar):** Creamos las variables de entrada, preparamos los datos mock o definimos el estado necesario que requiere la función que vamos a probar.
+   * 2. **Act (Actuar):** Ejecutamos la función o acción que queremos poner a prueba con las entradas preparadas, y guardamos el resultado.
+   * 3. **Assert (Afirmar/Comprobar):** Comparamos el resultado obtenido contra el valor que esperábamos recibir. Si coinciden, la prueba pasa; si no, la prueba falla.
+
+4. **Las Claves del Testing (`test` y `expect`)**:
+   * **`test("descripción", () => { ... })`**: Función global de Vitest que define una prueba. La descripción debe ser clara y detallada de lo que debe ocurrir (ej: *"Should add two positive numbers"*).
+   * **`expect(actual).toBe(expected)`**: La afirmación (assertion). Le indica a Vitest que esperamos que el valor real (`actual`) sea estrictamente igual al valor esperado (`expected`).
+
+---
+
+### ⚙️ Instalación, Configuración y Scripts de Vitest
+
+Para habilitar Vitest en un proyecto basado en Vite y TypeScript, seguimos estos sencillos pasos:
+
+#### 1. Instalación del Paquete
+Instalamos Vitest en las dependencias de desarrollo (`devDependencies`):
+```bash
+npm install -D vitest
+```
+
+#### 2. Configuración en Vite (`vite.config.ts`)
+Vitest lee el mismo archivo de configuración que Vite. Si deseamos habilitar el autocompletado y tipado de propiedades de testing en el archivo de configuración, agregamos una referencia de tipo con triple barra al inicio del archivo:
+
+```typescript
+/// <reference types="vitest" />
+import { defineConfig } from 'vite'
+import react, { reactCompilerPreset } from '@vitejs/plugin-react'
+import babel from '@rolldown/plugin-babel'
+
+export default defineConfig({
+  plugins: [
+    react(),
+    babel({ presets: [reactCompilerPreset()] })
+  ],
+  // Opcional: Configuraciones adicionales de pruebas si se requieren (ej. entorno de DOM)
+  // test: {
+  //   environment: 'jsdom',
+  //   globals: true,
+  // }
+})
+```
+
+#### 3. Declaración de Scripts en `package.json`
+Agregamos los comandos para correr nuestras pruebas en la sección de `scripts` en el archivo [`package.json`](./02-first-steps/package.json):
+```json
+"scripts": {
+  "dev": "vite",
+  "build": "tsc -b && vite build",
+  "lint": "eslint .",
+  "preview": "vite preview",
+  "test": "vitest",
+  "test:ui": "vitest --ui",
+  "coverage": "vitest run --coverage"
+}
+```
+
+* **`npm run test` (o `npm test`):** Ejecuta Vitest en **Watch Mode** (modo reloj). Vitest se queda escuchando los cambios en los archivos; cada vez que guardas un cambio, vuelve a ejecutar la prueba correspondiente al instante de forma automática.
+* **`npm run test:ui`:** Abre una interfaz gráfica interactiva en el navegador que te permite ver visualmente qué pruebas pasaron, cuáles fallaron, analizar dependencias y depurar visualmente de forma muy amigable.
+* **`npm run coverage`:** Genera un reporte de cobertura (*coverage report*) para auditar qué porcentaje de tus líneas de código, archivos y funciones están cubiertas por las pruebas.
+
+---
+
+### 💻 Código de la Clase Ilustrado:
+
+#### 🛠️ Archivo de Ayuda Matemático ([src/helpers/math.helper.ts](./02-first-steps/src/helpers/math.helper.ts)):
+```typescript
+export const add = (a: number, b: number) => {
+  return a + b;
+};
+
+export const subtract = (a: number, b: number) => {
+  return a - b;
+};
+
+export const multiply = (a: number, b: number) => {
+  return a * b;
+};
+
+export const divide = (a: number, b: number) => {
+  return a / b;
+};
+```
+
+#### 🧪 Archivo de Pruebas Unitarias Inicial ([src/helpers/math.helper.test.ts](./02-first-steps/src/helpers/math.helper.test.ts)):
+```typescript
+import { test, expect } from "vitest";
+import { add } from "./math.helper";
+
+test("Should add two positive numbers", () => {
+  // 1. Arrange (Preparar los datos de entrada)
+  const a = 1;
+  const b = 2;
+
+  // 2. Act (Ejecutar la función que queremos probar)
+  const result = add(a, b);
+
+  // 3. Assert (Verificar que el resultado sea el esperado)
+  expect(result).toBe(3); // 3 es equivalente a a + b (1 + 2)
+});
+```
+
+---
+
+> [!TIP]
+> **El Nombre de los Archivos de Pruebas:**
+> Por convención, para que Vitest encuentre automáticamente tus pruebas en el proyecto, debes nombrarlas con la extensión `.test.ts`, `.test.tsx`, `.spec.ts` o `.spec.tsx`. De esta manera, el comando `vitest` en tu terminal sabrá de inmediato qué archivos contienen las pruebas.
+
+---
+
+## Clase 22: Agrupar Pruebas Similares (describe)
+👉 Ver código de la clase: [math.helper.test.ts](./02-first-steps/src/helpers/math.helper.test.ts)
+
+En esta clase aprendimos cómo estructurar de forma profesional nuestros archivos de pruebas utilizando la función `describe` para agrupar múltiples pruebas relacionadas bajo un mismo contenedor (o **Test Suite**).
+
+### 📁 La Analogía de las Carpetas y Expedientes (describe)
+Imagina que eres un inspector de calidad en un almacén. 
+* Si realizas 50 pruebas y escribes cada resultado en hojas de papel sueltas y las dejas tiradas sobre tu escritorio, eventualmente tendrás un caos ilegible.
+* Usar `describe` es el equivalente a comprar **carpetas físicas con pestañas de colores**. Creas una carpeta llamada `"Inspección de Sumas"`, otra llamada `"Inspección de Restas"` y otra llamada `"Inspección de Multiplicaciones"`.
+* Dentro de la carpeta de "Suma" guardas únicamente las hojas de prueba (`test`) que evalúan sumas positivas y negativas. 
+* Cuando el jefe de almacén (Vitest en la terminal) te pida el informe, no le darás una pila desordenada de hojas; le presentarás carpetas perfectamente organizadas. Si algo falló en las multiplicaciones, podrás ir directo a esa carpeta específica.
+
+---
+
+### 🔑 Conceptos Clave:
+
+1. **¿Qué es `describe`?**:
+   Es una función proporcionada por frameworks de testing (como Vitest) que se utiliza para agrupar un conjunto de pruebas individuales (`test` o `it`) relacionadas, creando una **Suite de Pruebas** (*Test Suite*).
+
+2. **Propósitos de usar `describe`**:
+   * **Organización Visual:** En los reportes de consola o de la interfaz gráfica (`test:ui`), las pruebas se mostrarán indentadas y agrupadas bajo el título de su suite, facilitando la detección rápida de errores.
+   * **Limpieza de Código:** Agrupa lógicamente funciones o componentes para que sea fácil navegar por el archivo.
+   * **Encapsulación de Ciclos de Vida (Hooks):** Permite ejecutar funciones de configuración (ej: limpiar variables o mockear servicios con `beforeEach` o `afterEach`) de forma exclusiva para el grupo de pruebas que está dentro de ese `describe`, sin afectar a los demás tests del archivo.
+
+3. **Sintaxis de Agrupación**:
+   Recibe dos argumentos:
+   - Un `string` con el nombre del grupo (ej: el nombre de la función `"Add"` o del componente).
+   - Una función flecha (callback) que contiene todas las pruebas individuales (`test`).
+   ```typescript
+   describe("Nombre de la Suite", () => {
+     test("Prueba 1", () => { ... });
+     test("Prueba 2", () => { ... });
+   });
+   ```
+
+---
+
+### 💻 Código de la Clase Ilustrado:
+
+#### 🧪 Archivo de Pruebas Unitarias Agrupadas ([src/helpers/math.helper.test.ts](./02-first-steps/src/helpers/math.helper.test.ts)):
+```typescript
+import { test, expect, describe } from "vitest";
+import { add, subtract, multiply } from "./math.helper";
+
+describe("Add", () => {
+  test("Should add two positives numbers", () => {
+    // console.log("Hola mundo");
+    // ! 1.Arrange
+    const a = 1;
+    const b = 2;
+
+    // ! 2.Act
+    const result = add(a, b);
+
+    //! 3. Assert
+    expect(result).toBe(a + b);
+  });
+
+  test("Should add two negatives numbers", () => {
+    // console.log("Hola mundo");
+    // ! 1.Arrange
+    const a = -1;
+    const b = -3;
+
+    // ! 2.Act
+    const result = add(a, b);
+
+    //! 3. Assert
+    expect(result).toBe(a + b);
+  });
+});
+
+describe("Subtact", () => {
+  test("Should subtract two numbers", () => {
+    const a = 3;
+    const b = 2;
+
+    const result = subtract(a, b);
+
+    expect(result).toBe(a - b);
+  });
+
+  test("Should subtract four numbers", () => {
+    const a = 8;
+    const b = 4;
+
+    const result = subtract(a, b);
+
+    expect(result).toBe(4);
+  });
+});
+
+describe("multiply", () => {
+  test("Should multiply two numbers", () => {
+    const a = 2;
+    const b = 2;
+
+    const result = multiply(a, b);
+
+    expect(result).toBe(4);
+  });
+
+  test("Should multiply two numbers", () => {
+    const a = 8;
+    const b = 2;
+
+    const result = multiply(a, b);
+
+    expect(result).toBe(a * b);
+  });
+});
+```
+
+---
+
+> [!TIP]
+> **Jerarquía y Anidación:**
+> Puedes anidar bloques `describe` dentro de otros si necesitas sub-categorías de pruebas. Por ejemplo, un `describe("Componente ItemCounter")` principal y dentro de él un `describe("Botón +1")` y un `describe("Botón -1")`. Esto te permite estructurar pruebas tan detalladas como desees.
+
+---
+
+## Clase 23: Pruebas sobre Componentes (React Testing Library)
+👉 Ver código de la clase: [vite.config.ts](./02-first-steps/vite.config.ts) | [MyAwesomeApp.test.tsx](./02-first-steps/src/MyAwesomeApp.test.tsx)
+
+En esta clase aprendimos cómo dar el salto de probar funciones de JavaScript puras a realizar pruebas sobre **Componentes de React** visuales. Instalamos y configuramos el entorno de pruebas, entendimos cómo montar un componente en un DOM simulado y cómo auditar el HTML resultante.
+
+### 🎭 La Analogía de la Maqueta y el Simulador Virtual (jsdom & Testing Library)
+Imagina que eres un arquitecto y has diseñado una maqueta de una casa de cartón.
+* **El Componente (`<MyAwesomeApp />`):** Es el plano o maqueta del componente.
+* **El Simulador Virtual (`jsdom`):** Probar tu maqueta en la realidad física real (abrir un navegador real de forma manual como Chrome o Safari) es sumamente pesado y lento. Así que usas un simulador virtual en tu computadora (Node.js) que recrea de manera invisible las leyes de la física (los elementos `document`, `window`, el DOM). Eso es `jsdom`.
+* **El Sostenedor (`render`):** Es la base donde colocas tu maqueta dentro del simulador para que se sostenga derecha y se pueda ver.
+* **El Espejo Mágico (`screen.debug()`):** Es un espejo que proyecta en la terminal exactamente cómo se ve la estructura tridimensional de la casa ensamblada (el HTML completo resultante) para que puedas auditarla sin tener que verla en una pantalla real.
+
+---
+
+### 🔑 Conceptos Clave:
+
+1. **`jsdom` (El Entorno DOM Virtual)**:
+   TypeScript y Node.js no tienen una interfaz gráfica nativa por sí solos. `jsdom` es una librería que simula un navegador web completo en memoria de forma ultra ligera para que React pueda renderizar componentes y podamos interactuar con ellos en las pruebas como si estuviéramos en Chrome.
+
+2. **React Testing Library (`@testing-library/react`)**:
+   Es la librería estándar de la industria para probar componentes de React. Su filosofía es: *"Prueba tus componentes de la misma forma en que tus usuarios reales interactúan con ellos"*. No le importan los detalles internos de implementación, sino lo que se renderiza y se ve en pantalla.
+
+3. **`render`**:
+   Función que toma un componente de React en formato JSX/TSX y lo "dibuja" o monta en el DOM simulado de `jsdom`.
+
+4. **`screen` y `screen.debug()`**:
+   * `screen` es un objeto que representa el DOM virtual renderizado. Contiene métodos para buscar textos, botones, inputs y más.
+   * `screen.debug()` es una herramienta utilitaria indispensable durante el desarrollo que imprime en la terminal el código HTML del componente renderizado actual para poder auditar visualmente su estructura.
+
+---
+
+### 🛠️ Paso a Paso para Configurar y Probar Componentes:
+
+#### Paso 1: Instalar dependencias de testing
+Para poder probar componentes y simular el navegador, instalamos las siguientes herramientas en las dependencias de desarrollo (`devDependencies`):
+```bash
+npm install -D jsdom @testing-library/react @testing-library/dom
+```
+
+#### Paso 2: Configurar Vite para pruebas de componentes (`vite.config.ts`)
+Para que Vitest sepa que nuestras pruebas se ejecutarán en un ambiente de navegador virtual (`jsdom`) y use el tipado correcto de Vitest, modificamos [`vite.config.ts`](./02-first-steps/vite.config.ts) importando `defineConfig` desde **`vitest/config`**:
+
+```typescript
+// 1. Importamos defineConfig desde vitest/config en lugar de vite
+import { defineConfig } from "vitest/config";
+import react, { reactCompilerPreset } from "@vitejs/plugin-react";
+import babel from "@rolldown/plugin-babel";
+
+export default defineConfig({
+  plugins: [
+    react(),
+    babel({ presets: [reactCompilerPreset()] })
+  ],
+  // 2. Agregamos el bloque 'test' para indicar el entorno DOM simulado
+  test: {
+    environment: "jsdom",
+    globals: true, // Permite utilizar funciones como test y describe sin importarlas
+  },
+});
+```
+
+#### Paso 3: Crear el archivo de pruebas en formato `.tsx`
+El archivo de pruebas debe terminar en la extensión `.test.tsx` (o `.spec.tsx`) porque utilizaremos sintaxis JSX (`<MyAwesomeApp />`) para instanciar nuestro componente de React.
+
+#### Paso 4: Escribir la prueba y auditar con `screen.debug()`
+Escribimos el test importando `render` y `screen` desde `@testing-library/react` y renderizando el componente.
+
+---
+
+### 💻 Código de la Clase Ilustrado:
+
+#### 🧪 Archivo de Pruebas del Componente ([src/MyAwesomeApp.test.tsx](./02-first-steps/src/MyAwesomeApp.test.tsx)):
+```typescript
+import { test, describe } from "vitest";
+import { render, screen } from "@testing-library/react";
+import { MyAwesomeApp } from "./MyAwesomeApp";
+
+describe("MyAwesomeApp", () => {
+  test("Should render Firstname and Lastname", () => {
+    // 1. Montamos/Renderizamos el componente en el DOM virtual de jsdom
+    render(<MyAwesomeApp />);
+
+    // 2. Imprimimos el HTML resultante en consola para depurarlo visualmente
+    screen.debug();
+  });
+});
+```
+
+#### 🖥️ Salida de `screen.debug()` en Terminal al Ejecutar Pruebas:
+Al ejecutar `npm run test` (o `npx vitest run`), verás que Vitest imprime la estructura HTML exacta que tu componente genera:
+```html
+<body>
+  <div>
+    <h1>
+      Christian Camilo
+    </h1>
+    <h3>
+      Beltrán
+    </h3>
+    <p>
+      GTA V, FC 26, Fortnite, Forza Horizon 6, Red Dead Redemption
+    </p>
+    <p>
+      4
+    </p>
+    <h2>
+      Activo
+    </h2>
+    <p style="background-color: red; border-radius: 10px; padding: 10px;">
+      {"zipCode":"ABC-123","country":"Colombia"}
+    </p>
+  </div>
+</body>
+```
+
+---
+
+> [!WARNING]
+> **Importación de `defineConfig`:**
+> Si olvidas cambiar la importación de `defineConfig` en tu archivo de configuración de `vite` a `"vitest/config"`, TypeScript te arrojará un error de compilación indicándote que la propiedad `test` no existe en el objeto de configuración de Vite. Siempre utiliza la importación correcta de `"vitest/config"`.
+
 
 
 

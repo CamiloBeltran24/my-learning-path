@@ -10,27 +10,25 @@ El objetivo es tener un lugar organizado donde pueda consultar rápidamente cóm
 
 ## 🗺️ Índice de Conocimiento
 
-Navega por las diferentes tecnologías haciendo clic en las categorías (la estructura funciona como una Wiki):
+Navega por las diferentes tecnologías y cursos disponibles en el repositorio:
 
 ### 🎨 [1. Frontend](./01_Frontend/)
 Todo lo relacionado con las interfaces de usuario, la web estática y dinámica.
-* [Apuntes de HTML y CSS](./01_Frontend/HTML_CSS/) 
-* [Javascript](./01_Frontend/Javascript/) *(Próximamente)*
-* [React JS](./01_Frontend/React/) - [Guía de Estudio](./01_Frontend/React/guia_de_estudio.md)
+* **[HTML y CSS](./01_Frontend/HTML_CSS/)**
+  * [Curso de HTML](./01_Frontend/HTML_CSS/Curso_de_html/) — [📘 Guía de Estudio](./01_Frontend/HTML_CSS/Curso_de_html/guia_estudio_html.md)
+  * [Curso de CSS](./01_Frontend/HTML_CSS/curso_de_css/)
+* **[JavaScript](./01_Frontend/Javascript/)**
+  * [Platzi - Fundamentos de JavaScript](./01_Frontend/Javascript/platzi/Fundametos-de-javascript/) — [📘 Guía de Estudio](./01_Frontend/Javascript/platzi/Fundametos-de-javascript/guia_de_estudio.md) (Proyecto [notes-md](./01_Frontend/Javascript/platzi/Fundametos-de-javascript/notes-md/))
+  * [Udemy - JavaScript Moderno](./01_Frontend/Javascript/udemy/Javascript-moderno/)
+* **[React JS](./01_Frontend/React/)**
+  * [React de Cero a Experto (Udemy)](./01_Frontend/React/react-cero-a-experto-udemy/) — [📘 Guía de Estudio](./01_Frontend/React/react-cero-a-experto-udemy/guia_de_estudio.md)
+* **[Meta Frontend Developer Professional Certificate](./01_Frontend/Meta_Frontend_Developer_Professional_Certificate/)** *(Coursera / Meta)*
+  * [01 - Introduction to Front-End Development](./01_Frontend/Meta_Frontend_Developer_Professional_Certificate/01_Introduction_to_Front-End_Development/)
 
-### ⚙️ [2. Backend](./02_Backend/)
-La lógica de negocio, servidores, APIs y gestión de datos.
-* [Python](./02_Backend/Python/) *(Próximamente)*
-* [Node.js](./02_Backend/Node_JS/) *(Próximamente)*
-
-### 🛠️ [3. Herramientas y Arquitectura](./03_Tools_and_Architecture/)
-Las tecnologías y metodologías que uso para construir software.
-* Git y GitHub *(Próximamente)*
-* Bases de Datos *(Próximamente)*
-
-### 🤖 [4. Inteligencia Artificial](./04_Artificial_Intelligence/)
+### 🤖 [2. Inteligencia Artificial](./04_Artificial_Intelligence/)
 Todo lo relacionado con IA y uso efectivo de modelos de lenguaje.
 * [Prompt Engineering](./04_Artificial_Intelligence/Prompt_Engineering/)
+  * [Curso de Prompt Engineering](./04_Artificial_Intelligence/Prompt_Engineering/Curso_de_Prompt_Engineering/)
 
 ---
 *Hecho con ☕ y 💻 por Christian Camilo*
