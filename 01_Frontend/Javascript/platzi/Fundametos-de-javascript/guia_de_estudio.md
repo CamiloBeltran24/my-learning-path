@@ -9,6 +9,7 @@ Esta guía contiene los apuntes de estudio, explicaciones detalladas y conceptos
 - [Clase 01: Variables (`var`, `let`, `const`) y Hoisting](#clase-01-variables-var-let-const-y-hoisting)
 - [Clase 02: Tipos de Datos (Primitivos vs. Complejos) y `typeof`](#clase-02-tipos-de-datos-primitivos-vs-complejos-y-typeof)
 - [Clase 03: Operadores Aritméticos, Asignación Compuesta y Valores Especiales (`NaN` / `Infinity`)](#clase-03-operadores-aritméticos-asignación-compuesta-y-valores-especiales-nan--infinity)
+- [Clase 04: Strings, Template Literals y Métodos Principales](#clase-04-strings-template-literals-y-métodos-principales)
 
 ---
 
@@ -316,4 +317,206 @@ console.log("Hola" * 2);  // NaN (Operación matemática inválida con string)
 ```
 
 ---
+
+## Clase 04: Strings, Template Literals y Métodos Principales
+👉 [Ver código de la clase](./curso/src/04-strings.js)
+
+Los **Strings** (cadenas de texto) son secuencias de caracteres utilizadas para representar y manipular texto en JavaScript. Con la llegada de **ES6 (ECMAScript 2015)**, el trabajo con cadenas evolucionó drásticamente gracias a los **Template Literals** (plantillas literales) y a un conjunto completo de métodos utilitarios.
+
+---
+
+### 🧵 La Analogía del Collage vs. La Carta Personalizada
+
+* **Concatenación Tradicional con `+` (El Collage de Recortes)**: Es como armar una frase recortando palabras de periódicos y pegándolas una por una con cinta adhesiva (`"Hola " + nombre + " tienes " + edad + " años"`). Es tedioso, fácil de romper si olvidas un espacio y difícil de leer.
+* **Template Literals con Backticks `` ` `` (La Plantilla de Carta Inteligente)**: Es como un formulario pre-impreso con espacios en blanco rellenables (`${nombre}`). Escribes el texto de forma natural, insertas variables o cálculos directamente en su lugar y respetas saltos de línea sin trucos adicionales.
+
+---
+
+### 🔑 1. Formas de Declarar Cadenas de Texto
+
+En JavaScript existen 3 formas de envolver texto:
+
+1. **Comillas dobles (`"..."`)** o **comillas simples (`'...'`)**:
+   - Forma clásica.
+   - Requieren el operador `+` para unir variables.
+   - No permiten saltos de línea directos (requieren caracteres de escape como `\n`).
+2. **Backticks o Comillas Invertidas (`` `...` `` - Template Literals)**:
+   - **Interpolación de variables y expresiones**: `${expresion}`.
+   - **Cadenas multilínea**: Permiten saltos de línea limpios y directos en el editor de código.
+
+---
+
+### 💡 2. Poder de los Template Literals
+
+#### A. Interpolación de Expresiones y Cálculos
+Dentro de `${...}` puedes colocar cualquier expresión válida de JavaScript (operaciones matemáticas, llamadas a funciones, operadores ternarios, etc.):
+```javascript
+const precio = 100;
+const cantidad = 3;
+const total = `Total: $${precio * cantidad}`; // "Total: $300"
+```
+
+#### B. Texto Multilínea Nativo
+Facilita la creación de plantillas HTML, notas formateadas o mensajes largos:
+```javascript
+const nota = `
+# Mi nota
+Este es el contenido sin necesidad de usar \\n
+`;
+```
+
+---
+
+### 🛠️ 3. Catálogo Completo de Propiedades y Métodos de Strings
+
+Aunque los strings son datos primitivos e inmutables, JavaScript los envuelve temporalmente en un objeto (*wrapper*) para permitirnos invocar métodos y propiedades sobre ellos:
+
+| Método / Propiedad | Tipo | Descripción | Ejemplo | Resultado |
+| :--- | :--- | :--- | :--- | :--- |
+| **`.length`** | Propiedad | Devuelve la longitud total (número de caracteres con espacios). | `"Hola".length` | `4` |
+| **`.slice(inicio, fin)`** | Método | Extrae un fragmento de texto. **Acepta índices negativos** contando desde el final. | `"JavaScript".slice(0, 4)`<br>`"JavaScript".slice(-6)` | `"Java"`<br>`"Script"` |
+| **`.substring(inicio, fin)`** | Método | Extrae caracteres entre dos posiciones (si `inicio > fin`, los invierte). | `"Hola Mundo".substring(0, 4)` | `"Hola"` |
+| **`.split(separador)`** | Método | Divide la cadena en un **Arreglo (`Array`)** a partir del delimitador indicado. | `"L1 L2 L3".split(" ")` | `["L1", "L2", "L3"]` |
+| **`.trim()`** | Método | Elimina los espacios en blanco sobrantes **al inicio y al final**. | `"  Hola  ".trim()` | `"Hola"` |
+| **`.trimStart()`** | Método | Elimina espacios en blanco únicamente **al inicio**. | `"  Hola  ".trimStart()` | `"Hola  "` |
+| **`.trimEnd()`** | Método | Elimina espacios en blanco únicamente **al final**. | `"  Hola  ".trimEnd()` | `"  Hola"` |
+| **`.toLowerCase()`** | Método | Convierte toda la cadena a **minúsculas**. | `"JS".toLowerCase()` | `"js"` |
+| **`.toUpperCase()`** | Método | Convierte toda la cadena a **mayúsculas**. | `"js".toUpperCase()` | `"JS"` |
+| **`.includes(subcadena)`** | Método | Evalúa si la cadena contiene el texto buscado (*Case Sensitive*). | `"Hola".includes("ol")` | `true` |
+| **`.startsWith(texto)`** | Método | Comprueba si la cadena **comienza** con dicho texto. | `"doc.md".startsWith("doc")` | `true` |
+| **`.endsWith(texto)`** | Método | Comprueba si la cadena **termina** con dicho texto (ideal para extensiones). | `"doc.md".endsWith(".md")` | `true` |
+| **`.replace(buscar, nuevo)`** | Método | Reemplaza la **primera aparición** encontrada por el nuevo texto. | `"Hola Hola".replace("Hola", "Hi")` | `"Hi Hola"` |
+| **`.replaceAll(buscar, nuevo)`** | Método | Reemplaza **todas las apariciones** encontradas por el nuevo texto. | `"Hola Hola".replaceAll("Hola", "Hi")` | `"Hi Hi"` |
+
+---
+
+### 🔍 Comparativas y Comportamientos Clave
+
+1. **`.slice()` vs. `.substring()`**:
+   - `.slice(-6)` cuenta los últimos 6 caracteres; `.substring(-6)` interpreta el negativo como `0`.
+   - `.slice(10, 0)` devuelve `""`, mientras que `.substring(10, 0)` lo invierte automáticamente a `(0, 10)`.
+   - **Recomendación moderna:** Usa `.slice()` por consistencia y soporte de índices negativos.
+
+2. **Sensibilidad a Mayúsculas y Minúsculas (*Case-Sensitivity*)**:
+   - Métodos como `.includes()`, `.startsWith()` y `.endsWith()` son estrictamente sensibles a mayúsculas/minúsculas.
+   - Para búsquedas flexibles, combina con `.toLowerCase()`:
+     ```javascript
+     contenido.toLowerCase().includes("javascript");
+     ```
+
+3. **Reemplazo e Inmutabilidad (`replace` vs `replaceAll`)**:
+   - `texto.replace("Hola", "Hi")` solo cambia la primera coincidencia.
+   - `texto.replaceAll("Hola", "Hi")` actualiza todas las coincidencias.
+   - **¡Atención!** Ninguno altera la variable original `texto`; siempre retornan una nueva cadena.
+
+---
+
+### 💻 Código de la Clase Ilustrado
+
+```javascript
+// ==========================================
+// 1. Concatenación Tradicional vs. Template Literals
+// ==========================================
+const nombre = "Javascript";
+const version = "ES6";
+
+// Forma tradicional con operador +
+const message = "Bienvenido a " + nombre + " version: " + version;
+// console.log(message);
+
+// Forma moderna con Template Literals (Interpolación)
+const message2 = `Bienvenida y Bienvenido a el curso de ${nombre} en su version ${version}`;
+
+// ==========================================
+// 2. Evaluación de Expresiones Matemáticas
+// ==========================================
+const precio = 100;
+const cantidad = 3;
+const total = `Total: ${precio * cantidad}`;
+console.log(total); // "Total: 300"
+
+// ==========================================
+// 3. Cadenas Multilínea
+// ==========================================
+const nota = `
+# Mi nota
+Este es el contenido
+
+- Nota1
+- Nota 2
+- Nota 3
+`;
+console.log(nota);
+
+// ==========================================
+// 4. Métodos Principales en Strings
+// ==========================================
+
+// Length -> Propiedad con el conteo total de caracteres
+const texto = "Hola Mundo";
+console.log(texto.length); // 10
+
+// Slice(inicio, fin) -> Extracción con soporte de índices positivos y negativos
+const texto1 = "Javascript es Genial";
+console.log(texto1.slice(0, 10)); // "Javascript"
+console.log(texto1.slice(11));     // "es Genial"
+console.log(texto1.slice(-6));     // "Genial" (últimos 6 caracteres)
+
+// Substrings(inicio, fin)
+const texto2 = "Hola Mundo";
+console.log(texto2.substring(0, 4)); // "Hola"
+
+// Split(separador) -> Convierte el texto en un Array
+const texto3 = "Linea1 linea2 linea3";
+const lineas = texto3.split(" ");
+console.log(lineas); // [ 'Linea1', 'linea2', 'linea3' ]
+
+// ==========================================
+// 5. Limpieza de Espacios en Blanco (Trim)
+// ==========================================
+const texto4 = "    Hola Mundo.    ";
+console.log(texto4.trim());      // "Hola Mundo." (Limpia ambos extremos)
+console.log(texto4.trimStart()); // "Hola Mundo.    " (Limpia solo inicio)
+console.log(texto4.trimEnd());   // "    Hola Mundo." (Limpia solo final)
+
+// ==========================================
+// 6. Conversión de Mayúsculas / Minúsculas
+// ==========================================
+const texto5 = "Javascript";
+console.log(texto5.toLowerCase()); // "javascript"
+// console.log(texto5.toUpperCase()); // "JAVASCRIPT"
+
+// ==========================================
+// 7. Búsqueda y Validación de Contenido
+// ==========================================
+const contenido = "Aprende JAvaScript desde cero";
+console.log(contenido.includes("Javascirpt")); // false (Typo y case-sensitive)
+console.log(contenido.includes("Python"));     // false
+
+// startsWith() y endsWith()
+const archivo = "documento.md";
+console.log(archivo.startsWith("doc")); // true
+console.log(archivo.endsWith(".md"));   // true (Muy útil para validar extensiones de archivo)
+
+// ==========================================
+// 8. Reemplazo de Contenido (Inmutabilidad)
+// ==========================================
+const texto6 = "Hola Mundo, Hola javascript";
+console.log(texto6.replace("Hola", "Hi"));    // "Hi Mundo, Hola javascript" (Solo el primer "Hola")
+console.log(texto6.replaceAll("Hola", "Hi")); // "Hi Mundo, Hi javascript" (Todos los "Hola")
+console.log(texto6);                          // "Hola Mundo, Hola javascript" (¡El original sigue intacto!)
+```
+
+---
+
+> [!TIP]
+> **Regla de Inmutabilidad en Primitivos:**
+> Ningún método de strings modifica la variable existente. Si deseas conservar el resultado transformado (por ejemplo después de un `.trim()` o `.replaceAll()`), debes asignarlo a una nueva variable o reasignar con `let`:
+> ```javascript
+> let correo = "  usuario@correo.com  ";
+> correo = correo.trim().toLowerCase(); // "usuario@correo.com"
+> ```
+
+---
 *Hecho con ☕ y 💻 para el Curso de Fundamentos de JavaScript - Platzi*
+
