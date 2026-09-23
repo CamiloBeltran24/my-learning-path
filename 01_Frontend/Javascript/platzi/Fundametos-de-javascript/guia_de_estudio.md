@@ -12,6 +12,8 @@ Esta guía contiene los apuntes de estudio, explicaciones detalladas y conceptos
 - [Clase 04: Strings, Template Literals y Métodos Principales](#clase-04-strings-template-literals-y-métodos-principales)
 - [Clase 05: Coerción de Tipos (Implícita vs. Explícita) y Valores Truthy / Falsy](#clase-05-coerción-de-tipos-implícita-vs-explícita-y-valores-truthy--falsy)
 - [Clase 06: Operadores de Comparación (Igualdad Débil vs. Estricta y Desigualdad)](#clase-06-operadores-de-comparación-igualdad-débil-vs-estricta-y-desigualdad)
+- [Clase 07: Operadores Lógicos (`&&`, `||`, `!`) y Evaluación de Cortocircuito](#clase-07-operadores-lógicos--y-evaluación-de-cortocircuito)
+- [Clase 08: Estructuras de Control (`if`, `else if`, `else`) y Operador Ternario](#clase-08-estructuras-de-control-if-else-if-else-y-operador-ternario)
 
 ---
 
@@ -753,6 +755,218 @@ console.log(5 !== 5);            // false (Son exactamente idénticos en tipo y 
 > [!TIP]
 > **Regla de Oro en la Industria:**
 > Usa **SIEMPRE** igualdad estricta (`===`) y desigualdad estricta (`!==`). Prácticamente nunca debes usar `==` o `!=` en bases de código modernas, ya que la coerción implícita puede ocultar errores de lógica críticos.
+
+---
+
+## Clase 07: Operadores Lógicos (`&&`, `||`, `!`) y Evaluación de Cortocircuito
+👉 [Ver código de la clase](./curso/src/07-logic.js)
+
+Los **operadores lógicos** permiten combinar o invertir valores booleanos y expresiones condicionales. Son el motor fundamental para la toma de decisiones complejas en cualquier programa.
+
+---
+
+### 🛡️ La Analogía de la Bóveda de Seguridad y las Salidas de Emergencia
+
+* **`&&` (AND / La Bóveda de Doble Llave)**: Para abrir la caja fuerte se necesitan **ambas llaves girando al mismo tiempo**. Si falta una sola llave o falla, la bóveda permanece cerrada (`false`).
+* **`||` (OR / Las Puertas de Emergencia)**: Para evacuar un edificio, basta con que **al menos una de las puertas esté abierta**. Solo si todas las puertas están bloqueadas te quedas atrapado (`false`).
+* **`!` (NOT / El Interruptor Inversor)**: Cambia el estado actual al opuesto exacto: si la luz está encendida (`true`), la apaga (`false`); si está apagada, la enciende.
+
+---
+
+### 📊 1. Tablas de la Verdad
+
+#### A. Operador AND (`&&` - Y Lógico)
+Devuelve `true` **únicamente si todas las expresiones evaluadas son verdaderas**. Si encuentra un solo valor `false`, la operación completa se evalúa como `false`.
+
+| Expresión A | Expresión B | Resultado (`A && B`) | Explicación |
+| :---: | :---: | :---: | :--- |
+| `true` | `true` | `true` ✅ | Ambas son verdaderas. |
+| `true` | `false` | `false` ❌ | La segunda condición falló. |
+| `false` | `true` | `false` ❌ | La primera condición falló. |
+| `false` | `false` | `false` ❌ | Ambas son falsas. |
+
+#### B. Operador OR (`||` - O Lógico)
+Devuelve `true` **si al menos una de las expresiones es verdadera**. Solo devuelve `false` cuando todas las condiciones son falsas.
+
+| Expresión A | Expresión B | Resultado (`A \|\| B`) | Explicación |
+| :---: | :---: | :---: | :--- |
+| `true` | `true` | `true` ✅ | Ambas son verdaderas. |
+| `true` | `false` | `true` ✅ | La primera es suficiente para validar. |
+| `false` | `true` | `true` ✅ | La segunda cumple la condición. |
+| `false` | `false` | `false` ❌ | Ninguna condición se cumplió. |
+
+#### C. Operador NOT (`!` - Negación Lógica)
+Invierte el valor de verdad del operando:
+
+| Expresión | Resultado | Explicación |
+| :---: | :---: | :--- |
+| `!true` | `false` | Niega la verdad $\rightarrow$ falso. |
+| `!false` | `true` | Niega la falsedad $\rightarrow$ verdadero. |
+| `!!valor` | Booleano nativo | Doble negación: convierte cualquier valor a su tipo booleano (`truthy` o `falsy`). |
+
+---
+
+### ⚡ 2. Evaluación de Cortocircuito (*Short-Circuit Evaluation*)
+
+JavaScript evalúa las expresiones lógicas de izquierda a derecha y se detiene en cuanto el resultado es definitivo, devolviendo el **valor del operando evaluado**, no necesariamente un booleano literal:
+
+1. **Cortocircuito con `&&`**:
+   - Si el primer operando es *falsy*, JavaScript **se detiene de inmediato** y devuelve ese primer valor (no evalúa el segundo).
+   - Si el primero es *truthy*, continúa y devuelve el segundo operando.
+   ```javascript
+   const usuarioLogueado = true;
+   usuarioLogueado && console.log("Renderizar Dashboard"); // Se ejecuta
+   ```
+
+2. **Cortocircuito con `||` (Valores por Defecto Tradicionales)**:
+   - Si el primer operando es *truthy*, **se detiene de inmediato** y devuelve ese valor.
+   - Si el primero es *falsy*, devuelve el segundo operando.
+   ```javascript
+   const nombreIngresado = "";
+   const nombreFinal = nombreIngresado || "Invitado"; // "Invitado"
+   ```
+
+> [!NOTE]
+> **Diferencia entre `||` y el Operador Nullish Coalescing (`??`):**
+> El operador `||` considera `0`, `""` y `false` como falsy y aplicará el valor por defecto. Si deseas aplicar el valor por defecto **únicamente** cuando la variable sea `null` o `undefined`, usa `??`:
+> ```javascript
+> const puntuacion = 0;
+> const resultado1 = puntuacion || 10; // 10 ⚠️ (0 es falsy)
+> const resultado2 = puntuacion ?? 10; // 0  ✅ (0 está definido)
+> ```
+
+---
+
+### 💻 Código de la Clase Ilustrado
+
+```javascript
+// ==========================================
+// 1. Operador AND (&&)
+// Regresa true solo si AMBAS expresiones son verdaderas
+// ==========================================
+console.log(true && true);   // true
+console.log(true && false);  // false
+console.log(false && true);  // false
+console.log(false && false); // false
+
+// ==========================================
+// 2. Operador OR (||)
+// Regresa true si AL MENOS UNA de las expresiones es verdadera
+// ==========================================
+console.log(true || true);   // true
+console.log(true || false);  // true
+console.log(false || true);  // true
+console.log(false || false); // false
+
+// ==========================================
+// 3. Operador NOT (!)
+// Invierte el valor booleano actual
+// ==========================================
+console.log(!true);  // false
+console.log(!false); // true
+```
+
+---
+
+## Clase 08: Estructuras de Control (`if`, `else if`, `else`) y Operador Ternario
+👉 [Ver código de la clase](./curso/src/08-if-else.js)
+
+Las **estructuras de control condicionales** dirigen el flujo de ejecución de un programa, permitiendo que ciertas líneas de código se ejecuten solo cuando se cumplen condiciones específicas.
+
+---
+
+### 🚦 La Analogía del Guardia de Seguridad en el Evento
+
+Imagina la entrada a un evento exclusivo:
+1. **`if` (El pase VIP)**: El guardia revisa si tienes pase VIP (`edad > 18`). Si lo tienes, pasas directamente y no revisa nada más.
+2. **`else if` (La lista de invitados de cortesía)**: Si no tienes pase VIP, el guardia revisa una segunda condición alternativa (`edad === 18`).
+3. **`else` (La regla general para todos los demás)**: Si no cumpliste ninguna de las condiciones anteriores, se ejecuta la acción por defecto (`"Alto ahí galán!"`).
+
+---
+
+### 🧱 1. Anatomía de la Estructura `if / else if / else`
+
+```mermaid
+graph TD
+    A[Inicio: Evaluar Condición 1] -->|true| B[Ejecutar bloque IF]
+    A -->|false| C{Evaluar Condición 2}
+    C -->|true| D[Ejecutar bloque ELSE IF]
+    C -->|false| E[Ejecutar bloque ELSE por defecto]
+    B --> F[Continuar con el programa]
+    D --> F
+    E --> F
+```
+
+* **`if (condicion)`**: Es obligatorio para iniciar la estructura. Se ejecuta si la condición es evaluada como *truthy*.
+* **`else if (otraCondicion)`**: Opcional. Puedes encadenar múltiples `else if` secuenciales.
+* **`else`**: Opcional. No lleva condición de evaluación; se ejecuta cuando **ningún** `if` o `else if` previo fue verdadero.
+
+---
+
+### ⚡ 2. El Operador Ternario (`condición ? expr1 : expr2`)
+
+Es una alternativa concisa a `if / else` para asignaciones directas de una sola línea:
+
+```javascript
+const edad = 18;
+const mensaje = edad >= 18 ? "Acceso permitido" : "Acceso denegado";
+console.log(mensaje); // "Acceso permitido"
+```
+
+> [!TIP]
+> **Cuándo usar el Operador Ternario:**
+> - ✅ Úsalo para asignaciones simples o retornos directos de una sola línea.
+> - ❌ Evita anidar operadores ternarios (`a ? b : c ? d : e`), ya que arruinan la legibilidad del código. Para múltiples ramas, prefiere `if / else if / else` o `switch`.
+
+---
+
+### 💻 Código de la Clase Ilustrado
+
+```javascript
+// ==========================================
+// Control de Flujo Condicional: if / else if / else
+// ==========================================
+const edad = 18;
+
+if (edad > 18) {
+  // Se ejecuta si edad es estrictamente mayor que 18
+  console.log("Acceso permitido!");
+} else if (edad === 18) {
+  // Se evalúa únicamente si la condición anterior fue falsa
+  console.log("Tienes 18 años");
+} else {
+  // Se ejecuta como fallback si ninguna de las anteriores se cumplió
+  console.log("Alto ahi galan!");
+}
+```
+
+---
+
+### 🛡️ Buenas Prácticas: Cláusulas de Guarda (*Guard Clauses*)
+
+En desarrollo profesional se recomienda evitar anidamientos profundos (*Nested if statements*). En funciones, es preferible evaluar los casos de salida temprana (*Early Return*):
+
+```javascript
+// ❌ Código con anidamiento innecesario
+function validarUsuario(usuario) {
+  if (usuario) {
+    if (usuario.activo) {
+      if (usuario.edad >= 18) {
+        return "Acceso concedido";
+      }
+    }
+  }
+  return "Acceso denegado";
+}
+
+// ✅ Código limpio con Cláusulas de Guarda (Early Return)
+function validarUsuarioLimpio(usuario) {
+  if (!usuario || !usuario.activo) return "Acceso denegado";
+  if (usuario.edad < 18) return "Debes ser mayor de edad";
+  
+  return "Acceso concedido";
+}
+```
 
 ---
 *Hecho con ☕ y 💻 para el Curso de Fundamentos de JavaScript - Platzi*
