@@ -10,6 +10,8 @@ Esta guía contiene los apuntes de estudio, explicaciones detalladas y conceptos
 - [Clase 02: Tipos de Datos (Primitivos vs. Complejos) y `typeof`](#clase-02-tipos-de-datos-primitivos-vs-complejos-y-typeof)
 - [Clase 03: Operadores Aritméticos, Asignación Compuesta y Valores Especiales (`NaN` / `Infinity`)](#clase-03-operadores-aritméticos-asignación-compuesta-y-valores-especiales-nan--infinity)
 - [Clase 04: Strings, Template Literals y Métodos Principales](#clase-04-strings-template-literals-y-métodos-principales)
+- [Clase 05: Coerción de Tipos (Implícita vs. Explícita) y Valores Truthy / Falsy](#clase-05-coerción-de-tipos-implícita-vs-explícita-y-valores-truthy--falsy)
+- [Clase 06: Operadores de Comparación (Igualdad Débil vs. Estricta y Desigualdad)](#clase-06-operadores-de-comparación-igualdad-débil-vs-estricta-y-desigualdad)
 
 ---
 
@@ -516,6 +518,241 @@ console.log(texto6);                          // "Hola Mundo, Hola javascript" (
 > let correo = "  usuario@correo.com  ";
 > correo = correo.trim().toLowerCase(); // "usuario@correo.com"
 > ```
+
+---
+
+## Clase 05: Coerción de Tipos (Implícita vs. Explícita) y Valores Truthy / Falsy
+👉 [Ver código de la clase](./curso/src/05-coercion.js)
+
+La **coerción de tipos** (*Type Coercion*) es la conversión automática o implícita de valores de un tipo de dato a otro realizada por el motor de JavaScript. La **conversión de tipos** (*Type Conversion* o *Type Casting*), por el contrario, ocurre de forma explícita cuando el desarrollador indica intencionalmente la transformación.
+
+---
+
+### 🎭 La Analogía del Traductor Automático Entrometido
+
+* **Coerción Implícita (El traductor que asume sin preguntar)**: Imagina que estás hablando con alguien que habla otro idioma y un traductor en medio decide traducir lo que cree que quisiste decir sin consultarte. A veces acierta, pero otras veces produce malentendidos absurdos que pueden arruinar la conversación (provocar *bugs* difíciles de rastrear).
+* **Conversión Explícita (El diccionario oficial)**: Tú mismo buscas la palabra en el diccionario y especificas la traducción exacta con precisión matemática. El código es 100% predecible, legible y seguro.
+
+---
+
+### ⚙️ 1. Coerción Implícita (Conversión Automática)
+
+Ocurre cuando aplicamos operadores entre tipos de datos distintos y JavaScript intenta "ayudarnos" convirtiendo los tipos por su cuenta según sus reglas internas:
+
+| Operación | Expresión | Resultado | Tipo Resultante | Explicación Técnica |
+| :--- | :--- | :--- | :--- | :--- |
+| **Suma con String** | `"5" + 3` | `"53"` | `string` | Si al menos uno de los operandos del `+` es `string`, JS concatena convirtiendo el otro a `string`. |
+| **Resta con String** | `"5" - 3` | `2` | `number` | El operador `-` solo tiene significado aritmético, así que JS convierte `"5"` a número `5`. |
+| **Multiplicación con String** | `"4" * 2` | `8` | `number` | El operador `*` convierte ambos operandos a números. |
+| **División con String** | `"10" / "2"` | `5` | `number` | El operador `/` convierte ambos strings a números. |
+| **Suma de Booleano y Número** | `true + 1` | `2` | `number` | `true` se convierte implícitamente en `1` (`false` se convierte en `0`). |
+| **Resta de Booleano y Número** | `false - 1` | `-1` | `number` | `false` se convierte en `0`, por lo que $0 - 1 = -1$. |
+| **Suma de Booleano y String** | `true + " mundo"` | `"true mundo"` | `string` | El operador `+` con string convierte el booleano `true` en el texto `"true"`. |
+| **Operación inválida** | `"hola" - 2` | `NaN` | `number` | No puede convertir `"hola"` a número, resultando en *Not a Number*. |
+
+---
+
+### 🔧 2. Conversión Explícita (Type Casting Manual)
+
+Es la práctica recomendada: transformar valores conscientemente usando funciones nativas constructoras o métodos:
+
+#### A. A Tipo Numérico (`Number`, `parseInt`, `parseFloat`)
+1. **`Number(valor)`**: Convierte toda la cadena a número (si contiene caracteres no numéricos retorna `NaN`).
+2. **`parseInt(string, radix)`**: Parsea caracteres de izquierda a derecha hasta encontrar uno no numérico y retorna un entero. **Siempre debes especificar la base decimal `10`**.
+3. **`parseFloat(string)`**: Parsea números con punto decimal flotante.
+4. **Operador Unario `+`**: Forma concisa de convertir a número (`+"42"` da `42`).
+
+```javascript
+Number("42");         // 42
+Number("3.1416");     // 3.1416
+Number("42px");       // NaN ❌ (Number no tolera texto extra)
+parseInt("42px", 10); // 42 ✅ (Extrae los números iniciales)
+parseFloat("3.1415"); // 3.1415 ✅
+```
+
+#### B. A Tipo Texto (`String` y `.toString()`)
+1. **`String(valor)`**: Convierte cualquier dato a string (incluso `null` y `undefined` se vuelven `"null"` y `"undefined"`).
+2. **`valor.toString()`**: Método disponible en la mayoría de objetos y primitivos (excepto `null` y `undefined`, que lanzarán un error de tipo).
+
+```javascript
+String(123);        // "123"
+String(true);       // "true"
+String(null);       // "null"
+(123).toString();   // "123"
+```
+
+#### C. A Tipo Booleano (`Boolean` y Doble Negación `!!`)
+1. **`Boolean(valor)`**: Evalúa si el valor es verdadero (*truthy*) o falso (*falsy*).
+2. **`!!valor`**: Operador de doble negación que convierte cualquier valor a su representación booleana equivalente.
+
+```javascript
+Boolean(1);     // true
+Boolean(0);     // false
+Boolean("Hola");// true
+Boolean("");    // false
+!!42;           // true
+```
+
+---
+
+### 🚦 3. Valores Falsy y Truthy en JavaScript
+
+En JavaScript, cada valor tiene un valor booleano inherente cuando se evalúa en un contexto condicional (`if`, `while`, o `Boolean()`):
+
+#### ❌ Los Únicos Valores Falsy (Se evalúan como `false`):
+Cualquier cosa que **NO** esté en esta lista es automáticamente **Truthy**:
+
+1. `false`
+2. `0`, `-0` y `0n` (BigInt cero)
+3. `""`, `''`, ```` (Strings vacíos)
+4. `null`
+5. `undefined`
+6. `NaN`
+
+> [!WARNING]
+> **Ojo con los objetos y arreglos vacíos:**
+> `[]` (Array vacío) y `{}` (Objeto vacío) son **TRUTHY** (`Boolean([]) === true` y `Boolean({}) === true`).
+
+---
+
+### 💻 Código de la Clase Ilustrado
+
+```javascript
+// ==========================================
+// 1. Coerción Implícita (Automática por JS)
+// ==========================================
+console.log("5" + 3);  // "53" (El + con string concatena)
+console.log("5" - 3);  // 2    (El - obliga a conversión numérica)
+console.log("5" * 2);  // 10   (El * obliga a conversión numérica)
+console.log(true + 1); // 2    (true se convierte en 1)
+console.log(false + 5);// 5    (false se convierte en 0)
+
+// ==========================================
+// 2. Conversión Explícita (Manual y Segura)
+// ==========================================
+const str = "42";
+
+// Conversión a Number
+const num = Number(str);
+console.log(typeof num, num); // number 42
+
+// Conversión a Entero con parseInt (radix 10)
+const int = parseInt(str, 10);
+console.log(typeof int, int); // number 42
+
+// Conversión a Decimal con parseFloat
+const float = parseFloat("3.1415");
+console.log(typeof float, float); // number 3.1415
+
+// Conversión a String
+const texto = String(123);
+console.log(typeof texto, texto); // string "123"
+
+// Conversión a Boolean
+const bool1 = Boolean(1);
+console.log(typeof bool1, bool1); // boolean true
+
+const bool2 = Boolean(0);
+console.log(typeof bool2, bool2); // boolean false
+```
+
+---
+
+> [!TIP]
+> **Regla de Oro:**
+> Evita depender de la coerción implícita. Escribe código explícito usando `Number()`, `String()` y `Boolean()`. Esto hace que tu código sea auto-documentado y libre de comportamientos inesperados.
+
+---
+
+## Clase 06: Operadores de Comparación (Igualdad Débil vs. Estricta y Desigualdad)
+👉 [Ver código de la clase](./curso/src/06-comparison.js)
+
+Los operadores de comparación permiten evaluar dos operandos y devuelven un valor booleano (`true` o `false`). Comprender la diferencia entre la **igualdad débil** y la **igualdad estricta** es fundamental para escribir código profesional en JavaScript.
+
+---
+
+### ⚖️ 1. Igualdad Débil (`==`) vs. Igualdad Estricta (`===`)
+
+| Operador | Nombre | ¿Compara Tipo? | ¿Aplica Coerción? | Ejemplo | Resultado |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **`==`** | Igualdad Débil (*Abstract Equality*) | ❌ No | ✅ Sí (Convierte tipos antes de comparar) | `5 == "5"` | `true` ⚠️ |
+| **`===`** | Igualdad Estricta (*Strict Equality*) | ✅ Sí | ❌ No (Requiere mismo tipo y mismo valor) | `5 === "5"` | `false` ✅ |
+| **`!=`** | Desigualdad Débil | ❌ No | ✅ Sí (Aplica coerción) | `5 != "5"` | `false` ⚠️ |
+| **`!==`** | Desigualdad Estricta | ✅ Sí | ❌ No (Sin coerción) | `5 !== "5"` | `true` ✅ |
+
+---
+
+### 📐 2. Operadores Relacionales
+
+Comparan magnitudes numéricas o el orden alfabético/lexicográfico de strings:
+
+* **Mayor que (`>`)**: `10 > 5` $\rightarrow$ `true`
+* **Menor que (`<`)**: `3 < 8` $\rightarrow$ `true`
+* **Mayor o igual que (`>=`)**: `5 >= 5` $\rightarrow$ `true`
+* **Menor o igual que (`<=`)**: `4 <= 2` $\rightarrow$ `false`
+
+---
+
+### 🧪 3. Casos Especiales y Curiosidades en JavaScript
+
+```javascript
+// 1. null y undefined
+null == undefined;   // true  (Regla especial de JS en igualdad débil)
+null === undefined;  // false (Diferentes tipos de datos)
+
+// 2. El caso único de NaN
+NaN === NaN;         // false (NaN nunca es igual a nada, ni a sí mismo)
+Number.isNaN(NaN);   // true  (Forma correcta de verificar NaN)
+
+// 3. Comparación de Objetos / Arrays (Por Referencia)
+const a = [1, 2];
+const b = [1, 2];
+console.log(a === b); // false (Apuntan a diferentes direcciones de memoria en el Heap)
+
+const c = a;
+console.log(a === c); // true (Apuntan exactamente a la misma referencia en memoria)
+```
+
+---
+
+### 💻 Código de la Clase Ilustrado
+
+```javascript
+// ==========================================
+// 1. Igualdad Débil (==) con Coerción Implícita
+// ==========================================
+// Convierte tipos antes de comparar si son diferentes:
+console.log(5 == "5");           // true  ("5" es convertido al número 5)
+console.log(true == 1);          // true  (true se convierte al número 1)
+console.log(false == 0);         // true  (false se convierte al número 0)
+console.log(null == undefined);   // true  (Regla especial del estándar ECMAScript)
+
+// ==========================================
+// 2. Desigualdad Débil (!=)
+// ==========================================
+// Evalúa si NO son iguales aplicando coerción implícita:
+console.log(5 != "5");           // false (Como 5 == "5" es true, la desigualdad es false)
+
+// ==========================================
+// 3. Igualdad Estricta (===) - Sin Coerción
+// ==========================================
+// Compara que AMBOS operandos compartan el mismo tipo Y el mismo valor:
+console.log(5 === "5");          // false (Diferente tipo: number !== string)
+console.log(5 === 5);            // true  (Mismo tipo number y mismo valor 5)
+
+// ==========================================
+// 4. Desigualdad Estricta (!==) - Sin Coerción
+// ==========================================
+// Evalúa si son estrictamente diferentes en tipo O en valor:
+console.log(5 !== "5");          // true  (Son diferentes tipos: number vs string)
+console.log(5 !== 5);            // false (Son exactamente idénticos en tipo y valor)
+```
+
+---
+
+> [!TIP]
+> **Regla de Oro en la Industria:**
+> Usa **SIEMPRE** igualdad estricta (`===`) y desigualdad estricta (`!==`). Prácticamente nunca debes usar `==` o `!=` en bases de código modernas, ya que la coerción implícita puede ocultar errores de lógica críticos.
 
 ---
 *Hecho con ☕ y 💻 para el Curso de Fundamentos de JavaScript - Platzi*
