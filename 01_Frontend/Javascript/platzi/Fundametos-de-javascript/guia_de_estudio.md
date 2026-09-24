@@ -19,6 +19,8 @@ Esta guía contiene los apuntes de estudio, explicaciones detalladas y conceptos
 - [Clase 11: Funciones (Declaración, Parámetros vs. Argumentos, Arrow Functions y Parámetros por Defecto)](#clase-11-funciones-declaración-parámetros-vs-argumentos-arrow-functions-y-parámetros-por-defecto)
 - [Clase 12: Scope o Alcance (Global, de Función, de Bloque y Cadena de Alcance)](#clase-12-scope-o-alcance-global-de-función-de-bloque-y-cadena-de-alcance)
 - [Clase 13: Closures (Entorno Léxico, Memoria y Encapsulación de Datos Privados)](#clase-13-closures-entorno-léxico-memoria-y-encapsulación-de-datos-privados)
+- [Clase 14: Arreglos / Arrays (Estructura, Acceso por Índice y Operaciones CRUD Mutables)](#clase-14-arreglos--arrays-estructura-acceso-por-índice-y-operaciones-crud-mutables)
+- [Clase 15: Objetos Literales (Acceso, Optional Chaining, Desestructuración, Spread Operator y Métodos Estáticos)](#clase-15-objetos-literales-acceso-optional-chaining-desestructuración-spread-operator-y-métodos-estáticos)
 
 ---
 
@@ -1842,7 +1844,481 @@ console.log(miCuenta.retirar(200000));
 
 ---
 
+## Clase 14: Arreglos / Arrays (Estructura, Acceso por Índice y Operaciones CRUD Mutables)
+
+👉 [Ver código de la clase](./curso/src/14-arrays.js)
+
+Un **Arreglo (`Array`)** en JavaScript es una estructura de datos ordenada y dinámica que permite almacenar múltiples valores bajo una misma variable. A diferencia de otros lenguajes donde los arrays tienen un tamaño estricto y un tipo de dato único, en JavaScript son flexibles, heterogéneos y redimensionables de forma automática.
+
+---
+
+### 🗄️ La Analogía de la Estantería de Casilleros Numerados
+
+Imagina que un arreglo es una **estantería de casilleros numerados**:
+
+- Cada casillero tiene una etiqueta numérica llamada **Índice (`Index`)**, que **siempre comienza en `0`** (Base Cero).
+- En cada casillero puedes guardar cualquier objeto: un texto, un número, un booleano, una función o incluso otro arreglo u objeto completo.
+- Puedes agregar o quitar casilleros según lo necesites:
+  - **Por el frente (`.unshift()` / `.shift()`)**: Agregar o retirar casilleros desde el inicio (lo que obliga a renumerar todos los demás).
+  - **Por el fondo (`.push()` / `.pop()`)**: Agregar o retirar casilleros desde el final (muy rápido y eficiente).
+  - **En medio (`.splice()`)**: Insertar o extraer casilleros en cualquier posición intermedia.
+
+```mermaid
+flowchart LR
+    subgraph Array ["📦 Array en Memoria: ['Nota 0', 'Nota 1', 'Nota 2', 'Nota 3']"]
+        direction LR
+        I0["Índice [0]<br><b>'Nota 0'</b>"]
+        I1["Índice [1]<br><b>'Nota 1'</b>"]
+        I2["Índice [2]<br><b>'Nota 2'</b>"]
+        I3["Índice [3]<br><b>'Nota 3'</b>"]
+        I0 --- I1 --- I2 --- I3
+    end
+
+    U["📥 .unshift() / .shift() 📤<br><i>(Inicio del Array)</i>"] --> I0
+    I3 --> P["📥 .push() / .pop() 📤<br><i>(Final del Array)</i>"]
+    S["✂️ .splice(índice, cantidad, nuevo) ✂️<br><i>(Cualquier posición intermedia)</i>"] -.-> I1
+```
+
+---
+
+### 🔑 1. Creación y Tipos de Arreglos
+
+En JavaScript, los arrays se definen habitualmente utilizando **corchetes literales `[]`**:
+
+1. **Homogéneos**: Contienen elementos de un mismo tipo (números, strings, etc.).
+2. **Heterogéneos (Mixtos)**: Pueden combinar diferentes tipos de datos primitivos y complejos en la misma colección.
+
+```javascript
+const notas = ["Nota 1", "Nota 2", "Nota 3"]; // Homogéneo (strings)
+const numeros = [1, 2, 3, 4, 5, 6];           // Homogéneo (números)
+const mixtos = [1, "texto", true, null, { id: 1 }]; // Heterogéneo (mixto)
+```
+
+---
+
+### 📏 2. Indexación Base Cero y la Propiedad `.length`
+
+- **Primer elemento**: Siempre se ubica en el índice `[0]`.
+- **Propiedad `.length`**: Indica la cantidad total de elementos dentro del array.
+- **Último elemento**: Siempre se encuentra en la posición `[array.length - 1]`.
+- **Índice fuera de rango**: Si intentas acceder a un índice inexistente (ej. `notas[99]`), JavaScript devuelve `undefined` sin lanzar un error.
+
+---
+
+### 🔄 3. Operaciones CRUD Fundamentales en Arreglos
+
+El acrónimo **CRUD** describe las cuatro operaciones básicas sobre datos: **C**reate (Crear/Insertar), **R**ead (Leer/Consultar), **U**pdate (Actualizar/Modificar) y **D**elete (Eliminar).
+
+#### A. Create (Insertar / Agregar Elementos)
+
+| Método / Sintaxis | Posición de Inserción | ¿Qué retorna? | Ejemplo |
+| :--- | :--- | :--- | :--- |
+| **`.push(elem)`** | Al **final** del arreglo | La **nueva longitud** (`length`) del array | `notas.push("Nota 4")` |
+| **`.unshift(elem)`** | Al **inicio** del arreglo (desplaza los demás) | La **nueva longitud** (`length`) del array | `notas.unshift("Nota 0")` |
+| **`.splice(idx, 0, elem)`** | En una **posición intermedia específica** | Un array vacío `[]` (ya que no elimina nada) | `notas.splice(1, 0, "Nota 1.2")` |
+
+#### B. Read (Leer / Acceder a Elementos)
+
+- **Por posición**: `notas[0]`, `notas[1]`, `notas[2]`.
+- **Cantidad total**: `notas.length`.
+
+#### C. Update (Actualizar / Reemplazar Elementos)
+
+- **Por Asignación Directa**: Sobrescribe el valor en la posición indicada.
+  ```javascript
+  notas2[1] = "nota 3"; // Modifica directamente el índice 1
+  ```
+- **Con `.splice(idx, 1, nuevo)`**: Elimina 1 elemento en la posición `idx` e inserta el nuevo en su lugar.
+
+#### D. Delete (Eliminar Elementos)
+
+| Método | Posición de Eliminación | ¿Qué retorna? | Efecto Colateral |
+| :--- | :--- | :--- | :--- |
+| **`.pop()`** | El **último** elemento | El elemento eliminado | Reduce `.length` en 1 |
+| **`.shift()`** | El **primer** elemento | El elemento eliminado | Desplaza todos los índices restantes |
+| **`.splice(idx, cant)`** | A partir del índice `idx`, elimina `cant` elementos | Un **Array** con los elementos eliminados | Muta el array original reduciendo su tamaño |
+
+---
+
+### 📊 Tabla Comparativa de Métodos de Mutación
+
+| Método | ¿Dónde actúa? | ¿Qué hace? | ¿Qué retorna? | ¿Muta el Array original? |
+| :--- | :--- | :--- | :--- | :--- |
+| **`push()`** | Final | Agrega 1 o más elementos al final | Nueva longitud (`number`) | ✅ Sí |
+| **`pop()`** | Final | Quita el último elemento | Elemento extraído | ✅ Sí |
+| **`unshift()`** | Inicio | Agrega 1 o más elementos al inicio | Nueva longitud (`number`) | ✅ Sí |
+| **`shift()`** | Inicio | Quita el primer elemento | Elemento extraído | ✅ Sí |
+| **`splice()`** | Cualquier índice | Agrega, elimina o reemplaza elementos | Array con elementos eliminados | ✅ Sí |
+
+---
+
+### 💻 Código de la Clase Ilustrado y Comentado Paso a Paso
+
+```javascript
+// ==========================================
+// 1. Declaración y Creación de Arrays
+// ==========================================
+const notas = ["Nota 1", "Nota 2", "Nota 3"];
+const numeros = [1, 2, 3, 4, 5, 6];
+const mixtos = [1, "texto", true, null, { id: 1 }];
+
+// ==========================================
+// 2. CREATE (Agregar Elementos)
+// ==========================================
+
+// .push() -> Agrega al final del array
+notas.push("Nota 4");
+console.log(notas); 
+// 👉 [ 'Nota 1', 'Nota 2', 'Nota 3', 'Nota 4' ]
+
+// .unshift() -> Agrega al inicio del array
+notas.unshift("Nota 0");
+console.log(notas); 
+// 👉 [ 'Nota 0', 'Nota 1', 'Nota 2', 'Nota 3', 'Nota 4' ]
+
+// .splice(inicio, elementosAEliminar, ...elementosAInsertar)
+// En el índice 1, elimina 0 elementos e inserta "Notas 1.2"
+notas.splice(1, 0, "Notas 1.2");
+console.log(notas); 
+// 👉 [ 'Nota 0', 'Notas 1.2', 'Nota 1', 'Nota 2', 'Nota 3', 'Nota 4' ]
+
+// ==========================================
+// 3. READ (Leer Elementos y Longitud)
+// ==========================================
+console.log(notas[1]); // 👉 "Notas 1.2"
+console.log(notas[2]); // 👉 "Nota 1"
+console.log(notas[0]); // 👉 "Nota 0"
+
+// Longitud total del array
+console.log(`La cantidad de elementos contenidos son: ${notas.length}`);
+// 👉 "La cantidad de elementos contenidos son: 6"
+
+// ==========================================
+// 4. UPDATE (Actualizar Elementos)
+// ==========================================
+const notas2 = ["nota 1", "nota 2"];
+
+// Actualización por asignación de índice:
+notas2[1] = "nota 3";
+console.log(notas2); 
+// 👉 [ 'nota 1', 'nota 3' ]
+
+// Inserción / Reubicación con splice:
+notas2.splice(1, 0, "Nota 4");
+console.log(notas2); 
+// 👉 [ 'nota 1', 'Nota 4', 'nota 3' ]
+
+// ==========================================
+// 5. DELETE (Eliminar Elementos)
+// ==========================================
+
+// .pop() -> Extrae y elimina el ÚLTIMO elemento
+const notas3 = ["nota 1", "nota 2"];
+console.log(notas3.pop()); // 👉 "nota 2" (retorna el valor eliminado)
+console.log(notas3);        // 👉 [ 'nota 1' ]
+
+// .shift() y .splice() -> Eliminación al inicio o intermedia
+const notas4 = ["nota 1", "nota 2"];
+
+// notas4.shift(); // Eliminaría "nota 1" del inicio
+console.log(notas4); 
+
+// .splice(1, 1) -> A partir del índice 1, elimina 1 elemento
+console.log(notas4.splice(1, 1)); // 👉 [ 'nota 2' ] (retorna un array con lo eliminado)
+console.log(notas4);              // 👉 [ 'nota 1' ]
+```
+
+---
+
+### ⚠️ Conceptos Clave y Buenas Prácticas
+
+> [!IMPORTANT]
+> **Mutación en Métodos de Arreglos:**
+> Métodos como `.push()`, `.pop()`, `.shift()`, `.unshift()` y `.splice()` son **mutables** (modifican el arreglo original directamente en memoria). Aunque el array esté declarado con `const`, sus elementos internos sí pueden modificarse porque `const` protege la referencia de la variable, no el contenido del objeto en el Heap.
+
+> [!TIP]
+> **Rendimiento: `push` / `pop` vs. `unshift` / `shift`:**
+> - `.push()` y `.pop()` son operaciones $O(1)$ (muy rápidas), ya que actúan al final del array sin mover de lugar al resto.
+> - `.unshift()` y `.shift()` son operaciones $O(n)$ (más lentas en arrays grandes), porque obligan al motor de JavaScript a reindexar y desplazar todos los demás elementos una posición a la derecha o izquierda en memoria.
+
+---
+
+## Clase 15: Objetos Literales (Acceso, Optional Chaining, Desestructuración, Spread Operator y Métodos Estáticos)
+
+👉 [Ver código de la clase](./curso/src/15-objetos.js)
+
+Un **Objeto Literal** en JavaScript es una estructura de datos basada en pares **clave-valor (`key: value`)**. Mientras que los arreglos organizan la información mediante índices numéricos ordenados (`[0]`, `[1]`), los objetos permiten modelar entidades de la vida real asignando nombres descriptivos a cada propiedad.
+
+---
+
+### 📇 La Analogía de la Ficha de Expediente con Etiquetas
+
+Imagina que un objeto es una **carpeta o ficha de expediente personal**:
+
+- Cada dato tiene una **etiqueta con su nombre** (la clave: `id`, `title`, `edad`).
+- Puedes consultar el dato leyendo su etiqueta directamente (**Notación de punto `.`**) o buscando la etiqueta guardada en un papelito (**Notación de corchetes `[]`**).
+- Si buscas una sección que no existe dentro de una subcarpeta inexistente, el sistema normal de archivos se congelaría con un error; pero con una lupa especial (**Optional Chaining `?.`**), simplemente te dice *"no se encontró nada"* sin interrumpir el trabajo.
+- Puedes sacar copias rápidas y combinar datos de varias fichas con una fotocopiadora mágica (**Spread Operator `...`**), o extraer solo los datos clave que necesitas en tu mesa (**Desestructuración `{}`**).
+
+```mermaid
+flowchart TD
+    subgraph Objeto ["📁 Objeto Literal: nota"]
+        K1["🔑 id: 1"]
+        K2["🔑 title: 'Mi primera nota'"]
+        K3["🔑 content: 'Contenido...'"]
+        K4["🔑 author: undefined"]
+    end
+
+    DP["👉 nota.title"] --> K2
+    DC["👉 nota['content']"] --> K3
+    
+    subgraph Seguridad ["🛡️ Acceso Seguro con Optional Chaining"]
+        SE1["❌ nota.author.name ➔ 💥 TypeError"]
+        SE2["✅ nota.author?.name ➔ 🛡️ undefined (Seguro)"]
+    end
+
+    K4 -.-> Seguridad
+```
+
+---
+
+### 🔑 1. Acceso a Propiedades: Punto (`.`) vs. Corchetes (`[]`)
+
+| Método de Acceso | Sintaxis | Cuándo usarlo | Ejemplo |
+| :--- | :--- | :--- | :--- |
+| **Notación de Punto** | `objeto.propiedad` | La clave es fija, conocida y cumple las reglas de identificadores de JS. | `nota.title` |
+| **Notación de Corchetes** | `objeto[variable_o_string]` | La clave proviene de una variable dinámica, contiene espacios, guiones o números. | `const campo = "content";`<br>`nota[campo]` |
+
+---
+
+### 🛡️ 2. El Peligro de `undefined` y el Encadenamiento Opcional (`?.`)
+
+Cuando intentas leer una propiedad que no existe en un objeto, JavaScript devuelve `undefined`:
+```javascript
+console.log(nota.author); // undefined (No rompe el programa)
+```
+
+Sin embargo, si intentas acceder a una **subpropiedad** de algo que ya es `undefined` o `null`, JavaScript lanzará un error fatal que detendrá la ejecución del programa:
+```javascript
+console.log(nota.author.name); 
+// ❌ TypeError: Cannot read properties of undefined (reading 'name')
+```
+
+#### ✅ La Solución Moderna: Optional Chaining (`?.`)
+Introducido en **ES2020**, el operador `?.` verifica si el valor a la izquierda es `null` o `undefined`. Si lo es, **detiene la evaluación inmediatamente** (_short-circuit_) y retorna `undefined` en lugar de arrojar un error:
+```javascript
+console.log(nota.author?.name); 
+// 👉 undefined  (✅ Seguro, no rompe la aplicación)
+```
+
+---
+
+### 📦 3. Desestructuración de Objetos (`Destructuring`)
+
+La desestructuración es una sintaxis concisa de ES6 para **extraer propiedades de un objeto y almacenarlas directamente en variables independientes**:
+
+```javascript
+const nota2 = {
+  id: 1,
+  title: "Mi Segunda nota",
+  content: "Contenido de la nota"
+};
+
+// 1. Extracción tradicional (verbosa):
+const titleOld = nota2.title;
+
+// 2. Desestructuración moderna:
+const { id, content } = nota2;
+console.log(id, content); // 1 "Contenido de la nota"
+
+// 3. Desestructuración con Alias (Renombrar variables):
+const { title: titulo } = nota2;
+console.log(titulo); // "Mi Segunda nota" (crea la variable 'titulo')
+```
+
+---
+
+### 🪄 4. Operador de Propagación (`Spread Operator ...`) en Objetos
+
+El operador `...` permite "desempaquetar" las propiedades de un objeto dentro de otro nuevo:
+
+#### A. Clonación Superficial (_Shallow Copy_)
+Evita que dos variables apunten a la misma referencia en memoria:
+```javascript
+const notaOriginal = { id: 2, title: "Hola" };
+const copia = { ...notaOriginal }; // Crea un nuevo objeto independiente
+
+copia.id = 3; // Modificar la copia NO altera a notaOriginal
+console.log(notaOriginal.id); // 👉 2 (Intacto)
+console.log(copia.id);        // 👉 3
+```
+
+#### B. Fusión (_Merge_) y Sobreescritura
+Permite combinar múltiples fuentes de datos en un solo objeto. Las propiedades declaradas más a la derecha tienen prioridad en caso de colisión:
+```javascript
+const base = { id: 1, title: "Nota base" };
+const extras = { admin: true, edad: 18 };
+
+const notaFinal = {
+  ...base,
+  content: "Nuevo contenido agregado",
+  ...extras
+};
+```
+
+---
+
+### 🔍 5. Métodos Estáticos de `Object` (`keys`, `values`, `entries`)
+
+La clase global `Object` provee métodos utilitarios para convertir las partes de un objeto en **arreglos iterables**:
+
+```mermaid
+flowchart TD
+    subgraph OBJ ["📁 Objeto: { id: 1, title: 'Nota' }"]
+        direction TB
+        P1["'id' : 1"]
+        P2["'title' : 'Nota'"]
+    end
+
+    OBJ -->|Object.keys| OK["📋 ['id', 'title'] (Solo claves)"]
+    OBJ -->|Object.values| OV["📊 [1, 'Nota'] (Solo valores)"]
+    OBJ -->|Object.entries| OE["📑 [['id', 1], ['title', 'Nota']] (Pares clave-valor)"]
+```
+
+| Método | ¿Qué hace? | ¿Qué retorna? | Ejemplo sobre `{ a: 1, b: 2 }` |
+| :--- | :--- | :--- | :--- |
+| **`Object.keys(obj)`** | Extrae todos los nombres de las propiedades (claves) | Arreglo de strings `Array<string>` | `['a', 'b']` |
+| **`Object.values(obj)`** | Extrae todos los valores asignados | Arreglo con los valores `Array<any>` | `[1, 2]` |
+| **`Object.entries(obj)`** | Extrae pares `[clave, valor]` en matrices de 2 dimensiones | Arreglo de tuplas `Array<[string, any]>` | `[['a', 1], ['b', 2]]` |
+
+---
+
+### 💻 Código de la Clase Ilustrado y Comentado Paso a Paso
+
+```javascript
+// ==========================================
+// 1. Declaración de un Objeto Literal
+// ==========================================
+const nota = {
+  id: 1,
+  title: "Mi primera nota",
+  content: "Contenido de la nota",
+  createAt: Date.now(),
+  edad: 13,
+  esAdmin: true,
+  dates: [1, 1, 1, 1],
+};
+
+// Acceso por notación de punto:
+console.log(nota.id);    // 👉 1
+console.log(nota.title); // 👉 "Mi primera nota"
+
+// Acceso por notación de corchetes con variable dinámica:
+const campo = "content";
+console.log(nota[campo]); // 👉 "Contenido de la nota"
+
+// ==========================================
+// 2. Manejo de undefined vs. Optional Chaining (?.)
+// ==========================================
+// Acceso a propiedad no declarada:
+// console.log(nota.author.name); 
+// ❌ TypeError: Cannot read properties of undefined (reading 'name')
+
+// Acceso seguro con Optional Chaining:
+console.log(nota.author?.name); 
+// 👉 undefined (No explota ni detiene la ejecución)
+
+// ==========================================
+// 3. Desestructuración de Objetos
+// ==========================================
+const nota2 = {
+  id: 1,
+  title: "Mi Segunda nota",
+  content: "Contenido de la nota",
+  createAt: Date.now(),
+  edad: 13,
+  esAdmin: true,
+  dates: [1, 1, 1, 1],
+};
+
+// Forma tradicional:
+const title = nota2.title;
+
+// Forma moderna con desestructuración y renombrado (alias):
+const { id, title: titulo, content } = nota2;
+console.log(id, titulo, content); 
+// 👉 1 "Mi Segunda nota" "Contenido de la nota"
+
+// ==========================================
+// 4. Spread Operator (...) para Clonación y Fusión
+// ==========================================
+const nota3 = { id: 2, title: "Hola" };
+const copia = { ...nota3 }; // Clon superficial
+const data = { admin: true, edad: 18 };
+
+console.log(nota3); // 👉 { id: 2, title: 'Hola' }
+console.log(copia); // 👉 { id: 2, title: 'Hola' }
+
+// Modificamos solo la copia:
+copia.id = 3;
+
+console.log(nota3); // 👉 { id: 2, title: 'Hola' } (El original permanece intacto)
+console.log(copia); // 👉 { id: 3, title: 'Hola' }
+
+// Fusión (Merge) y enriquecimiento de propiedades:
+const notaActualizada = {
+  ...nota3,
+  content: "contenido de la nota",
+  ...data,
+};
+console.log(notaActualizada);
+// 👉 { id: 2, title: 'Hola', content: 'contenido de la nota', admin: true, edad: 18 }
+
+// ==========================================
+// 5. Métodos Estáticos de la Clase Object
+// ==========================================
+
+// Object.keys() -> Retorna un arreglo con las claves
+console.log(Object.keys(notaActualizada));
+// 👉 [ 'id', 'title', 'content', 'admin', 'edad' ]
+
+// Object.values() -> Retorna un arreglo con los valores
+console.log(Object.values(notaActualizada));
+// 👉 [ 2, 'Hola', 'contenido de la nota', true, 18 ]
+
+// Object.entries() -> Retorna un arreglo de pares [clave, valor]
+console.log(Object.entries(notaActualizada));
+// 👉 [
+//      [ 'id', 2 ],
+//      [ 'title', 'Hola' ],
+//      [ 'content', 'contenido de la nota' ],
+//      [ 'admin', true ],
+//      [ 'edad', 18 ]
+//    ]
+```
+
+---
+
+### ⚠️ Conceptos Clave y Buenas Prácticas
+
+> [!TIP]
+> **¿Cuándo usar `Object.entries()`?**
+> Es la herramienta predilecta cuando necesitas iterar tanto las claves como los valores de un objeto usando bucles modernos como `for...of` con desestructuración de arreglos:
+> ```javascript
+> for (const [clave, valor] of Object.entries(notaActualizada)) {
+>   console.log(`${clave}: ${valor}`);
+> }
+> ```
+
+> [!WARNING]
+> **Limitación de la Clonación con Spread (`...`):**
+> El spread operator realiza una **copia superficial** (_shallow copy_). Si el objeto contiene objetos o arreglos anidados internamente (por ejemplo `dates: [1, 1]`), esos sub-objetos seguirán compartiendo la misma referencia de memoria. Para copias profundas en JavaScript moderno, utiliza `structuredClone(objeto)`.
+
+---
+
 _Hecho con ☕ y 💻 para el Curso de Fundamentos de JavaScript - Platzi_
+
+
 
 
 
