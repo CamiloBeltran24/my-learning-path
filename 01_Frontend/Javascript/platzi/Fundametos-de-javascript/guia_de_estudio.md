@@ -16,6 +16,7 @@ Esta guía contiene los apuntes de estudio, explicaciones detalladas y conceptos
 - [Clase 08: Estructuras de Control (`if`, `else if`, `else`) y Operador Ternario](#clase-08-estructuras-de-control-if-else-if-else-y-operador-ternario)
 - [Clase 09: Estructura de Control `switch`, Agrupación de Casos y `default`](#clase-09-estructura-de-control-switch-agrupación-de-casos-y-default)
 - [Clase 10: Bucles e Iteraciones (`for`, `for...of`, `for...in`, `while` y `do...while`)](#clase-10-bucles-e-iteraciones-for-forof-forin-while-y-dowhile)
+- [Clase 11: Funciones (Declaración, Parámetros vs. Argumentos, Arrow Functions y Parámetros por Defecto)](#clase-11-funciones-declaración-parámetros-vs-argumentos-arrow-functions-y-parámetros-por-defecto)
 
 ---
 
@@ -1325,5 +1326,168 @@ console.log(numero); // 👉 Imprime: 3
 
 ---
 
+## Clase 11: Funciones (Declaración, Parámetros vs. Argumentos, Arrow Functions y Parámetros por Defecto)
+
+👉 [Ver código de la clase](./curso/src/11-funciones.js)
+
+Las **funciones** son los bloques de construcción fundamentales en JavaScript. Son conjuntos de instrucciones agrupadas bajo un nombre reutilizable diseñadas para realizar una tarea específica, procesar datos de entrada y devolver un resultado.
+
+---
+
+### ☕ La Analogía de la Máquina de Café Automática
+
+Imagina una cafetera moderna programable:
+
+```mermaid
+graph LR
+    A["Argumentos (Café en grano, Leche)"] --> B["⚙️ Función Cafetera (Parámetros: granos, liquido)"]
+    B --> C["☕ Retorno / return (Taza de Capuchino)"]
+```
+
+1. **La Definición / Receta (Declaración de la función)**: Es el manual interno de la máquina que dice cómo procesar granos de café y líquidos.
+2. **Los Parámetros (`granos`, `liquido`)**: Son las ranuras o contenedores vacíos definidos en el diseño de la máquina a la espera de ingredientes.
+3. **Los Argumentos (`"Café Colombiano"`, `"Leche de Almendras"`)**: Son los ingredientes reales y concretos que introduces en la máquina al momento de presionar el botón de encendido.
+4. **El `return`**: Es la taza de café servida que la máquina te entrega de vuelta. Si una función no tiene `return`, realiza el trabajo internamente pero devuelve `undefined` al exterior.
+
+---
+
+### 🔑 Conceptos Clave
+
+#### 1. Parámetros vs. Argumentos (La Gran Diferencia)
+
+| Concepto       | ¿Qué es?                                                     | Momento en que existe                  | Ejemplo en Código                |
+| :------------- | :----------------------------------------------------------- | :------------------------------------- | :------------------------------- |
+| **Parámetro**  | Variable receptora declarada en la definición de la función. | **Fase de definición** de la función   | `function sumar(a, b)`           |
+| **Argumento**  | Valor real y concreto enviado al invocar la función.         | **Fase de ejecución / llamada** (`()`) | `sumar(10, 5)`                   |
+
+---
+
+#### 2. Funciones Tradicionales vs. Funciones Flecha (*Arrow Functions*)
+
+Introducidas en ES6, las **Arrow Functions** proporcionan una sintaxis mucho más limpia, moderna y concisa:
+
+```javascript
+// 1. Función Declarada Tradicional
+function multiplicarTradicional(a, b) {
+  return a * b;
+}
+
+// 2. Función Flecha (Arrow Function con cuerpo de bloque y return explícito)
+const multiplicarFlecha = (a, b) => {
+  return a * b;
+};
+
+// 3. Función Flecha con Retorno Implícito (Una sola línea, sin llaves ni return)
+const multiplicarCorto = (a, b) => a * b;
+```
+
+> [!TIP]
+> **Ventajas de las Arrow Functions:**
+> - Sintaxis más limpia y legible.
+> - **Retorno implícito** en expresiones de una sola línea (`(a, b) => a * b`).
+> - No crean su propio contexto de `this` (heredan el `this` léxico del entorno contenedor), lo cual es ideal para métodos de arrays y callbacks.
+
+---
+
+#### 3. Parámetros por Defecto (*Default Parameters*)
+
+Permiten asignar un valor de respaldo a un parámetro en caso de que al invocar la función no se envíe ningún argumento o se envíe `undefined`:
+
+```javascript
+// Si no se envía 'titulo', tomará automáticamente "Sin Titulo"
+const crearNota = (contenido, titulo = "Sin Titulo") => {
+  return {
+    titulo,
+    contenido,
+    creado: Date.now(),
+  };
+};
+
+console.log(crearNota("Repasar funciones")); 
+// 👉 { titulo: "Sin Titulo", contenido: "Repasar funciones", creado: 1727148581000 }
+```
+
+---
+
+#### 4. Notación Simplificada de Propiedades de Objetos (*Object Property Shorthand*)
+
+Cuando el nombre de la propiedad de un objeto coincide exactamente con el nombre de la variable que contiene su valor, puedes omitir la repetición:
+
+```javascript
+// ❌ Redundante:
+return { nombre: nombre, edad: edad };
+
+// ✅ Moderno y conciso (Property Shorthand):
+return { nombre, edad };
+```
+
+---
+
+### 💻 Código de la Clase Ilustrado
+
+```javascript
+// ==========================================
+// 1. Declaración de Función y Sentencia return
+// ==========================================
+function saludar(nombre) {
+  return `Hola ${nombre}`;
+}
+
+// Invocación y almacenamiento del valor retornado
+let mensaje = saludar("Christian Camilo");
+let mensaje2 = saludar("Johana");
+
+console.log(mensaje, mensaje2); 
+// 👉 Imprime: "Hola Christian Camilo" "Hola Johana"
+
+// ==========================================
+// 2. Parámetros vs. Argumentos y Shorthand de Objetos
+// ==========================================
+// Parámetros: 'nombre' y 'edad' son las variables receptoras
+function crearUsuario(nombre, edad) {
+  // Retorna un objeto utilizando Object Property Shorthand { nombre, edad }
+  return { nombre, edad };
+}
+
+// Argumentos: "Christian" y 32 son los valores reales suministrados
+const usuario = crearUsuario("Christian", 32);
+console.log(usuario); // 👉 { nombre: "Christian", edad: 32 }
+
+// ==========================================
+// 3. Funciones Flecha (Arrow Functions)
+// ==========================================
+const multiplicar = (numero1, numero2) => {
+  return numero1 * numero2;
+};
+
+let resultado = multiplicar(10, 5);
+console.log(resultado); // 👉 50
+
+// ==========================================
+// 4. Parámetros por Defecto (Default Parameters) y Metadatos Dinámicos
+// ==========================================
+// 'titulo' tiene un valor por defecto si no es suministrado
+const crearNota = (contenido, titulo = "Sin Titulo") => {
+  return {
+    titulo,
+    contenido,
+    creado: Date.now(), // Marca de tiempo actual en milisegundos
+  };
+};
+
+let nota = crearNota(4.5, "Matematicas");
+console.log(nota);
+// 👉 { titulo: "Matematicas", contenido: 4.5, creado: 1727148581000 }
+```
+
+---
+
+> [!NOTE]
+> **¿Por qué usar `Date.now()` en registros u objetos?**
+> `Date.now()` devuelve el número de milisegundos transcurridos desde el 1 de enero de 1970 UTC (*Unix Epoch*). Es un estándar muy utilizado para generar marcas de tiempo (*timestamps*) precisas, ordenar registros cronológicamente o calcular diferencias de tiempo.
+
+---
+
 _Hecho con ☕ y 💻 para el Curso de Fundamentos de JavaScript - Platzi_
+
 
