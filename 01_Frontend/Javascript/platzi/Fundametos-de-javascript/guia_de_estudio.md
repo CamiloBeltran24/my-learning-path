@@ -1,6 +1,6 @@
 # 📘 Guía de Estudio: Fundamentos de JavaScript
 
-Esta guía contiene los apuntes de estudio, explicaciones detalladas y conceptos clave aprendidos durante el curso de **Fundamentos de JavaScript** (Platzi). El objetivo es documentar las bases esenciales del lenguaje de forma **sencilla, gráfica y accesible**, explicando el porqué detrás de cada comportamiento técnico (como el *hoisting*, los tipos de datos, los operadores o el manejo de memoria).
+Esta guía contiene los apuntes de estudio, explicaciones detalladas y conceptos clave aprendidos durante el curso de **Fundamentos de JavaScript** (Platzi). El objetivo es documentar las bases esenciales del lenguaje de forma **sencilla, gráfica y accesible**, explicando el porqué detrás de cada comportamiento técnico (como el _hoisting_, los tipos de datos, los operadores o el manejo de memoria).
 
 ---
 
@@ -14,10 +14,13 @@ Esta guía contiene los apuntes de estudio, explicaciones detalladas y conceptos
 - [Clase 06: Operadores de Comparación (Igualdad Débil vs. Estricta y Desigualdad)](#clase-06-operadores-de-comparación-igualdad-débil-vs-estricta-y-desigualdad)
 - [Clase 07: Operadores Lógicos (`&&`, `||`, `!`) y Evaluación de Cortocircuito](#clase-07-operadores-lógicos--y-evaluación-de-cortocircuito)
 - [Clase 08: Estructuras de Control (`if`, `else if`, `else`) y Operador Ternario](#clase-08-estructuras-de-control-if-else-if-else-y-operador-ternario)
+- [Clase 09: Estructura de Control `switch`, Agrupación de Casos y `default`](#clase-09-estructura-de-control-switch-agrupación-de-casos-y-default)
+- [Clase 10: Bucles e Iteraciones (`for`, `for...of`, `for...in`, `while` y `do...while`)](#clase-10-bucles-e-iteraciones-for-forof-forin-while-y-dowhile)
 
 ---
 
 ## Clase 01: Variables (`var`, `let`, `const`) y Hoisting
+
 👉 [Ver código de la clase](./curso/src/01-vars.js)
 
 En JavaScript, una variable es un contenedor en memoria donde almacenamos información para utilizarla y manipularla a lo largo del programa. La evolución de JavaScript (especialmente con ES6) introdujo formas más seguras y predecibles de gestionar datos en memoria.
@@ -28,9 +31,9 @@ En JavaScript, una variable es un contenedor en memoria donde almacenamos inform
 
 Imagina que declarar variables es como etiquetar cajas para organizar tu habitación:
 
-* **`var` (La caja sin tapa de los años 90)**: Es una caja abierta que cualquiera en la casa puede ver, modificar o incluso cambiarle el nombre por error. Además, JavaScript la mueve "mágicamente" al techo de la habitación antes de que despiertes (*Hoisting*). **¡Mala práctica hoy en día!**
-* **`let` (La caja con tapa de velcro)**: Está guardada dentro de una habitación específica (bloque `{}`). Puedes abrirla en cualquier momento, sacar su contenido y poner uno nuevo (reasignar). Pero **no puedes** comprar otra caja con el mismo nombre en la misma habitación (evita redeclaraciones accidentales).
-* **`const` (La caja fuerte sellada)**: Una vez que guardas un valor y la cierras, queda blindada. No puedes reasignarle un valor completamente nuevo. Es la opción más segura y predecible.
+- **`var` (La caja sin tapa de los años 90)**: Es una caja abierta que cualquiera en la casa puede ver, modificar o incluso cambiarle el nombre por error. Además, JavaScript la mueve "mágicamente" al techo de la habitación antes de que despiertes (_Hoisting_). **¡Mala práctica hoy en día!**
+- **`let` (La caja con tapa de velcro)**: Está guardada dentro de una habitación específica (bloque `{}`). Puedes abrirla en cualquier momento, sacar su contenido y poner uno nuevo (reasignar). Pero **no puedes** comprar otra caja con el mismo nombre en la misma habitación (evita redeclaraciones accidentales).
+- **`const` (La caja fuerte sellada)**: Una vez que guardas un valor y la cierras, queda blindada. No puedes reasignarle un valor completamente nuevo. Es la opción más segura y predecible.
 
 ---
 
@@ -44,13 +47,13 @@ Imagina que declarar variables es como etiquetar cajas para organizar tu habitac
 
 2. **Tabla Comparativa de Comportamiento**:
 
-| Característica | `var` | `let` | `const` |
-| :--- | :--- | :--- | :--- |
-| **Ámbito (*Scope*)** | Función o Global | Bloque `{}` | Bloque `{}` |
-| **¿Permite Reasignar?** | ✅ Sí | ✅ Sí | ❌ No |
-| **¿Permite Redeclarar?** | ✅ Sí (Peligroso) | ❌ No | ❌ No |
-| **Hoisting** | ✅ Sí (Inicializa en `undefined`) | ⚠️ Sí (Temporal Dead Zone) | ⚠️ Sí (Temporal Dead Zone) |
-| **Uso Recomendado** | ⛔ Evitar siempre | 🟡 Solo si cambiará su valor | 🟢 **Uso por defecto** |
+| Característica           | `var`                             | `let`                        | `const`                    |
+| :----------------------- | :-------------------------------- | :--------------------------- | :------------------------- |
+| **Ámbito (_Scope_)**     | Función o Global                  | Bloque `{}`                  | Bloque `{}`                |
+| **¿Permite Reasignar?**  | ✅ Sí                             | ✅ Sí                        | ❌ No                      |
+| **¿Permite Redeclarar?** | ✅ Sí (Peligroso)                 | ❌ No                        | ❌ No                      |
+| **Hoisting**             | ✅ Sí (Inicializa en `undefined`) | ⚠️ Sí (Temporal Dead Zone)   | ⚠️ Sí (Temporal Dead Zone) |
+| **Uso Recomendado**      | ⛔ Evitar siempre                 | 🟡 Solo si cambiará su valor | 🟢 **Uso por defecto**     |
 
 3. **¿Qué es el Hoisting (Elevación)?**:
    - Es el comportamiento interno de JavaScript durante la fase de compilación/creación, donde las **declaraciones** de variables y funciones son procesadas en memoria antes de ejecutar cualquier línea de código.
@@ -73,7 +76,7 @@ var bloquesRojos = 5; // ⚠️ Permitido con var: sobreescribe sin avisar
 // ==========================================
 let contador = 0;
 // let contador = 5; // ❌ Error: Identifier 'contador' has already been declared
-contador = 5;        // ✅ Válido: Reasignación de valor
+contador = 5; // ✅ Válido: Reasignación de valor
 let mensaje = "Hola";
 
 // ==========================================
@@ -106,6 +109,7 @@ nombre = "Christian";   // 3. Asigna el valor real en la línea original
 ---
 
 ## Clase 02: Tipos de Datos (Primitivos vs. Complejos) y `typeof`
+
 👉 [Ver código de la clase](./curso/src/02-types.js)
 
 En JavaScript, los datos que manipulamos se dividen en dos grandes categorías: **Tipos Primitivos** y **Tipos Complejos (o de Referencia)**. Conocer sus diferencias es vital para entender cómo se guardan en memoria y cómo se comportan al pasarlos como argumentos.
@@ -114,8 +118,8 @@ En JavaScript, los datos que manipulamos se dividen en dos grandes categorías: 
 
 ### 🪙 La Analogía de la Fotocopia vs. La Llave de Casa
 
-* **Tipos Primitivos (Paso por Valor / La Fotocopia)**: Imagina que tienes una hoja con un poema y le sacas una fotocopia para dársela a un amigo. Si tu amigo mancha con café su fotocopia, tu hoja original sigue intacta. Cada variable guarda **su propio valor independiente** directamente en memoria (*Stack*).
-* **Tipos Complejos (Paso por Referencia / La Llave Compartida)**: Imagina que le das una copia de la llave de tu casa a un amigo. Si tu amigo entra y pinta las paredes de verde, tú también verás las paredes verdes al entrar. La variable no guarda la casa entera, guarda únicamente la **dirección de memoria** (*Heap*) donde vive el objeto.
+- **Tipos Primitivos (Paso por Valor / La Fotocopia)**: Imagina que tienes una hoja con un poema y le sacas una fotocopia para dársela a un amigo. Si tu amigo mancha con café su fotocopia, tu hoja original sigue intacta. Cada variable guarda **su propio valor independiente** directamente en memoria (_Stack_).
+- **Tipos Complejos (Paso por Referencia / La Llave Compartida)**: Imagina que le das una copia de la llave de tu casa a un amigo. Si tu amigo entra y pinta las paredes de verde, tú también verás las paredes verdes al entrar. La variable no guarda la casa entera, guarda únicamente la **dirección de memoria** (_Heap_) donde vive el objeto.
 
 ---
 
@@ -123,15 +127,15 @@ En JavaScript, los datos que manipulamos se dividen en dos grandes categorías: 
 
 Son valores simples, inmutables y de tamaño fijo:
 
-| Tipo | Descripción | Ejemplo | Resultado de `typeof` |
-| :--- | :--- | :--- | :--- |
-| **`string`** | Texto o cadenas de caracteres envueltas en comillas (`""`, `''`, `` ` ``). | `"Hola"` | `"string"` |
-| **`number`** | Números enteros o decimales (punto flotante de 64 bits). | `42`, `3.14` | `"number"` |
-| **`boolean`** | Valores lógicos de verdadero o falso. | `true`, `false` | `"boolean"` |
-| **`null`** | Representa intencionalmente la ausencia de valor o valor vacío. | `null` | `"object"` *(Bug histórico)* |
-| **`undefined`** | Variable declarada a la que aún no se le ha asignado un valor. | `undefined` | `"undefined"` |
-| **`symbol`** | Identificador único e inmutable (introducido en ES6). | `Symbol("id")` | `"symbol"` |
-| **`bigint`** | Enteros de precisión arbitraria para números mayores a $2^{53} - 1$ (sufijo `n`). | `123n` | `"bigint"` |
+| Tipo            | Descripción                                                                       | Ejemplo         | Resultado de `typeof`        |
+| :-------------- | :-------------------------------------------------------------------------------- | :-------------- | :--------------------------- |
+| **`string`**    | Texto o cadenas de caracteres envueltas en comillas (`""`, `''`, `` ` ``).        | `"Hola"`        | `"string"`                   |
+| **`number`**    | Números enteros o decimales (punto flotante de 64 bits).                          | `42`, `3.14`    | `"number"`                   |
+| **`boolean`**   | Valores lógicos de verdadero o falso.                                             | `true`, `false` | `"boolean"`                  |
+| **`null`**      | Representa intencionalmente la ausencia de valor o valor vacío.                   | `null`          | `"object"` _(Bug histórico)_ |
+| **`undefined`** | Variable declarada a la que aún no se le ha asignado un valor.                    | `undefined`     | `"undefined"`                |
+| **`symbol`**    | Identificador único e inmutable (introducido en ES6).                             | `Symbol("id")`  | `"symbol"`                   |
+| **`bigint`**    | Enteros de precisión arbitraria para números mayores a $2^{53} - 1$ (sufijo `n`). | `123n`          | `"bigint"`                   |
 
 > [!WARNING]
 > **El Bug Histórico de `typeof null`:**
@@ -155,33 +159,33 @@ Son colecciones de valores o unidades de código ejecutable que pueden crecer de
 // ==========================================
 // 1. Tipos de Datos Primitivos
 // ==========================================
-const texto = "Hola";              // string
-const numero = 42;                 // number
-const boolean = true;              // boolean (true o false)
-const nulo = null;                 // null (ausencia intencional de valor)
-const indefinido = undefined;      // undefined (valor por defecto no asignado)
-const simbolo = Symbol("id");      // symbol (identificador único garantizado)
-const grande = 123n;               // bigint (número entero gigante con sufijo 'n')
+const texto = "Hola"; // string
+const numero = 42; // number
+const boolean = true; // boolean (true o false)
+const nulo = null; // null (ausencia intencional de valor)
+const indefinido = undefined; // undefined (valor por defecto no asignado)
+const simbolo = Symbol("id"); // symbol (identificador único garantizado)
+const grande = 123n; // bigint (número entero gigante con sufijo 'n')
 
 // Inspección con el operador typeof:
-console.log(typeof texto);       // "string"
-console.log(typeof numero);      // "number"
-console.log(typeof boolean);     // "boolean"
-console.log(typeof nulo);        // "object" ⚠️ (Bug histórico de JS)
-console.log(typeof indefinido);  // "undefined"
-console.log(typeof simbolo);     // "symbol"
-console.log(typeof grande);      // "bigint"
+console.log(typeof texto); // "string"
+console.log(typeof numero); // "number"
+console.log(typeof boolean); // "boolean"
+console.log(typeof nulo); // "object" ⚠️ (Bug histórico de JS)
+console.log(typeof indefinido); // "undefined"
+console.log(typeof simbolo); // "symbol"
+console.log(typeof grande); // "bigint"
 
 // ==========================================
 // 2. Tipos de Datos Complejos (Por Referencia)
 // ==========================================
 const objeto = { nombre: "Juan", edad: 30 }; // Objeto literal
-const arreglo = [1, 2, 3, "string"];         // Array (colección indexada)
-const funcion = function () {};              // Función
+const arreglo = [1, 2, 3, "string"]; // Array (colección indexada)
+const funcion = function () {}; // Función
 
-console.log(typeof objeto);      // "object"
-console.log(typeof arreglo);     // "object" (Usa Array.isArray(arreglo) para comprobar si es un array)
-console.log(typeof funcion);     // "function"
+console.log(typeof objeto); // "object"
+console.log(typeof arreglo); // "object" (Usa Array.isArray(arreglo) para comprobar si es un array)
+console.log(typeof funcion); // "function"
 ```
 
 ---
@@ -189,6 +193,7 @@ console.log(typeof funcion);     // "function"
 > [!NOTE]
 > **¿Cómo comprobar si un dato es realmente un Arreglo?**
 > Dado que `typeof []` devuelve `"object"`, la forma correcta y estándar de verificar si una variable es un array es utilizando el método nativo:
+>
 > ```javascript
 > Array.isArray(arreglo); // Devuelve true
 > ```
@@ -196,6 +201,7 @@ console.log(typeof funcion);     // "function"
 ---
 
 ## Clase 03: Operadores Aritméticos, Asignación Compuesta y Valores Especiales (`NaN` / `Infinity`)
+
 👉 [Ver código de la clase](./curso/src/03-operators.js)
 
 Los operadores son símbolos que le indican al motor de JavaScript que realice operaciones matemáticas, manipulaciones de valores o asignaciones sobre una o más variables (operandos).
@@ -206,18 +212,19 @@ Los operadores son símbolos que le indican al motor de JavaScript que realice o
 
 Permiten realizar cálculos matemáticos directos:
 
-| Operador | Operación | Ejemplo | Resultado |
-| :--- | :--- | :--- | :--- |
-| **`+`** | Suma | `2 + 2` | `4` |
-| **`-`** | Resta | `5 - 2` | `3` |
-| **`*`** | Multiplicación | `5 * 3` | `15` |
-| **`/`** | División | `10 / 2` | `5` |
-| **`%`** | Módulo (Residuo de la división) | `5 % 2` | `1` |
-| **`**`** | Exponenciación / Potencia | `2 ** 3` | `8` ($2^3$) |
+| Operador   | Operación                       | Ejemplo  | Resultado   |
+| :--------- | :------------------------------ | :------- | :---------- |
+| **`+`**    | Suma                            | `2 + 2`  | `4`         |
+| **`-`**    | Resta                           | `5 - 2`  | `3`         |
+| **`*`**    | Multiplicación                  | `5 * 3`  | `15`        |
+| **`/`**    | División                        | `10 / 2` | `5`         |
+| **`%`**    | Módulo (Residuo de la división) | `5 % 2`  | `1`         |
+| **`**`\*\* | Exponenciación / Potencia       | `2 ** 3` | `8` ($2^3$) |
 
 > [!TIP]
 > **El caso de uso estrella del operador Módulo (`%`):**
 > Se utiliza frecuentemente para determinar si un número es **par** o **impar**:
+>
 > ```javascript
 > const esPar = numero % 2 === 0; // Si el residuo es 0, es par
 > ```
@@ -228,10 +235,10 @@ Permiten realizar cálculos matemáticos directos:
 
 Son atajos sintácticos para tomar el valor actual de una variable, aplicarle una operación matemática y reasignar el resultado en la misma variable:
 
-* **`a += 3`** $\rightarrow$ Equivale a: `a = a + 3`
-* **`b -= 10`** $\rightarrow$ Equivale a: `b = b - 10`
-* **`c *= 2`** $\rightarrow$ Equivale a: `c = c * 2`
-* **`d /= 3`** $\rightarrow$ Equivale a: `d = d / 3`
+- **`a += 3`** $\rightarrow$ Equivale a: `a = a + 3`
+- **`b -= 10`** $\rightarrow$ Equivale a: `b = b - 10`
+- **`c *= 2`** $\rightarrow$ Equivale a: `c = c * 2`
+- **`d /= 3`** $\rightarrow$ Equivale a: `d = d / 3`
 
 ---
 
@@ -239,13 +246,14 @@ Son atajos sintácticos para tomar el valor actual de una variable, aplicarle un
 
 Permiten sumar o restar exactamente `1` a una variable:
 
-* **Incremento (`++`)**: `contador++` (aumenta el valor en 1).
-* **Decremento (`--`)**: `contador--` (disminuye el valor en 1).
+- **Incremento (`++`)**: `contador++` (aumenta el valor en 1).
+- **Decremento (`--`)**: `contador--` (disminuye el valor en 1).
 
 > [!NOTE]
 > **Post-incremento vs. Pre-incremento:**
-> * `x++` (Post): Primero devuelve el valor actual y luego lo incrementa.
-> * `++x` (Pre): Primero incrementa el valor y luego lo devuelve.
+>
+> - `x++` (Post): Primero devuelve el valor actual y luego lo incrementa.
+> - `++x` (Pre): Primero incrementa el valor y luego lo devuelve.
 
 ---
 
@@ -258,7 +266,7 @@ JavaScript no se "rompe" ni detiene la ejecución del programa cuando ocurre un 
    - `1 / 0` $\rightarrow$ `Infinity`
    - `-1 / 0` $\rightarrow$ `-Infinity`
 
-2. **`NaN` (*Not a Number*)**:
+2. **`NaN` (_Not a Number_)**:
    - Representa un cálculo que no tiene sentido matemático o una conversión fallida.
    - `0 / 0` $\rightarrow$ `NaN` (indeterminación matemática).
    - `"Hola" * 2` $\rightarrow$ `NaN` (intentar multiplicar un texto no numérico).
@@ -272,12 +280,12 @@ JavaScript no se "rompe" ni detiene la ejecución del programa cuando ocurre un 
 // ==========================================
 // 1. Operaciones Aritméticas Básicas
 // ==========================================
-const suma = 2 + 2;             // 4
-const resta = 5 - 2;            // 3
-const multiplicacion = 5 * 3;   // 15
-const divicion = 10 / 2;        // 5
-const modulo = 5 % 2;           // 1 (Residuo de dividir 5 entre 2)
-const potencia = 2 ** 3;        // 8 (2 elevado al cubo: 2 * 2 * 2)
+const suma = 2 + 2; // 4
+const resta = 5 - 2; // 3
+const multiplicacion = 5 * 3; // 15
+const divicion = 10 / 2; // 5
+const modulo = 5 % 2; // 1 (Residuo de dividir 5 entre 2)
+const potencia = 2 ** 3; // 8 (2 elevado al cubo: 2 * 2 * 2)
 
 console.log({ suma, resta, multiplicacion, divicion, modulo, potencia });
 
@@ -313,16 +321,17 @@ console.log(contador);
 // ==========================================
 // 4. Valores Especiales: Infinity y NaN
 // ==========================================
-console.log(1 / 0);       // Infinity
-console.log(-1 / 0);      // -Infinity
+console.log(1 / 0); // Infinity
+console.log(-1 / 0); // -Infinity
 
-console.log(0 / 0);       // NaN (Not-a-Number)
-console.log("Hola" * 2);  // NaN (Operación matemática inválida con string)
+console.log(0 / 0); // NaN (Not-a-Number)
+console.log("Hola" * 2); // NaN (Operación matemática inválida con string)
 ```
 
 ---
 
 ## Clase 04: Strings, Template Literals y Métodos Principales
+
 👉 [Ver código de la clase](./curso/src/04-strings.js)
 
 Los **Strings** (cadenas de texto) son secuencias de caracteres utilizadas para representar y manipular texto en JavaScript. Con la llegada de **ES6 (ECMAScript 2015)**, el trabajo con cadenas evolucionó drásticamente gracias a los **Template Literals** (plantillas literales) y a un conjunto completo de métodos utilitarios.
@@ -331,8 +340,8 @@ Los **Strings** (cadenas de texto) son secuencias de caracteres utilizadas para 
 
 ### 🧵 La Analogía del Collage vs. La Carta Personalizada
 
-* **Concatenación Tradicional con `+` (El Collage de Recortes)**: Es como armar una frase recortando palabras de periódicos y pegándolas una por una con cinta adhesiva (`"Hola " + nombre + " tienes " + edad + " años"`). Es tedioso, fácil de romper si olvidas un espacio y difícil de leer.
-* **Template Literals con Backticks `` ` `` (La Plantilla de Carta Inteligente)**: Es como un formulario pre-impreso con espacios en blanco rellenables (`${nombre}`). Escribes el texto de forma natural, insertas variables o cálculos directamente en su lugar y respetas saltos de línea sin trucos adicionales.
+- **Concatenación Tradicional con `+` (El Collage de Recortes)**: Es como armar una frase recortando palabras de periódicos y pegándolas una por una con cinta adhesiva (`"Hola " + nombre + " tienes " + edad + " años"`). Es tedioso, fácil de romper si olvidas un espacio y difícil de leer.
+- **Template Literals con Backticks `` ` `` (La Plantilla de Carta Inteligente)**: Es como un formulario pre-impreso con espacios en blanco rellenables (`${nombre}`). Escribes el texto de forma natural, insertas variables o cálculos directamente en su lugar y respetas saltos de línea sin trucos adicionales.
 
 ---
 
@@ -353,7 +362,9 @@ En JavaScript existen 3 formas de envolver texto:
 ### 💡 2. Poder de los Template Literals
 
 #### A. Interpolación de Expresiones y Cálculos
+
 Dentro de `${...}` puedes colocar cualquier expresión válida de JavaScript (operaciones matemáticas, llamadas a funciones, operadores ternarios, etc.):
+
 ```javascript
 const precio = 100;
 const cantidad = 3;
@@ -361,7 +372,9 @@ const total = `Total: $${precio * cantidad}`; // "Total: $300"
 ```
 
 #### B. Texto Multilínea Nativo
+
 Facilita la creación de plantillas HTML, notas formateadas o mensajes largos:
+
 ```javascript
 const nota = `
 # Mi nota
@@ -373,24 +386,24 @@ Este es el contenido sin necesidad de usar \\n
 
 ### 🛠️ 3. Catálogo Completo de Propiedades y Métodos de Strings
 
-Aunque los strings son datos primitivos e inmutables, JavaScript los envuelve temporalmente en un objeto (*wrapper*) para permitirnos invocar métodos y propiedades sobre ellos:
+Aunque los strings son datos primitivos e inmutables, JavaScript los envuelve temporalmente en un objeto (_wrapper_) para permitirnos invocar métodos y propiedades sobre ellos:
 
-| Método / Propiedad | Tipo | Descripción | Ejemplo | Resultado |
-| :--- | :--- | :--- | :--- | :--- |
-| **`.length`** | Propiedad | Devuelve la longitud total (número de caracteres con espacios). | `"Hola".length` | `4` |
-| **`.slice(inicio, fin)`** | Método | Extrae un fragmento de texto. **Acepta índices negativos** contando desde el final. | `"JavaScript".slice(0, 4)`<br>`"JavaScript".slice(-6)` | `"Java"`<br>`"Script"` |
-| **`.substring(inicio, fin)`** | Método | Extrae caracteres entre dos posiciones (si `inicio > fin`, los invierte). | `"Hola Mundo".substring(0, 4)` | `"Hola"` |
-| **`.split(separador)`** | Método | Divide la cadena en un **Arreglo (`Array`)** a partir del delimitador indicado. | `"L1 L2 L3".split(" ")` | `["L1", "L2", "L3"]` |
-| **`.trim()`** | Método | Elimina los espacios en blanco sobrantes **al inicio y al final**. | `"  Hola  ".trim()` | `"Hola"` |
-| **`.trimStart()`** | Método | Elimina espacios en blanco únicamente **al inicio**. | `"  Hola  ".trimStart()` | `"Hola  "` |
-| **`.trimEnd()`** | Método | Elimina espacios en blanco únicamente **al final**. | `"  Hola  ".trimEnd()` | `"  Hola"` |
-| **`.toLowerCase()`** | Método | Convierte toda la cadena a **minúsculas**. | `"JS".toLowerCase()` | `"js"` |
-| **`.toUpperCase()`** | Método | Convierte toda la cadena a **mayúsculas**. | `"js".toUpperCase()` | `"JS"` |
-| **`.includes(subcadena)`** | Método | Evalúa si la cadena contiene el texto buscado (*Case Sensitive*). | `"Hola".includes("ol")` | `true` |
-| **`.startsWith(texto)`** | Método | Comprueba si la cadena **comienza** con dicho texto. | `"doc.md".startsWith("doc")` | `true` |
-| **`.endsWith(texto)`** | Método | Comprueba si la cadena **termina** con dicho texto (ideal para extensiones). | `"doc.md".endsWith(".md")` | `true` |
-| **`.replace(buscar, nuevo)`** | Método | Reemplaza la **primera aparición** encontrada por el nuevo texto. | `"Hola Hola".replace("Hola", "Hi")` | `"Hi Hola"` |
-| **`.replaceAll(buscar, nuevo)`** | Método | Reemplaza **todas las apariciones** encontradas por el nuevo texto. | `"Hola Hola".replaceAll("Hola", "Hi")` | `"Hi Hi"` |
+| Método / Propiedad               | Tipo      | Descripción                                                                         | Ejemplo                                                | Resultado              |
+| :------------------------------- | :-------- | :---------------------------------------------------------------------------------- | :----------------------------------------------------- | :--------------------- |
+| **`.length`**                    | Propiedad | Devuelve la longitud total (número de caracteres con espacios).                     | `"Hola".length`                                        | `4`                    |
+| **`.slice(inicio, fin)`**        | Método    | Extrae un fragmento de texto. **Acepta índices negativos** contando desde el final. | `"JavaScript".slice(0, 4)`<br>`"JavaScript".slice(-6)` | `"Java"`<br>`"Script"` |
+| **`.substring(inicio, fin)`**    | Método    | Extrae caracteres entre dos posiciones (si `inicio > fin`, los invierte).           | `"Hola Mundo".substring(0, 4)`                         | `"Hola"`               |
+| **`.split(separador)`**          | Método    | Divide la cadena en un **Arreglo (`Array`)** a partir del delimitador indicado.     | `"L1 L2 L3".split(" ")`                                | `["L1", "L2", "L3"]`   |
+| **`.trim()`**                    | Método    | Elimina los espacios en blanco sobrantes **al inicio y al final**.                  | `"  Hola  ".trim()`                                    | `"Hola"`               |
+| **`.trimStart()`**               | Método    | Elimina espacios en blanco únicamente **al inicio**.                                | `"  Hola  ".trimStart()`                               | `"Hola  "`             |
+| **`.trimEnd()`**                 | Método    | Elimina espacios en blanco únicamente **al final**.                                 | `"  Hola  ".trimEnd()`                                 | `"  Hola"`             |
+| **`.toLowerCase()`**             | Método    | Convierte toda la cadena a **minúsculas**.                                          | `"JS".toLowerCase()`                                   | `"js"`                 |
+| **`.toUpperCase()`**             | Método    | Convierte toda la cadena a **mayúsculas**.                                          | `"js".toUpperCase()`                                   | `"JS"`                 |
+| **`.includes(subcadena)`**       | Método    | Evalúa si la cadena contiene el texto buscado (_Case Sensitive_).                   | `"Hola".includes("ol")`                                | `true`                 |
+| **`.startsWith(texto)`**         | Método    | Comprueba si la cadena **comienza** con dicho texto.                                | `"doc.md".startsWith("doc")`                           | `true`                 |
+| **`.endsWith(texto)`**           | Método    | Comprueba si la cadena **termina** con dicho texto (ideal para extensiones).        | `"doc.md".endsWith(".md")`                             | `true`                 |
+| **`.replace(buscar, nuevo)`**    | Método    | Reemplaza la **primera aparición** encontrada por el nuevo texto.                   | `"Hola Hola".replace("Hola", "Hi")`                    | `"Hi Hola"`            |
+| **`.replaceAll(buscar, nuevo)`** | Método    | Reemplaza **todas las apariciones** encontradas por el nuevo texto.                 | `"Hola Hola".replaceAll("Hola", "Hi")`                 | `"Hi Hi"`              |
 
 ---
 
@@ -401,7 +414,7 @@ Aunque los strings son datos primitivos e inmutables, JavaScript los envuelve te
    - `.slice(10, 0)` devuelve `""`, mientras que `.substring(10, 0)` lo invierte automáticamente a `(0, 10)`.
    - **Recomendación moderna:** Usa `.slice()` por consistencia y soporte de índices negativos.
 
-2. **Sensibilidad a Mayúsculas y Minúsculas (*Case-Sensitivity*)**:
+2. **Sensibilidad a Mayúsculas y Minúsculas (_Case-Sensitivity_)**:
    - Métodos como `.includes()`, `.startsWith()` y `.endsWith()` son estrictamente sensibles a mayúsculas/minúsculas.
    - Para búsquedas flexibles, combina con `.toLowerCase()`:
      ```javascript
@@ -463,8 +476,8 @@ console.log(texto.length); // 10
 // Slice(inicio, fin) -> Extracción con soporte de índices positivos y negativos
 const texto1 = "Javascript es Genial";
 console.log(texto1.slice(0, 10)); // "Javascript"
-console.log(texto1.slice(11));     // "es Genial"
-console.log(texto1.slice(-6));     // "Genial" (últimos 6 caracteres)
+console.log(texto1.slice(11)); // "es Genial"
+console.log(texto1.slice(-6)); // "Genial" (últimos 6 caracteres)
 
 // Substrings(inicio, fin)
 const texto2 = "Hola Mundo";
@@ -479,9 +492,9 @@ console.log(lineas); // [ 'Linea1', 'linea2', 'linea3' ]
 // 5. Limpieza de Espacios en Blanco (Trim)
 // ==========================================
 const texto4 = "    Hola Mundo.    ";
-console.log(texto4.trim());      // "Hola Mundo." (Limpia ambos extremos)
+console.log(texto4.trim()); // "Hola Mundo." (Limpia ambos extremos)
 console.log(texto4.trimStart()); // "Hola Mundo.    " (Limpia solo inicio)
-console.log(texto4.trimEnd());   // "    Hola Mundo." (Limpia solo final)
+console.log(texto4.trimEnd()); // "    Hola Mundo." (Limpia solo final)
 
 // ==========================================
 // 6. Conversión de Mayúsculas / Minúsculas
@@ -495,20 +508,20 @@ console.log(texto5.toLowerCase()); // "javascript"
 // ==========================================
 const contenido = "Aprende JAvaScript desde cero";
 console.log(contenido.includes("Javascirpt")); // false (Typo y case-sensitive)
-console.log(contenido.includes("Python"));     // false
+console.log(contenido.includes("Python")); // false
 
 // startsWith() y endsWith()
 const archivo = "documento.md";
 console.log(archivo.startsWith("doc")); // true
-console.log(archivo.endsWith(".md"));   // true (Muy útil para validar extensiones de archivo)
+console.log(archivo.endsWith(".md")); // true (Muy útil para validar extensiones de archivo)
 
 // ==========================================
 // 8. Reemplazo de Contenido (Inmutabilidad)
 // ==========================================
 const texto6 = "Hola Mundo, Hola javascript";
-console.log(texto6.replace("Hola", "Hi"));    // "Hi Mundo, Hola javascript" (Solo el primer "Hola")
+console.log(texto6.replace("Hola", "Hi")); // "Hi Mundo, Hola javascript" (Solo el primer "Hola")
 console.log(texto6.replaceAll("Hola", "Hi")); // "Hi Mundo, Hi javascript" (Todos los "Hola")
-console.log(texto6);                          // "Hola Mundo, Hola javascript" (¡El original sigue intacto!)
+console.log(texto6); // "Hola Mundo, Hola javascript" (¡El original sigue intacto!)
 ```
 
 ---
@@ -516,6 +529,7 @@ console.log(texto6);                          // "Hola Mundo, Hola javascript" (
 > [!TIP]
 > **Regla de Inmutabilidad en Primitivos:**
 > Ningún método de strings modifica la variable existente. Si deseas conservar el resultado transformado (por ejemplo después de un `.trim()` o `.replaceAll()`), debes asignarlo a una nueva variable o reasignar con `let`:
+>
 > ```javascript
 > let correo = "  usuario@correo.com  ";
 > correo = correo.trim().toLowerCase(); // "usuario@correo.com"
@@ -524,16 +538,17 @@ console.log(texto6);                          // "Hola Mundo, Hola javascript" (
 ---
 
 ## Clase 05: Coerción de Tipos (Implícita vs. Explícita) y Valores Truthy / Falsy
+
 👉 [Ver código de la clase](./curso/src/05-coercion.js)
 
-La **coerción de tipos** (*Type Coercion*) es la conversión automática o implícita de valores de un tipo de dato a otro realizada por el motor de JavaScript. La **conversión de tipos** (*Type Conversion* o *Type Casting*), por el contrario, ocurre de forma explícita cuando el desarrollador indica intencionalmente la transformación.
+La **coerción de tipos** (_Type Coercion_) es la conversión automática o implícita de valores de un tipo de dato a otro realizada por el motor de JavaScript. La **conversión de tipos** (_Type Conversion_ o _Type Casting_), por el contrario, ocurre de forma explícita cuando el desarrollador indica intencionalmente la transformación.
 
 ---
 
 ### 🎭 La Analogía del Traductor Automático Entrometido
 
-* **Coerción Implícita (El traductor que asume sin preguntar)**: Imagina que estás hablando con alguien que habla otro idioma y un traductor en medio decide traducir lo que cree que quisiste decir sin consultarte. A veces acierta, pero otras veces produce malentendidos absurdos que pueden arruinar la conversación (provocar *bugs* difíciles de rastrear).
-* **Conversión Explícita (El diccionario oficial)**: Tú mismo buscas la palabra en el diccionario y especificas la traducción exacta con precisión matemática. El código es 100% predecible, legible y seguro.
+- **Coerción Implícita (El traductor que asume sin preguntar)**: Imagina que estás hablando con alguien que habla otro idioma y un traductor en medio decide traducir lo que cree que quisiste decir sin consultarte. A veces acierta, pero otras veces produce malentendidos absurdos que pueden arruinar la conversación (provocar _bugs_ difíciles de rastrear).
+- **Conversión Explícita (El diccionario oficial)**: Tú mismo buscas la palabra en el diccionario y especificas la traducción exacta con precisión matemática. El código es 100% predecible, legible y seguro.
 
 ---
 
@@ -541,16 +556,16 @@ La **coerción de tipos** (*Type Coercion*) es la conversión automática o impl
 
 Ocurre cuando aplicamos operadores entre tipos de datos distintos y JavaScript intenta "ayudarnos" convirtiendo los tipos por su cuenta según sus reglas internas:
 
-| Operación | Expresión | Resultado | Tipo Resultante | Explicación Técnica |
-| :--- | :--- | :--- | :--- | :--- |
-| **Suma con String** | `"5" + 3` | `"53"` | `string` | Si al menos uno de los operandos del `+` es `string`, JS concatena convirtiendo el otro a `string`. |
-| **Resta con String** | `"5" - 3` | `2` | `number` | El operador `-` solo tiene significado aritmético, así que JS convierte `"5"` a número `5`. |
-| **Multiplicación con String** | `"4" * 2` | `8` | `number` | El operador `*` convierte ambos operandos a números. |
-| **División con String** | `"10" / "2"` | `5` | `number` | El operador `/` convierte ambos strings a números. |
-| **Suma de Booleano y Número** | `true + 1` | `2` | `number` | `true` se convierte implícitamente en `1` (`false` se convierte en `0`). |
-| **Resta de Booleano y Número** | `false - 1` | `-1` | `number` | `false` se convierte en `0`, por lo que $0 - 1 = -1$. |
-| **Suma de Booleano y String** | `true + " mundo"` | `"true mundo"` | `string` | El operador `+` con string convierte el booleano `true` en el texto `"true"`. |
-| **Operación inválida** | `"hola" - 2` | `NaN` | `number` | No puede convertir `"hola"` a número, resultando en *Not a Number*. |
+| Operación                      | Expresión         | Resultado      | Tipo Resultante | Explicación Técnica                                                                                 |
+| :----------------------------- | :---------------- | :------------- | :-------------- | :-------------------------------------------------------------------------------------------------- |
+| **Suma con String**            | `"5" + 3`         | `"53"`         | `string`        | Si al menos uno de los operandos del `+` es `string`, JS concatena convirtiendo el otro a `string`. |
+| **Resta con String**           | `"5" - 3`         | `2`            | `number`        | El operador `-` solo tiene significado aritmético, así que JS convierte `"5"` a número `5`.         |
+| **Multiplicación con String**  | `"4" * 2`         | `8`            | `number`        | El operador `*` convierte ambos operandos a números.                                                |
+| **División con String**        | `"10" / "2"`      | `5`            | `number`        | El operador `/` convierte ambos strings a números.                                                  |
+| **Suma de Booleano y Número**  | `true + 1`        | `2`            | `number`        | `true` se convierte implícitamente en `1` (`false` se convierte en `0`).                            |
+| **Resta de Booleano y Número** | `false - 1`       | `-1`           | `number`        | `false` se convierte en `0`, por lo que $0 - 1 = -1$.                                               |
+| **Suma de Booleano y String**  | `true + " mundo"` | `"true mundo"` | `string`        | El operador `+` con string convierte el booleano `true` en el texto `"true"`.                       |
+| **Operación inválida**         | `"hola" - 2`      | `NaN`          | `number`        | No puede convertir `"hola"` a número, resultando en _Not a Number_.                                 |
 
 ---
 
@@ -559,40 +574,43 @@ Ocurre cuando aplicamos operadores entre tipos de datos distintos y JavaScript i
 Es la práctica recomendada: transformar valores conscientemente usando funciones nativas constructoras o métodos:
 
 #### A. A Tipo Numérico (`Number`, `parseInt`, `parseFloat`)
+
 1. **`Number(valor)`**: Convierte toda la cadena a número (si contiene caracteres no numéricos retorna `NaN`).
 2. **`parseInt(string, radix)`**: Parsea caracteres de izquierda a derecha hasta encontrar uno no numérico y retorna un entero. **Siempre debes especificar la base decimal `10`**.
 3. **`parseFloat(string)`**: Parsea números con punto decimal flotante.
 4. **Operador Unario `+`**: Forma concisa de convertir a número (`+"42"` da `42`).
 
 ```javascript
-Number("42");         // 42
-Number("3.1416");     // 3.1416
-Number("42px");       // NaN ❌ (Number no tolera texto extra)
+Number("42"); // 42
+Number("3.1416"); // 3.1416
+Number("42px"); // NaN ❌ (Number no tolera texto extra)
 parseInt("42px", 10); // 42 ✅ (Extrae los números iniciales)
 parseFloat("3.1415"); // 3.1415 ✅
 ```
 
 #### B. A Tipo Texto (`String` y `.toString()`)
+
 1. **`String(valor)`**: Convierte cualquier dato a string (incluso `null` y `undefined` se vuelven `"null"` y `"undefined"`).
 2. **`valor.toString()`**: Método disponible en la mayoría de objetos y primitivos (excepto `null` y `undefined`, que lanzarán un error de tipo).
 
 ```javascript
-String(123);        // "123"
-String(true);       // "true"
-String(null);       // "null"
-(123).toString();   // "123"
+String(123); // "123"
+String(true); // "true"
+String(null); // "null"
+(123).toString(); // "123"
 ```
 
 #### C. A Tipo Booleano (`Boolean` y Doble Negación `!!`)
-1. **`Boolean(valor)`**: Evalúa si el valor es verdadero (*truthy*) o falso (*falsy*).
+
+1. **`Boolean(valor)`**: Evalúa si el valor es verdadero (_truthy_) o falso (_falsy_).
 2. **`!!valor`**: Operador de doble negación que convierte cualquier valor a su representación booleana equivalente.
 
 ```javascript
-Boolean(1);     // true
-Boolean(0);     // false
-Boolean("Hola");// true
-Boolean("");    // false
-!!42;           // true
+Boolean(1); // true
+Boolean(0); // false
+Boolean("Hola"); // true
+Boolean(""); // false
+!!42; // true
 ```
 
 ---
@@ -602,6 +620,7 @@ Boolean("");    // false
 En JavaScript, cada valor tiene un valor booleano inherente cuando se evalúa en un contexto condicional (`if`, `while`, o `Boolean()`):
 
 #### ❌ Los Únicos Valores Falsy (Se evalúan como `false`):
+
 Cualquier cosa que **NO** esté en esta lista es automáticamente **Truthy**:
 
 1. `false`
@@ -623,11 +642,11 @@ Cualquier cosa que **NO** esté en esta lista es automáticamente **Truthy**:
 // ==========================================
 // 1. Coerción Implícita (Automática por JS)
 // ==========================================
-console.log("5" + 3);  // "53" (El + con string concatena)
-console.log("5" - 3);  // 2    (El - obliga a conversión numérica)
-console.log("5" * 2);  // 10   (El * obliga a conversión numérica)
+console.log("5" + 3); // "53" (El + con string concatena)
+console.log("5" - 3); // 2    (El - obliga a conversión numérica)
+console.log("5" * 2); // 10   (El * obliga a conversión numérica)
 console.log(true + 1); // 2    (true se convierte en 1)
-console.log(false + 5);// 5    (false se convierte en 0)
+console.log(false + 5); // 5    (false se convierte en 0)
 
 // ==========================================
 // 2. Conversión Explícita (Manual y Segura)
@@ -667,6 +686,7 @@ console.log(typeof bool2, bool2); // boolean false
 ---
 
 ## Clase 06: Operadores de Comparación (Igualdad Débil vs. Estricta y Desigualdad)
+
 👉 [Ver código de la clase](./curso/src/06-comparison.js)
 
 Los operadores de comparación permiten evaluar dos operandos y devuelven un valor booleano (`true` o `false`). Comprender la diferencia entre la **igualdad débil** y la **igualdad estricta** es fundamental para escribir código profesional en JavaScript.
@@ -675,12 +695,12 @@ Los operadores de comparación permiten evaluar dos operandos y devuelven un val
 
 ### ⚖️ 1. Igualdad Débil (`==`) vs. Igualdad Estricta (`===`)
 
-| Operador | Nombre | ¿Compara Tipo? | ¿Aplica Coerción? | Ejemplo | Resultado |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **`==`** | Igualdad Débil (*Abstract Equality*) | ❌ No | ✅ Sí (Convierte tipos antes de comparar) | `5 == "5"` | `true` ⚠️ |
-| **`===`** | Igualdad Estricta (*Strict Equality*) | ✅ Sí | ❌ No (Requiere mismo tipo y mismo valor) | `5 === "5"` | `false` ✅ |
-| **`!=`** | Desigualdad Débil | ❌ No | ✅ Sí (Aplica coerción) | `5 != "5"` | `false` ⚠️ |
-| **`!==`** | Desigualdad Estricta | ✅ Sí | ❌ No (Sin coerción) | `5 !== "5"` | `true` ✅ |
+| Operador  | Nombre                                | ¿Compara Tipo? | ¿Aplica Coerción?                         | Ejemplo     | Resultado  |
+| :-------- | :------------------------------------ | :------------- | :---------------------------------------- | :---------- | :--------- |
+| **`==`**  | Igualdad Débil (_Abstract Equality_)  | ❌ No          | ✅ Sí (Convierte tipos antes de comparar) | `5 == "5"`  | `true` ⚠️  |
+| **`===`** | Igualdad Estricta (_Strict Equality_) | ✅ Sí          | ❌ No (Requiere mismo tipo y mismo valor) | `5 === "5"` | `false` ✅ |
+| **`!=`**  | Desigualdad Débil                     | ❌ No          | ✅ Sí (Aplica coerción)                   | `5 != "5"`  | `false` ⚠️ |
+| **`!==`** | Desigualdad Estricta                  | ✅ Sí          | ❌ No (Sin coerción)                      | `5 !== "5"` | `true` ✅  |
 
 ---
 
@@ -688,10 +708,10 @@ Los operadores de comparación permiten evaluar dos operandos y devuelven un val
 
 Comparan magnitudes numéricas o el orden alfabético/lexicográfico de strings:
 
-* **Mayor que (`>`)**: `10 > 5` $\rightarrow$ `true`
-* **Menor que (`<`)**: `3 < 8` $\rightarrow$ `true`
-* **Mayor o igual que (`>=`)**: `5 >= 5` $\rightarrow$ `true`
-* **Menor o igual que (`<=`)**: `4 <= 2` $\rightarrow$ `false`
+- **Mayor que (`>`)**: `10 > 5` $\rightarrow$ `true`
+- **Menor que (`<`)**: `3 < 8` $\rightarrow$ `true`
+- **Mayor o igual que (`>=`)**: `5 >= 5` $\rightarrow$ `true`
+- **Menor o igual que (`<=`)**: `4 <= 2` $\rightarrow$ `false`
 
 ---
 
@@ -699,12 +719,12 @@ Comparan magnitudes numéricas o el orden alfabético/lexicográfico de strings:
 
 ```javascript
 // 1. null y undefined
-null == undefined;   // true  (Regla especial de JS en igualdad débil)
-null === undefined;  // false (Diferentes tipos de datos)
+null == undefined; // true  (Regla especial de JS en igualdad débil)
+null === undefined; // false (Diferentes tipos de datos)
 
 // 2. El caso único de NaN
-NaN === NaN;         // false (NaN nunca es igual a nada, ni a sí mismo)
-Number.isNaN(NaN);   // true  (Forma correcta de verificar NaN)
+NaN === NaN; // false (NaN nunca es igual a nada, ni a sí mismo)
+Number.isNaN(NaN); // true  (Forma correcta de verificar NaN)
 
 // 3. Comparación de Objetos / Arrays (Por Referencia)
 const a = [1, 2];
@@ -724,30 +744,30 @@ console.log(a === c); // true (Apuntan exactamente a la misma referencia en memo
 // 1. Igualdad Débil (==) con Coerción Implícita
 // ==========================================
 // Convierte tipos antes de comparar si son diferentes:
-console.log(5 == "5");           // true  ("5" es convertido al número 5)
-console.log(true == 1);          // true  (true se convierte al número 1)
-console.log(false == 0);         // true  (false se convierte al número 0)
-console.log(null == undefined);   // true  (Regla especial del estándar ECMAScript)
+console.log(5 == "5"); // true  ("5" es convertido al número 5)
+console.log(true == 1); // true  (true se convierte al número 1)
+console.log(false == 0); // true  (false se convierte al número 0)
+console.log(null == undefined); // true  (Regla especial del estándar ECMAScript)
 
 // ==========================================
 // 2. Desigualdad Débil (!=)
 // ==========================================
 // Evalúa si NO son iguales aplicando coerción implícita:
-console.log(5 != "5");           // false (Como 5 == "5" es true, la desigualdad es false)
+console.log(5 != "5"); // false (Como 5 == "5" es true, la desigualdad es false)
 
 // ==========================================
 // 3. Igualdad Estricta (===) - Sin Coerción
 // ==========================================
 // Compara que AMBOS operandos compartan el mismo tipo Y el mismo valor:
-console.log(5 === "5");          // false (Diferente tipo: number !== string)
-console.log(5 === 5);            // true  (Mismo tipo number y mismo valor 5)
+console.log(5 === "5"); // false (Diferente tipo: number !== string)
+console.log(5 === 5); // true  (Mismo tipo number y mismo valor 5)
 
 // ==========================================
 // 4. Desigualdad Estricta (!==) - Sin Coerción
 // ==========================================
 // Evalúa si son estrictamente diferentes en tipo O en valor:
-console.log(5 !== "5");          // true  (Son diferentes tipos: number vs string)
-console.log(5 !== 5);            // false (Son exactamente idénticos en tipo y valor)
+console.log(5 !== "5"); // true  (Son diferentes tipos: number vs string)
+console.log(5 !== 5); // false (Son exactamente idénticos en tipo y valor)
 ```
 
 ---
@@ -759,6 +779,7 @@ console.log(5 !== 5);            // false (Son exactamente idénticos en tipo y 
 ---
 
 ## Clase 07: Operadores Lógicos (`&&`, `||`, `!`) y Evaluación de Cortocircuito
+
 👉 [Ver código de la clase](./curso/src/07-logic.js)
 
 Los **operadores lógicos** permiten combinar o invertir valores booleanos y expresiones condicionales. Son el motor fundamental para la toma de decisiones complejas en cualquier programa.
@@ -767,60 +788,64 @@ Los **operadores lógicos** permiten combinar o invertir valores booleanos y exp
 
 ### 🛡️ La Analogía de la Bóveda de Seguridad y las Salidas de Emergencia
 
-* **`&&` (AND / La Bóveda de Doble Llave)**: Para abrir la caja fuerte se necesitan **ambas llaves girando al mismo tiempo**. Si falta una sola llave o falla, la bóveda permanece cerrada (`false`).
-* **`||` (OR / Las Puertas de Emergencia)**: Para evacuar un edificio, basta con que **al menos una de las puertas esté abierta**. Solo si todas las puertas están bloqueadas te quedas atrapado (`false`).
-* **`!` (NOT / El Interruptor Inversor)**: Cambia el estado actual al opuesto exacto: si la luz está encendida (`true`), la apaga (`false`); si está apagada, la enciende.
+- **`&&` (AND / La Bóveda de Doble Llave)**: Para abrir la caja fuerte se necesitan **ambas llaves girando al mismo tiempo**. Si falta una sola llave o falla, la bóveda permanece cerrada (`false`).
+- **`||` (OR / Las Puertas de Emergencia)**: Para evacuar un edificio, basta con que **al menos una de las puertas esté abierta**. Solo si todas las puertas están bloqueadas te quedas atrapado (`false`).
+- **`!` (NOT / El Interruptor Inversor)**: Cambia el estado actual al opuesto exacto: si la luz está encendida (`true`), la apaga (`false`); si está apagada, la enciende.
 
 ---
 
 ### 📊 1. Tablas de la Verdad
 
 #### A. Operador AND (`&&` - Y Lógico)
+
 Devuelve `true` **únicamente si todas las expresiones evaluadas son verdaderas**. Si encuentra un solo valor `false`, la operación completa se evalúa como `false`.
 
-| Expresión A | Expresión B | Resultado (`A && B`) | Explicación |
-| :---: | :---: | :---: | :--- |
-| `true` | `true` | `true` ✅ | Ambas son verdaderas. |
-| `true` | `false` | `false` ❌ | La segunda condición falló. |
-| `false` | `true` | `false` ❌ | La primera condición falló. |
-| `false` | `false` | `false` ❌ | Ambas son falsas. |
+| Expresión A | Expresión B | Resultado (`A && B`) | Explicación                 |
+| :---------: | :---------: | :------------------: | :-------------------------- |
+|   `true`    |   `true`    |      `true` ✅       | Ambas son verdaderas.       |
+|   `true`    |   `false`   |      `false` ❌      | La segunda condición falló. |
+|   `false`   |   `true`    |      `false` ❌      | La primera condición falló. |
+|   `false`   |   `false`   |      `false` ❌      | Ambas son falsas.           |
 
 #### B. Operador OR (`||` - O Lógico)
+
 Devuelve `true` **si al menos una de las expresiones es verdadera**. Solo devuelve `false` cuando todas las condiciones son falsas.
 
-| Expresión A | Expresión B | Resultado (`A \|\| B`) | Explicación |
-| :---: | :---: | :---: | :--- |
-| `true` | `true` | `true` ✅ | Ambas son verdaderas. |
-| `true` | `false` | `true` ✅ | La primera es suficiente para validar. |
-| `false` | `true` | `true` ✅ | La segunda cumple la condición. |
-| `false` | `false` | `false` ❌ | Ninguna condición se cumplió. |
+| Expresión A | Expresión B | Resultado (`A \|\| B`) | Explicación                            |
+| :---------: | :---------: | :--------------------: | :------------------------------------- |
+|   `true`    |   `true`    |       `true` ✅        | Ambas son verdaderas.                  |
+|   `true`    |   `false`   |       `true` ✅        | La primera es suficiente para validar. |
+|   `false`   |   `true`    |       `true` ✅        | La segunda cumple la condición.        |
+|   `false`   |   `false`   |       `false` ❌       | Ninguna condición se cumplió.          |
 
 #### C. Operador NOT (`!` - Negación Lógica)
+
 Invierte el valor de verdad del operando:
 
-| Expresión | Resultado | Explicación |
-| :---: | :---: | :--- |
-| `!true` | `false` | Niega la verdad $\rightarrow$ falso. |
-| `!false` | `true` | Niega la falsedad $\rightarrow$ verdadero. |
+| Expresión |    Resultado    | Explicación                                                                        |
+| :-------: | :-------------: | :--------------------------------------------------------------------------------- |
+|  `!true`  |     `false`     | Niega la verdad $\rightarrow$ falso.                                               |
+| `!false`  |     `true`      | Niega la falsedad $\rightarrow$ verdadero.                                         |
 | `!!valor` | Booleano nativo | Doble negación: convierte cualquier valor a su tipo booleano (`truthy` o `falsy`). |
 
 ---
 
-### ⚡ 2. Evaluación de Cortocircuito (*Short-Circuit Evaluation*)
+### ⚡ 2. Evaluación de Cortocircuito (_Short-Circuit Evaluation_)
 
 JavaScript evalúa las expresiones lógicas de izquierda a derecha y se detiene en cuanto el resultado es definitivo, devolviendo el **valor del operando evaluado**, no necesariamente un booleano literal:
 
 1. **Cortocircuito con `&&`**:
-   - Si el primer operando es *falsy*, JavaScript **se detiene de inmediato** y devuelve ese primer valor (no evalúa el segundo).
-   - Si el primero es *truthy*, continúa y devuelve el segundo operando.
+   - Si el primer operando es _falsy_, JavaScript **se detiene de inmediato** y devuelve ese primer valor (no evalúa el segundo).
+   - Si el primero es _truthy_, continúa y devuelve el segundo operando.
+
    ```javascript
    const usuarioLogueado = true;
    usuarioLogueado && console.log("Renderizar Dashboard"); // Se ejecuta
    ```
 
 2. **Cortocircuito con `||` (Valores por Defecto Tradicionales)**:
-   - Si el primer operando es *truthy*, **se detiene de inmediato** y devuelve ese valor.
-   - Si el primero es *falsy*, devuelve el segundo operando.
+   - Si el primer operando es _truthy_, **se detiene de inmediato** y devuelve ese valor.
+   - Si el primero es _falsy_, devuelve el segundo operando.
    ```javascript
    const nombreIngresado = "";
    const nombreFinal = nombreIngresado || "Invitado"; // "Invitado"
@@ -829,6 +854,7 @@ JavaScript evalúa las expresiones lógicas de izquierda a derecha y se detiene 
 > [!NOTE]
 > **Diferencia entre `||` y el Operador Nullish Coalescing (`??`):**
 > El operador `||` considera `0`, `""` y `false` como falsy y aplicará el valor por defecto. Si deseas aplicar el valor por defecto **únicamente** cuando la variable sea `null` o `undefined`, usa `??`:
+>
 > ```javascript
 > const puntuacion = 0;
 > const resultado1 = puntuacion || 10; // 10 ⚠️ (0 es falsy)
@@ -844,31 +870,32 @@ JavaScript evalúa las expresiones lógicas de izquierda a derecha y se detiene 
 // 1. Operador AND (&&)
 // Regresa true solo si AMBAS expresiones son verdaderas
 // ==========================================
-console.log(true && true);   // true
-console.log(true && false);  // false
-console.log(false && true);  // false
+console.log(true && true); // true
+console.log(true && false); // false
+console.log(false && true); // false
 console.log(false && false); // false
 
 // ==========================================
 // 2. Operador OR (||)
 // Regresa true si AL MENOS UNA de las expresiones es verdadera
 // ==========================================
-console.log(true || true);   // true
-console.log(true || false);  // true
-console.log(false || true);  // true
+console.log(true || true); // true
+console.log(true || false); // true
+console.log(false || true); // true
 console.log(false || false); // false
 
 // ==========================================
 // 3. Operador NOT (!)
 // Invierte el valor booleano actual
 // ==========================================
-console.log(!true);  // false
+console.log(!true); // false
 console.log(!false); // true
 ```
 
 ---
 
 ## Clase 08: Estructuras de Control (`if`, `else if`, `else`) y Operador Ternario
+
 👉 [Ver código de la clase](./curso/src/08-if-else.js)
 
 Las **estructuras de control condicionales** dirigen el flujo de ejecución de un programa, permitiendo que ciertas líneas de código se ejecuten solo cuando se cumplen condiciones específicas.
@@ -878,6 +905,7 @@ Las **estructuras de control condicionales** dirigen el flujo de ejecución de u
 ### 🚦 La Analogía del Guardia de Seguridad en el Evento
 
 Imagina la entrada a un evento exclusivo:
+
 1. **`if` (El pase VIP)**: El guardia revisa si tienes pase VIP (`edad > 18`). Si lo tienes, pasas directamente y no revisa nada más.
 2. **`else if` (La lista de invitados de cortesía)**: Si no tienes pase VIP, el guardia revisa una segunda condición alternativa (`edad === 18`).
 3. **`else` (La regla general para todos los demás)**: Si no cumpliste ninguna de las condiciones anteriores, se ejecuta la acción por defecto (`"Alto ahí galán!"`).
@@ -897,9 +925,9 @@ graph TD
     E --> F
 ```
 
-* **`if (condicion)`**: Es obligatorio para iniciar la estructura. Se ejecuta si la condición es evaluada como *truthy*.
-* **`else if (otraCondicion)`**: Opcional. Puedes encadenar múltiples `else if` secuenciales.
-* **`else`**: Opcional. No lleva condición de evaluación; se ejecuta cuando **ningún** `if` o `else if` previo fue verdadero.
+- **`if (condicion)`**: Es obligatorio para iniciar la estructura. Se ejecuta si la condición es evaluada como _truthy_.
+- **`else if (otraCondicion)`**: Opcional. Puedes encadenar múltiples `else if` secuenciales.
+- **`else`**: Opcional. No lleva condición de evaluación; se ejecuta cuando **ningún** `if` o `else if` previo fue verdadero.
 
 ---
 
@@ -915,6 +943,7 @@ console.log(mensaje); // "Acceso permitido"
 
 > [!TIP]
 > **Cuándo usar el Operador Ternario:**
+>
 > - ✅ Úsalo para asignaciones simples o retornos directos de una sola línea.
 > - ❌ Evita anidar operadores ternarios (`a ? b : c ? d : e`), ya que arruinan la legibilidad del código. Para múltiples ramas, prefiere `if / else if / else` o `switch`.
 
@@ -942,9 +971,9 @@ if (edad > 18) {
 
 ---
 
-### 🛡️ Buenas Prácticas: Cláusulas de Guarda (*Guard Clauses*)
+### 🛡️ Buenas Prácticas: Cláusulas de Guarda (_Guard Clauses_)
 
-En desarrollo profesional se recomienda evitar anidamientos profundos (*Nested if statements*). En funciones, es preferible evaluar los casos de salida temprana (*Early Return*):
+En desarrollo profesional se recomienda evitar anidamientos profundos (_Nested if statements_). En funciones, es preferible evaluar los casos de salida temprana (_Early Return_):
 
 ```javascript
 // ❌ Código con anidamiento innecesario
@@ -963,11 +992,338 @@ function validarUsuario(usuario) {
 function validarUsuarioLimpio(usuario) {
   if (!usuario || !usuario.activo) return "Acceso denegado";
   if (usuario.edad < 18) return "Debes ser mayor de edad";
-  
+
   return "Acceso concedido";
 }
 ```
 
 ---
-*Hecho con ☕ y 💻 para el Curso de Fundamentos de JavaScript - Platzi*
+
+## Clase 09: Estructura de Control `switch`, Agrupación de Casos y `default`
+
+👉 [Ver código de la clase](./curso/src/09-switch.js)
+
+La estructura **`switch`** es una sentencia de control de flujo diseñada para evaluar una única expresión y ejecutar diferentes bloques de código según el valor coincidente (_pattern matching_ básico). Es una alternativa mucho más limpia y organizada que encadenar una larga serie de `if / else if / else`.
+
+---
+
+### 📞 La Analogía del Menú Telefónico Automatizado
+
+Imagina llamar a la línea de atención al cliente de un banco:
+
+- **`switch (opcion)`**: La centralita escucha el número que presionaste en el teclado.
+- **`case "1":`**: Si presionaste 1, te transfiere a _Cuentas y Saldo_.
+- **`case "2":`**: Si presionaste 2, te transfiere a _Tarjetas de Crédito_.
+- **`break;`**: Finaliza la llamada una vez atendida tu solicitud (evita que el sistema continúe ejecutando las siguientes opciones por error).
+- **`default:`**: Si presionaste un número no registrado (por ejemplo 9), te dice _"Opción no válida"_ y te envía con un asesor general.
+
+---
+
+### 🔑 Conceptos Clave
+
+1. **Evaluación de Igualdad Estricta (`===`)**:
+   - `switch` compara el valor evaluado contra cada `case` utilizando **igualdad estricta** (`===`).
+   - Si evalúas el número `1`, **no** coincidirá con `case "1"` (tipo `string`).
+
+2. **La Importancia del `break`**:
+   - La sentencia `break` detiene inmediatamente la ejecución dentro del bloque `switch`.
+   - Si omites el `break`, JavaScript continuará ejecutando los siguientes `case` hacia abajo **sin evaluar sus condiciones**, un comportamiento conocido como **Fall-Through**.
+
+3. **Agrupación de Casos (_Multi-Case Matching_)**:
+   - Puedes aprovechar el _fall-through_ intencionalmente para ejecutar la misma acción cuando varias opciones comparten la misma lógica (por ejemplo, agrupar `"sabado"` y `"domingo"` como fin de semana).
+
+4. **La Cláusula `default`**:
+   - Es el bloque de respaldo que se ejecuta cuando **ningún** `case` anterior coincide con el valor evaluado.
+
+---
+
+### ⚖️ ¿Cuándo usar `switch` vs. `if / else if`?
+
+| Criterio                | `if / else if`                                          | `switch`                                         |
+| :---------------------- | :------------------------------------------------------ | :----------------------------------------------- |
+| **Tipo de condiciones** | Rangos, comparaciones complejas (`edad > 18 && activo`) | Valores discretos y exactos (`dia === "sabado"`) |
+| **Cantidad de casos**   | Ideal para 1 a 3 condiciones                            | Ideal para 4 o más valores específicos           |
+| **Legibilidad**         | Puede volverse engorroso con muchos `else if`           | Muy limpio y fácil de leer/mantener              |
+
+---
+
+### 💻 Código de la Clase Ilustrado
+
+```javascript
+// ==========================================
+// Estructura de Control: switch / case / default
+// ==========================================
+const dia = "sabado";
+
+switch (dia) {
+  case "lunes":
+    console.log("Es lunes, inicio de semana laboral");
+    break;
+
+  case "martes":
+    console.log("Es martes");
+    break;
+
+  case "miercoles":
+    console.log("Es miércoles");
+    break;
+
+  case "jueves":
+    console.log("Es jueves, casi viernes");
+    break;
+
+  case "viernes":
+    console.log("Es viernes");
+    break;
+
+  // ==========================================
+  // Agrupación de Casos (Multi-case / Fall-Through intencional)
+  // Tanto sábado como domingo ejecutan la misma lógica:
+  // ==========================================
+  case "sabado":
+  case "domingo":
+    console.log("Fin de semana");
+    break;
+
+  // ==========================================
+  // Caso por Defecto (Fallback)
+  // Se ejecuta si 'dia' no coincide con ningún case anterior
+  // ==========================================
+  default:
+    console.log("Día no válido o no reconocido");
+}
+```
+
+---
+
+> [!WARNING]
+> **El Peligro de Olvidar el `break`:**
+> Omitir el `break` accidentalmente es una de las fuentes de _bugs_ más comunes en JavaScript principiante. Si omites el `break` en `case "lunes":`, el motor ejecutará el código de `"lunes"` y continuará de largo ejecutando `"martes"` hasta encontrar un `break` o el final del `switch`.
+
+---
+
+## Clase 10: Bucles e Iteraciones (`for`, `for...of`, `for...in`, `while` y `do...while`)
+
+👉 [Ver código de la clase](./curso/src/10-for-while.js)
+
+Las **estructuras de iteración o bucles** permiten ejecutar un bloque de código múltiples veces de forma automática mientras se cumpla una condición determinada. Son la herramienta fundamental para procesar colecciones de datos, automatizar tareas repetitivas y recorrer arreglos u objetos.
+
+---
+
+### 🏋️ La Analogía de las Series en el Gimnasio
+
+Imagina que estás entrenando en el gimnasio:
+
+- **`for` tradicional (La serie de 10 repeticiones con contador)**: Dices *"haré 10 repeticiones, empiezo en la 0, sumo 1 en cada una y paro al llegar a 10"*. Sabes exactamente cuántas veces vas a iterar desde el principio.
+- **`for...of` (Sacar frutas de una canasta)**: Tienes una canasta de frutas (`["manzana", "pera", "uva"]`) y tomas cada fruta una por una directamente para revisarla o comerla, sin preocuparte por su posición numérica en la canasta.
+- **`for...in` (Revisar la etiqueta de especificaciones de un producto)**: Tienes un objeto (un producto o una persona) y vas leyendo una por una sus etiquetas/propiedades (`nombre`, `edad`, `ciudad`) junto con su valor correspondiente.
+- **`while` (Correr en la caminadora mientras tengas energía)**: Sigues corriendo *mientras* (`while (tengoEnergia)`) la condición sea verdadera. No sabes exactamente cuántas vueltas darás, pero te detienes en el instante en que la condición cambia a falsa.
+- **`do...while` (Probar un bocado antes de decidir si sigues comiendo)**: Pruebas al menos una vez el platillo primero (`do`) y luego evalúas si continuas comiendo (`while (tengoHambre)`).
+
+---
+
+### 🔑 1. Tipos de Bucles en JavaScript
+
+#### A. Ciclo `for` Tradicional
+Ideal cuando conoces de antemano el número de iteraciones o necesitas manipular el índice numérico explícitamente:
+
+```mermaid
+graph TD
+    A[1. Inicialización: let i = 0] --> B{2. Condición: i <= 10}
+    B -->|true| C[3. Ejecutar Bloque de Código]
+    C --> D[4. Incremento / Actualización: i++]
+    D --> B
+    B -->|false| E[Fin del Bucle: Continuar Programa]
+```
+
+Sintaxis:
+```javascript
+for (inicialización; condición; incremento) {
+  // Código a repetir en cada vuelta
+}
+```
+
+1. **Inicialización**: Se ejecuta una sola vez antes de que arranque el bucle (ej. `let i = 0`).
+2. **Condición**: Se evalúa antes de cada iteración. Si es `true`, el bloque se ejecuta; si es `false`, el bucle termina.
+3. **Incremento / Paso**: Se ejecuta al finalizar cada vuelta (ej. `i++`, `i += 2`, `i--`).
+
+---
+
+#### B. Ciclo `for...of` (Iterar sobre Valores)
+Introducido en ES6, es la forma más limpia y moderna de recorrer elementos de estructuras **iterables** (Arreglos, Strings, Maps, Sets):
+
+```javascript
+const frutas = ["manzana", "pera", "uva"];
+
+for (const fruta of frutas) {
+  console.log(fruta); // Imprime directamente: "manzana", "pera", "uva"
+}
+```
+
+> [!TIP]
+> **¿Cuándo usar `for...of`?**
+> Úsalo siempre que necesites acceder directamente al **valor de cada elemento** de un arreglo sin necesidad de calcular ni usar el índice numérico.
+
+---
+
+#### C. Ciclo `for...in` (Iterar sobre Claves / Propiedades)
+Diseñado para recorrer los nombres de las **propiedades enumerables (claves)** de un **objeto**:
+
+```javascript
+const persona = {
+  nombre: "Ana",
+  edad: 25,
+};
+
+for (const clave in persona) {
+  console.log(`${clave}: ${persona[clave]}`);
+  // Salida:
+  // nombre: Ana
+  // edad: 25
+}
+```
+
+> [!WARNING]
+> **¡Evita usar `for...in` para recorrer Arreglos!**
+> `for...in` itera sobre los nombres de las propiedades (los índices como strings `"0"`, `"1"`) y puede incluir propiedades heredadas del prototipo o en orden no garantizado. Para arreglos utiliza siempre **`for` tradicional**, **`for...of`** o métodos funcionales como **`.forEach()` / `.map()`**.
+
+---
+
+#### D. Ciclos Condicionales: `while` y `do...while`
+
+- **`while`**: Evalúa la condición **antes** de entrar al bloque. Si la condición inicial es `false`, el bloque **nunca se ejecuta**.
+- **`do...while`**: Ejecuta el bloque **al menos una vez** y luego evalúa la condición para decidir si repite.
+
+```javascript
+// Bucle while
+let energia = 3;
+while (energia > 0) {
+  console.log(`Entrenando... energía restante: ${energia}`);
+  energia--;
+}
+
+// Bucle do...while (Garantiza mínimo 1 ejecución)
+let intentos = 0;
+do {
+  console.log(`Intento número: ${intentos + 1}`);
+  intentos++;
+} while (intentos < 1);
+```
+
+---
+
+### 🛑 Control de Bucles: `break` vs. `continue`
+
+| Sentencia      | Acción                                                        | Analogía                                                      |
+| :------------- | :------------------------------------------------------------ | :------------------------------------------------------------ |
+| **`break`**    | **Aborta y termina** el bucle por completo inmediatamente.    | Sonó la alarma de incendio: todos salen del edificio ahora.   |
+| **`continue`** | **Salta la iteración actual** y pasa directo a la siguiente.  | Te saltas una canción en tu playlist que no quieres escuchar. |
+
+```javascript
+// Ejemplo de break: Detenerse al encontrar un objetivo
+for (let i = 1; i <= 10; i++) {
+  if (i === 5) break; // Termina el bucle al llegar a 5
+  console.log(i); // Imprime 1, 2, 3, 4
+}
+
+// Ejemplo de continue: Omitir números impares
+for (let i = 1; i <= 5; i++) {
+  if (i % 2 !== 0) continue; // Salta los impares
+  console.log(i); // Imprime 2, 4
+}
+```
+
+---
+
+### ⚖️ Tabla Comparativa de Bucles
+
+| Estructura      | ¿Para qué se usa principalmente?               | ¿Sobre qué itera?         | ¿Garantiza al menos 1 vuelta? |
+| :-------------- | :--------------------------------------------- | :------------------------ | :---------------------------- |
+| **`for`**       | Rangos numéricos conocidos y acceso por índice | Índices / Contadores      | ❌ No (si la condición falla) |
+| **`for...of`**  | Recorrer elementos de **Arreglos** y Strings   | **Valores** de iterables  | ❌ No (si el array está vacío)|
+| **`for...in`**  | Recorrer propiedades de **Objetos**            | **Claves (keys)** / Nombres| ❌ No (si no hay propiedades)|
+| **`while`**     | Repetición basada en condición dinámica        | Condición booleana        | ❌ No (evalúa al inicio)      |
+| **`do...while`**| Repetición que debe ejecutarse al menos 1 vez  | Condición booleana        | ✅ **Sí (evalúa al final)**   |
+
+---
+
+### 💻 Código de la Clase Ilustrado
+
+```javascript
+// ==========================================
+// 1. Ciclo for tradicional con contador
+// ==========================================
+// for (inicializacion; condicion; incremento)
+for (let i = 0; i <= 10; i++) {
+  console.log(i); // Imprime números del 0 al 10
+}
+
+// ==========================================
+// 2. Iteración sobre un Arreglo por Índice
+// ==========================================
+const notas = ["Nota 1", "Nota 2", "Nota 3"];
+
+for (let i = 0; i < notas.length; i++) {
+  // notas[i] accede al elemento en la posición actual
+  console.log(`Indice ${i}: ${notas[i]}`);
+}
+
+// ==========================================
+// 3. Ciclo for...of (Iterar directamente sobre Valores)
+// ==========================================
+const frutas = ["manzana", "pera", "uva"];
+
+for (const fruta of frutas) {
+  if (fruta === "manzana") {
+    console.log("Es una rica manzana");
+  }
+}
+
+// ==========================================
+// 4. Ciclo for...in (Iterar sobre Claves / Propiedades de un Objeto)
+// ==========================================
+const persona = {
+  nombre: "Ana",
+  edad: 25,
+};
+
+for (const clave in persona) {
+  // 'clave' toma el nombre de cada propiedad ("nombre", luego "edad")
+  // persona[clave] accede al valor asociado a esa propiedad
+  console.log(`${clave}: ${persona[clave]}`);
+}
+
+// ==========================================
+// 5. Ciclo while (Evalúa la condición antes de cada iteración)
+// ==========================================
+let contador = 0;
+
+while (contador < 4) {
+  console.log(contador); // Imprime: 0, 1, 2, 3
+  contador++; // ⚠️ Esencial: actualizar el contador para evitar bucle infinito
+}
+
+// ==========================================
+// 6. Ciclo do...while (Ejecuta primero, evalúa después)
+// ==========================================
+let numero = 0;
+
+do {
+  console.log("Entra en " + numero); // Imprime: "Entra en 0", "Entra en 1", "Entra en 2"
+  numero++;
+} while (numero < 3);
+
+// Valor final de la variable tras terminar el bucle:
+console.log(numero); // 👉 Imprime: 3
+```
+
+---
+
+> [!CAUTION]
+> **Peligro: El Bucle Infinito (_Infinite Loop_)**
+> Si olvidas actualizar la variable de control (por ejemplo olvidar `i++` o `energia--`), o si la condición de salida nunca se vuelve `false`, el bucle se ejecutará indefinidamente consumiendo el 100% de la CPU hasta bloquear el navegador o la terminal. Asegúrate siempre de que tu bucle tenga una ruta garantizada de salida.
+
+---
+
+_Hecho con ☕ y 💻 para el Curso de Fundamentos de JavaScript - Platzi_
 
