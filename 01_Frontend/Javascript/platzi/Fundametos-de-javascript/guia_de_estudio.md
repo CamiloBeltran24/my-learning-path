@@ -17,6 +17,8 @@ Esta guía contiene los apuntes de estudio, explicaciones detalladas y conceptos
 - [Clase 09: Estructura de Control `switch`, Agrupación de Casos y `default`](#clase-09-estructura-de-control-switch-agrupación-de-casos-y-default)
 - [Clase 10: Bucles e Iteraciones (`for`, `for...of`, `for...in`, `while` y `do...while`)](#clase-10-bucles-e-iteraciones-for-forof-forin-while-y-dowhile)
 - [Clase 11: Funciones (Declaración, Parámetros vs. Argumentos, Arrow Functions y Parámetros por Defecto)](#clase-11-funciones-declaración-parámetros-vs-argumentos-arrow-functions-y-parámetros-por-defecto)
+- [Clase 12: Scope o Alcance (Global, de Función, de Bloque y Cadena de Alcance)](#clase-12-scope-o-alcance-global-de-función-de-bloque-y-cadena-de-alcance)
+- [Clase 13: Closures (Entorno Léxico, Memoria y Encapsulación de Datos Privados)](#clase-13-closures-entorno-léxico-memoria-y-encapsulación-de-datos-privados)
 
 ---
 
@@ -1489,5 +1491,359 @@ console.log(nota);
 ---
 
 _Hecho con ☕ y 💻 para el Curso de Fundamentos de JavaScript - Platzi_
+
+---
+
+## Clase 12: Scope o Alcance (Global, de Función, de Bloque y Cadena de Alcance)
+
+👉 [Ver código de la clase](./curso/src/12-scope.js)
+
+El **Scope** (o alcance) es el conjunto de reglas que determina **dónde es accesible y visible una variable** dentro de tu programa. En palabras sencillas: define qué partes de tu código pueden "ver" y utilizar una variable específica.
+
+---
+
+### 🏢 La Analogía del Edificio con Vidrios Polarizados
+
+Imagina un edificio de oficinas con tres niveles de seguridad:
+
+```mermaid
+graph TD
+    subgraph Global ["🌍 Patio Central (Scope Global)"]
+        G["Variable 'global' (Visible para todos)"]
+        subgraph Funcion ["🏢 Oficina Privada (Scope de Función)"]
+            F["Variable 'alcanceFuncion' (Solo visible en la oficina)"]
+            subgraph Bloque ["🔒 Caja Fuerte / Armario (Scope de Bloque)"]
+                B["Variable 'bloque' (Solo visible dentro del armario)"]
+            end
+        end
+    end
+```
+
+1. **El Patio Central (Scope Global)**: Todos en el edificio pueden mirar hacia el patio y ver lo que hay allí. Las variables globales están al alcance de cualquier función o bloque.
+2. **La Oficina Privada (Scope de Función)**: Quienes están dentro de la oficina pueden ver su propio escritorio y también mirar por la ventana hacia el patio global. Pero la gente que camina por el patio **no puede ver** lo que hay dentro de la oficina.
+3. **El Armario / Caja Fuerte (Scope de Bloque `{}`)**: Quien entra al armario puede ver lo que hay en el armario, en la oficina y en el patio. Pero quien está afuera en la oficina **no puede ver** lo que hay dentro del armario cerrado.
+
+> [!IMPORTANT]
+> **Regla de Oro del Scope (Dirección de Visibilidad):**
+> La búsqueda de variables siempre va **de adentro hacia afuera** (hacia los padres), **NUNCA de afuera hacia adentro** (hacia los hijos).
+
+---
+
+### 🔑 Conceptos Clave
+
+#### 1. Los Tres Tipos de Scope en JavaScript
+
+| Tipo de Scope | ¿Dónde se declara? | ¿Quién puede acceder? | Creado por |
+| :--- | :--- | :--- | :--- |
+| **Global Scope** | Fuera de cualquier función o bloque `{}` | Todo el programa en cualquier lugar | `var`, `let`, `const` |
+| **Function Scope (Local)** | Dentro del cuerpo de una `function` | Solo dentro de esa misma función | `var`, `let`, `const` |
+| **Block Scope** | Dentro de un bloque delimitado por llaves `{}` (`if`, `for`, `while`, etc.) | Solo dentro de ese bloque `{}` específico | `let` y `const` (*`var` NO lo respeta*) |
+
+---
+
+#### 2. La Cadena de Alcance (*Scope Chain*)
+
+Cuando JavaScript intenta leer una variable, sigue un camino de búsqueda muy estricto:
+
+```mermaid
+graph LR
+    A["1. ¿Existe en el Bloque actual?"] -- No --> B["2. ¿Existe en la Función contenedora?"]
+    B -- No --> C["3. ¿Existe en el Scope Global?"]
+    C -- No --> D["❌ ReferenceError: Variable no definida"]
+    A -- Sí --> E["✅ Usar valor local"]
+    B -- Sí --> F["✅ Usar valor de función"]
+    C -- Sí --> G["✅ Usar valor global"]
+```
+
+Si llega al nivel global y la variable no existe en ningún lado, JavaScript arroja un `ReferenceError: [variable] is not defined`.
+
+---
+
+#### 3. El Peligro de `var` vs. la Seguridad de `let` y `const`
+
+- `let` y `const` tienen **Block Scope**: Nacen y mueren dentro de las llaves `{}` donde fueron creadas.
+- `var` **NO tiene Block Scope**: Se "escapa" de los `if` y bucles `for`, viviendo en el ámbito de la función completa o global, lo que suele causar errores inesperados.
+
+---
+
+### 💻 Código de la Clase Ilustrado
+
+```javascript
+// ==========================================
+// 1. Scope Global
+// ==========================================
+const global = "Soy global"; // Accesible desde cualquier lugar
+
+function ejemplo() {
+  // ==========================================
+  // 2. Scope de Función (Local)
+  // ==========================================
+  const alcanceFuncion = "soy de funcion";
+
+  if (true) {
+    // ==========================================
+    // 3. Scope de Bloque (Delimitado por llaves {})
+    // ==========================================
+    const bloque = "Soy de Bloque";
+
+    console.log(bloque); // 👉 "Soy de Bloque" (Scope actual)
+    console.log(`Bloque - Funcion = ${alcanceFuncion}`); // 👉 "soy de funcion" (Mira hacia la función padre)
+    console.log(`Bloque - Bloque = ${bloque}`);           // 👉 "Soy de Bloque" (Scope local)
+    console.log(`Bloque - Bloque = ${global}`);           // 👉 "Soy global" (Mira hacia el entorno global)
+  }
+
+  // Fuera del bloque 'if', pero dentro de la función:
+  console.log(alcanceFuncion); // 👉 "soy de funcion" (Accesible dentro de la función)
+  console.log(`Funcion - Funcion = ${alcanceFuncion}`); // 👉 "Funcion - Funcion = soy de funcion"
+
+  // ❌ console.log(`Funcion - Bloque = ${bloque}`);
+  // 🚨 Error si se descomenta: ReferenceError: bloque is not defined
+  // (La función NO puede ver hacia el interior del bloque 'if')
+
+  console.log(`Funcion - Bloque = ${global}`); // 👉 "Funcion - Bloque = Soy global" (Mira hacia el scope global)
+}
+
+ejemplo();
+
+// ==========================================
+// 4. Intentos de acceso desde el Scope Global
+// ==========================================
+console.log(global); // 👉 "Soy global"
+
+// ❌ console.log(`Global - Funcion = ${alcanceFuncion}`);
+// 🚨 Error: ReferenceError: alcanceFuncion is not defined
+// (El scope global NO puede acceder a las variables internas de una función)
+
+// ❌ console.log(`Global - Bloque = ${bloque}`);
+// 🚨 Error: ReferenceError: bloque is not defined
+// (El scope global NO puede acceder a las variables internas de un bloque)
+
+console.log(`Global - Bloque = ${global}`); // 👉 "Global - Bloque = Soy global"
+```
+
+---
+
+## Clase 13: Closures (Entorno Léxico, Memoria y Encapsulación de Datos Privados)
+
+👉 [Ver código de la clase](./curso/src/13-closure.js)
+
+Un **Closure** (o clausura) suele parecer intimidante al principio, pero su idea central es muy sencilla:
+
+> [!IMPORTANT]
+> **Definición en Palabras Simples:**
+> Un **Closure** ocurre cuando **una función "hija" recuerda las variables de la función "madre" donde nació**, incluso después de que la función madre ya terminó de ejecutarse y desapareció.
+> 
+> Es como si la función hija saliera al mundo exterior llevando una **"mochila mágica"** que contiene todas las variables de la casa donde fue creada.
+
+---
+
+### 🎒 La Analogía de la Mochila Mágica
+
+Imagina cómo se comportan las funciones normales vs. las funciones con Closure:
+
+```mermaid
+graph TD
+    subgraph Normal ["❌ Función Normal (Sin Closure)"]
+        N1["Se ejecuta la función"] --> N2["Crea variables temporales"]
+        N2 --> N3["Termina la función"]
+        N3 --> N4["🗑️ Todo se borra de la memoria"]
+    end
+
+    subgraph Closure ["✨ Función con Closure"]
+        C1["Se ejecuta la función 'madre'"] --> C2["Crea sus variables"]
+        C2 --> C3["Entrega una función 'hija' al exterior"]
+        C3 --> C4["🎒 La hija guarda las variables en su mochila"]
+        C4 --> C5["🧠 Aunque la madre termine, la hija sigue usando esas variables"]
+    end
+```
+
+---
+
+### 🧪 Ejemplos Progresivos (De lo Más Fácil a lo Avanzado)
+
+Para entender un Closure sin complicaciones, vayamos paso a paso con tres ejemplos:
+
+---
+
+#### Nivel 1: El Contador Mágico (El Ejemplo Clásico)
+
+Normalmente, una variable dentro de una función se reinicia cada vez que la llamas. Con un closure, la variable **recuerda su estado anterior**:
+
+```javascript
+function crearContador() {
+  let cuenta = 0; // 🔒 Variable guardada en la "mochila"
+
+  // Retornamos la función hija:
+  return function () {
+    cuenta++; // Incrementa la variable recordada
+    return cuenta;
+  };
+}
+
+// 1. Creamos un contador independiente:
+const miContador = crearContador();
+
+console.log(miContador()); // 👉 1
+console.log(miContador()); // 👉 2
+console.log(miContador()); // 👉 3 (¡Recuerda los llamados anteriores!)
+
+// 2. Si creamos un segundo contador, tiene su PROPIA mochila separada:
+const otroContador = crearContador();
+console.log(otroContador()); // 👉 1 (Empieza desde cero, no afecta a miContador)
+```
+
+---
+
+#### Nivel 2: Fábrica de Funciones (*Function Factory*)
+
+Un Closure permite crear funciones personalizadas que recuerdan una configuración inicial:
+
+```javascript
+function crearMultiplicador(factor) {
+  // 'factor' queda atrapado en el closure de la función que retornamos
+  return function (numero) {
+    return numero * factor;
+  };
+}
+
+// Creamos funciones especializadas:
+const duplicar = crearMultiplicador(2); // Recuerda que factor = 2
+const triplicar = crearMultiplicador(3); // Recuerda que factor = 3
+
+console.log(duplicar(5)); // 👉 10  (5 * 2)
+console.log(duplicar(8)); // 👉 16  (8 * 2)
+
+console.log(triplicar(5)); // 👉 15  (5 * 3)
+console.log(triplicar(8)); // 👉 24  (8 * 3)
+```
+
+---
+
+#### Nivel 3: El Ejemplo de la Clase (La Cuenta Bancaria y la Bóveda Privada)
+
+👉 [Ver archivo: 13-closure.js](./curso/src/13-closure.js)
+
+En este ejemplo del curso, la función madre no retorna una sola función, sino un **objeto con 3 funciones (métodos)**. Todas comparten acceso a la misma variable privada `saldo`:
+
+```mermaid
+graph TD
+    subgraph Boveda ["🔒 Bóveda Oculta en Memoria"]
+        S["let saldo = 100000"]
+    end
+
+    subgraph Cuenta ["🏦 Objeto 'miCuenta' (Accesible al usuario)"]
+        M1["📥 .depositar(50000) ➔ Modifica saldo (+50000)"]
+        M2["📤 .retirar(150) ➔ Modifica saldo (-150)"]
+        M3["🔍 .consultarSaldo() ➔ Lee saldo actual"]
+    end
+
+    M1 --> S
+    M2 --> S
+    M3 --> S
+
+    Usuario["👤 Código Externo"] --> Cuenta
+    Usuario -. "❌ miCuenta.saldo da undefined (Nadie puede alterarlo directamente)" .-> S
+```
+
+---
+
+### 💻 Código de la Clase Ilustrado y Comentado Paso a Paso
+
+```javascript
+// ==========================================
+// 1. Declaración de la Función con Closure
+// ==========================================
+function crearCuentaBancaria(saldoInicial) {
+  // 'saldo' es una variable PRIVADA. Nadie desde afuera puede tocarla directamente.
+  let saldo = saldoInicial;
+
+  // Retornamos un conjunto de métodos que tienen la llave de acceso a 'saldo':
+  return {
+    // Método 1: Sumar dinero al saldo privado
+    depositar(cantidad) {
+      saldo += cantidad;
+      return `Depositado $${cantidad}. Saldo actual: $${saldo}`;
+    },
+
+    // Método 2: Restar dinero con validación de seguridad
+    retirar(cantidad) {
+      // Si piden más de lo que hay, no permitimos el retiro:
+      if (cantidad > saldo) {
+        return "Fondos Insuficientes";
+      }
+      saldo -= cantidad;
+      return `Retirado $${cantidad}. Saldo actual: $${saldo}`;
+    },
+
+    // Método 3: Consultar el saldo sin modificarlo
+    consultarSaldo() {
+      return `Saldo: $${saldo}`;
+    },
+  };
+}
+
+// ==========================================
+// 2. Creación de una Cuenta Real
+// ==========================================
+// Al ejecutar esta línea:
+// 1. Se crea 'saldo = 100000'.
+// 2. Se retorna el objeto con los métodos.
+// 3. 'crearCuentaBancaria' finaliza, pero los métodos GUARDAN 'saldo' en su closure.
+const miCuenta = crearCuentaBancaria(100000);
+
+// ==========================================
+// 3. Demostración de Privacidad (Encapsulación)
+// ==========================================
+// ¿Qué pasa si intentamos leer o modificar 'saldo' directamente?
+console.log(miCuenta.saldo); 
+// 👉 undefined  (¡No existe como propiedad pública, está blindada!)
+
+// ==========================================
+// 4. Operaciones a través de los Métodos Autorizados
+// ==========================================
+
+// Consulta inicial:
+console.log(miCuenta.consultarSaldo()); 
+// 👉 "Saldo: $100000"
+
+// Depositamos $50,000:
+console.log(miCuenta.depositar(50000)); 
+// 👉 "Depositado $50000. Saldo actual: $150000"
+
+// Retiramos $150:
+console.log(miCuenta.retirar(150)); 
+// 👉 "Retirado $150. Saldo actual: $149850"
+
+// Verificamos el saldo tras las operaciones:
+console.log(miCuenta.consultarSaldo()); 
+// 👉 "Saldo: $149850"
+
+// Intentamos retirar más dinero del que tenemos:
+console.log(miCuenta.retirar(200000));
+// 👉 "Fondos Insuficientes" (La validación protege el saldo)
+```
+
+---
+
+### 📋 Resumen Rápido: ¿Por qué usar Closures?
+
+| Beneficio | ¿Para qué sirve? | Ejemplo en la vida real |
+| :--- | :--- | :--- |
+| **1. Variables Privadas** | Proteger datos para que nadie los cambie por accidente. | El saldo de tu cuenta bancaria. |
+| **2. Memoria de Estado** | Recordar datos entre llamadas sin usar variables globales. | Un contador de clics o turnos. |
+| **3. Fábricas de Código** | Crear funciones especializadas reutilizables. | Un conversor de monedas (`aDolares`, `aEuros`). |
+
+---
+
+> [!TIP]
+> **Regla Mnemotécnica para Recordar:**
+> - **Scope** = *¿Dónde puedo ver una variable ahora mismo?*
+> - **Closure** = *¿Qué variables se llevó la función en su mochila para usarlas después?*
+
+---
+
+_Hecho con ☕ y 💻 para el Curso de Fundamentos de JavaScript - Platzi_
+
+
 
 
