@@ -21,6 +21,7 @@ Esta guía contiene los apuntes de estudio, explicaciones detalladas y conceptos
 - [Clase 13: Closures (Entorno Léxico, Memoria y Encapsulación de Datos Privados)](#clase-13-closures-entorno-léxico-memoria-y-encapsulación-de-datos-privados)
 - [Clase 14: Arreglos / Arrays (Estructura, Acceso por Índice y Operaciones CRUD Mutables)](#clase-14-arreglos--arrays-estructura-acceso-por-índice-y-operaciones-crud-mutables)
 - [Clase 15: Objetos Literales (Acceso, Optional Chaining, Desestructuración, Spread Operator y Métodos Estáticos)](#clase-15-objetos-literales-acceso-optional-chaining-desestructuración-spread-operator-y-métodos-estáticos)
+- [Clase 16: Métodos de Arreglos de Orden Superior (`map`, `filter`, `find`, `reduce`)](#clase-16-métodos-de-arreglos-de-orden-superior-map-filter-find-reduce)
 
 ---
 
@@ -2299,20 +2300,255 @@ console.log(Object.entries(notaActualizada));
 
 ---
 
+## Clase 16: Métodos de Arreglos de Orden Superior (`map`, `filter`, `find`, `reduce`)
+
+👉 [Ver código de la clase](./curso/src/16-methods.js)
+
+Los **Métodos de Orden Superior** (_Higher-Order Methods_) en JavaScript son funciones que pertenecen al prototipo de `Array` y que **reciben otra función como argumento (callback)** para procesar, transformar o resumir sus elementos. 
+
+Representan el paso de la **Programación Imperativa** (decirle a la computadora paso a paso con bucles `for` tradicionales *cómo* hacer la iteración) a la **Programación Declarativa / Funcional** (describir *qué* resultado deseamos obtener de forma limpia, legible e **inmutable**).
+
+---
+
+### 🏭 La Analogía de la Línea de Ensamblaje / Fábrica de Datos
+
+Imagina que tu arreglo es una **cinta transportadora** por la que pasan cajas de productos:
+
+- **`.map()` (La Estación de Transformación)**: Por cada caja que entra, sale exactamente **una caja transformada**. Transforma cada elemento $1 \text{ a } 1$ sin alterar el tamaño del arreglo ($N \to N$).
+- **`.filter()` (El Inspector de Calidad / Aduana)**: Revisa cada caja con una regla estricta (¿Pasa la prueba? `true`/`false`). Solo deja pasar las cajas aprobadas a un nuevo contenedor ($N \to \le N$).
+- **`.find()` (El Detective de Búsqueda)**: Va mirando las cajas una por una en la fila. En el instante exacto en que encuentra la primera que busca, **la toma y detiene la búsqueda de inmediato**. Si ninguna cumple, regresa con las manos vacías (`undefined`).
+- **`.reduce()` (La Prensa Compactadora / Caja Registradora)**: Toma todas las cajas de la cinta y las combina una tras otra con un acumulador para producir **un único resultado condensado** (un número total, un string, un objeto o un nuevo array).
+
+```mermaid
+flowchart TD
+    subgraph IN ["📦 Arreglo Original: [ 1, 2, 3, 4 ]"]
+    end
+
+    IN -->|map: x * 2| M["✨ [ 2, 4, 6, 8 ] (Misma longitud, transformados)"]
+    IN -->|filter: x % 2 === 0| F["🔍 [ 2, 4 ] (Solo los que cumplen la condición)"]
+    IN -->|find: x === 3| FD["🎯 3 (Primer elemento coincidente o undefined)"]
+    IN -->|reduce: acc + x | R["📊 10 (Un único valor acumulado final)"]
+```
+
+---
+
+### 🔑 1. Método `.map()`: Transformación 1 a 1
+
+Crea un **nuevo arreglo** con los resultados de aplicar la función callback a cada uno de los elementos del arreglo original.
+
+- **Regla de Oro**: Siempre retorna un arreglo con **la misma cantidad exacta de elementos** que el original.
+- **Inmutabilidad**: El arreglo de origen nunca se modifica.
+
+#### Casos de uso típicos:
+1. **Extraer una sola propiedad de un array de objetos** (proyección de datos):
+   ```javascript
+   const titulos = notas.map((nota) => nota.title);
+   // ['Nota 1', 'Nota 2', 'Nota 3']
+   ```
+2. **Enriquecer o clonar objetos agregando nuevos campos** con el operador spread (`...`):
+   ```javascript
+   const notasConFecha = notas.map((nota) => ({
+     ...nota,
+     fechaCreacion: Date.now(),
+   }));
+   ```
+
+> [!NOTE]
+> Al retornar un objeto literal directamente en una arrow function de una sola línea, debes envolverlo entre paréntesis `({ ... })` para que JavaScript no confunda las llaves del objeto con el cuerpo de la función.
+
+---
+
+### 🔍 2. Método `.filter()`: Selección y Filtrado
+
+Crea un **nuevo arreglo** que contiene únicamente los elementos que **cumplen la condición dada por el callback** (es decir, cuando el callback retorna `true` o un valor *truthy*).
+
+- Si ningún elemento cumple la condición, retorna un arreglo vacío `[]`.
+- Si todos cumplen la condición, retorna una copia superficial con todos los elementos.
+
+#### Casos de uso típicos:
+1. **Filtrar por flags booleanas**:
+   ```javascript
+   const favoritas = notas.filter((nota) => nota.esFavorita);
+   ```
+2. **Búsqueda por texto insensible a mayúsculas/minúsculas**:
+   ```javascript
+   const resultado = notas.filter((nota) =>
+     nota.title.toLowerCase().includes("nota 1")
+   );
+   ```
+
+---
+
+### 🎯 3. Método `.find()`: Búsqueda del Primer Elemento
+
+Recorre el arreglo y devuelve el **valor del primer elemento** que cumpla la función de prueba proporcionada.
+
+- En cuanto encuentra una coincidencia, **termina la ejecución inmediatamente** (_early exit_), lo que optimiza el rendimiento.
+- Si ningún elemento satisface la condición, retorna `undefined`.
+
+```mermaid
+flowchart LR
+    A["[ Nota 1, Nota 2, Nota 3 ]"] --> B{"¿id === 2?"}
+    B -->|Nota 1| N1["❌ false (continúa)"]
+    B -->|Nota 2| N2["✅ true (¡Se detiene y retorna Nota 2!)"]
+    N2 -.-> STOP["⛔ Ya no evalúa Nota 3"]
+```
+
+#### Comparativa: `.find()` vs. `.filter()`
+
+| Característica | `.find()` | `.filter()` |
+| :--- | :--- | :--- |
+| **¿Qué retorna?** | El **elemento directamente** (o `undefined`) | Un **Array** con todas las coincidencias (o `[]`) |
+| **Cantidad máxima de resultados** | 1 elemento | $0$ hasta $N$ elementos |
+| **Comportamiento al encontrar match** | Se detiene inmediatamente | Sigue evaluando hasta el último elemento |
+| **Cuándo usarlo** | Buscar por ID único o primer registro | Obtener listas de elementos que comparten un criterio |
+
+---
+
+### 📊 4. Método `.reduce()`: Acumulación y Síntesis
+
+Ejecuta una función reductora sobre cada elemento del arreglo, devolviendo como resultado un **único valor acumulado**.
+
+```javascript
+arreglo.reduce((acumulador, valorActual, indice, arregloOriginal) => {
+  return nuevoAcumulador;
+}, valorInicial);
+```
+
+#### Parámetros del Callback de `reduce`:
+1. **`acumulador` (`acc`)**: Acumula el valor devuelto por la función en la iteración anterior.
+2. **`valorActual` (`numero` / `item`)**: El elemento que se está procesando actualmente en el array.
+3. **`valorInicial` (`0`, `[]`, `{}`, etc.)**: El valor con el que arranca el acumulador antes de procesar el primer elemento.
+
+#### 🧠 Traza de Ejecución Paso a Paso (Sumatoria de `[1, 2, 3, 4, 5]` con valor inicial `0`):
+
+| Iteración | `acc` (Entrada) | `numero` (Actual) | Operación (`acc + numero`) | `acc` (Retornado al siguiente ciclo) |
+| :---: | :---: | :---: | :---: | :---: |
+| **1ª** | `0` | `1` | `0 + 1` | `1` |
+| **2ª** | `1` | `2` | `1 + 2` | `3` |
+| **3ª** | `3` | `3` | `3 + 3` | `6` |
+| **4ª** | `6` | `4` | `6 + 4` | `10` |
+| **5ª** | `10` | `5` | `10 + 5` | **`15` (Resultado Final)** |
+
+---
+
+### 📊 Tabla Comparativa de Métodos de Iteración de Arreglos
+
+| Método | Propósito Principal | Retorno | ¿Modifica el original? | ¿Se detiene antes? |
+| :--- | :--- | :--- | :---: | :---: |
+| **`map()`** | Transformar elementos uno a uno | `Array<NuevoTipo>` (Misma longitud) | ❌ No | ❌ No |
+| **`filter()`** | Seleccionar elementos que cumplan una condición | `Array<Tipo>` (Longitud $\le N$) | ❌ No | ❌ No |
+| **`find()`** | Obtener el primer elemento coincidente | `Elemento` \| `undefined` | ❌ No | ✅ Sí (al primer match) |
+| **`reduce()`** | Acumular / condensar todos los elementos | Cualquier tipo (`number`, `object`, `array`, etc.) | ❌ No | ❌ No |
+| **`forEach()`** | Ejecutar efectos secundarios por cada elemento | `undefined` | ❌ No | ❌ No |
+| **`some()`** | Comprobar si **al menos un** elemento cumple la condición | `boolean` (`true` / `false`) | ❌ No | ✅ Sí (al primer `true`) |
+| **`every()`** | Comprobar si **todos** los elementos cumplen la condición | `boolean` (`true` / `false`) | ❌ No | ✅ Sí (al primer `false`) |
+
+---
+
+### 💻 Código de la Clase Ilustrado y Comentado Paso a Paso
+
+```javascript
+// ==========================================
+// 1. Método .map() - Transformación Inmutable
+// ==========================================
+const notas = [
+  { id: 1, title: "Nota 1", content: "Contenido uno" },
+  { id: 2, title: "Nota 2", content: "Contenido dos" },
+  { id: 3, title: "Nota 3", content: "Contenido tres" },
+];
+
+// Extracción de una propiedad específica (proyección):
+const titulos = notas.map((nota) => nota.title);
+console.log(titulos);
+// 👉 [ 'Nota 1', 'Nota 2', 'Nota 3' ]
+
+// Enriquecimiento de objetos retornando una nueva estructura con Spread:
+const notasConFecha = notas.map((nota) => ({
+  ...nota,
+  fechaCreacion: Date.now(),
+}));
+console.log(notasConFecha);
+// 👉 [
+//      { id: 1, title: 'Nota 1', content: 'Contenido uno', fechaCreacion: 1727413765000 },
+//      { id: 2, title: 'Nota 2', content: 'Contenido dos', fechaCreacion: 1727413765000 },
+//      { id: 3, title: 'Nota 3', content: 'Contenido tres', fechaCreacion: 1727413765000 }
+//    ]
+
+// ==========================================
+// 2. Método .filter() - Filtrado Condicional
+// ==========================================
+const notas2 = [
+  { id: 1, title: "Nota 1", content: "Contenido uno", esFavorita: true },
+  { id: 2, title: "Nota 2", content: "Contenido dos", esFavorita: false },
+  { id: 3, title: "Nota 3", content: "Contenido tres", esFavorita: true },
+];
+
+// Filtrar únicamente las notas marcadas como favoritas:
+const favorites = notas2.filter((nota) => nota.esFavorita);
+console.log(favorites);
+// 👉 [
+//      { id: 1, title: 'Nota 1', content: 'Contenido uno', esFavorita: true },
+//      { id: 3, title: 'Nota 3', content: 'Contenido tres', esFavorita: true }
+//    ]
+
+// Búsqueda por coincidencia de texto (case-insensitive):
+const title = notas2.filter((nota) =>
+  nota.title.toLowerCase().includes("nota 1"),
+);
+console.log(title);
+// 👉 [ { id: 1, title: 'Nota 1', content: 'Contenido uno', esFavorita: true } ]
+
+// ==========================================
+// 3. Método .find() - Búsqueda de Primer Registro
+// ==========================================
+const notas3 = [
+  { id: 1, title: "Nota 1", content: "Contenido uno", esFavorita: true },
+  { id: 2, title: "Nota 2", content: "Contenido dos", esFavorita: false },
+  { id: 3, title: "Nota 3", content: "Contenido tres", esFavorita: true },
+];
+
+// Encuentra el primer objeto cuyo ID sea exactamente 2:
+const nota = notas3.find((nota) => nota.id === 2);
+console.log(nota);
+// 👉 { id: 2, title: 'Nota 2', content: 'Contenido dos', esFavorita: false }
+
+// ==========================================
+// 4. Método .reduce() - Reducción / Acumulación
+// ==========================================
+const numeros = [1, 2, 3, 4, 5];
+
+// Sumatoria de todos los elementos con valor inicial 0:
+const sumatoria = numeros.reduce((acc, numero) => acc + numero, 0);
+console.log(sumatoria);
+// 👉 15
+```
+
+---
+
 ### ⚠️ Conceptos Clave y Buenas Prácticas
 
+> [!IMPORTANT]
+> **Inmutabilidad y Funciones Puras:**
+> Ninguno de estos métodos (`map`, `filter`, `find`, `reduce`) muta o altera el arreglo original. Retornan nuevos arreglos o valores calculados, lo que evita efectos secundarios accidentales (_side effects_) y hace que tu código sea mucho más predecible y fácil de depurar.
+
 > [!TIP]
-> **¿Cuándo usar `Object.entries()`?**
-> Es la herramienta predilecta cuando necesitas iterar tanto las claves como los valores de un objeto usando bucles modernos como `for...of` con desestructuración de arreglos:
-> ```javascript
-> for (const [clave, valor] of Object.entries(notaActualizada)) {
->   console.log(`${clave}: ${valor}`);
-> }
-> ```
+> **Siempre define el `valorInicial` en `.reduce()`:**
+> Si omites el segundo argumento (`valorInicial`), `reduce` tomará el primer elemento del arreglo como acumulador inicial y empezará la iteración desde el segundo elemento. Aunque funciona para sumas numéricas simples, omitirlo sobre colecciones de objetos o arreglos vacíos `[]` lanzará un error crítico `TypeError: Reduce of empty array with no initial value`.
 
 > [!WARNING]
-> **Limitación de la Clonación con Spread (`...`):**
-> El spread operator realiza una **copia superficial** (_shallow copy_). Si el objeto contiene objetos o arreglos anidados internamente (por ejemplo `dates: [1, 1]`), esos sub-objetos seguirán compartiendo la misma referencia de memoria. Para copias profundas en JavaScript moderno, utiliza `structuredClone(objeto)`.
+> **No olvides retornar un valor dentro de los callbacks:**
+> Si usas arrow functions con cuerpo entre llaves `{}` en `map`, `filter` o `reduce`, es obligatorio colocar explícitamente la palabra clave `return`. Si lo olvidas, el callback retornará `undefined` en cada ciclo:
+> ```javascript
+> // ❌ Error común: retorna [undefined, undefined]
+> const titulosErr = notas.map((n) => { n.title });
+> 
+> // ✅ Correcto con retorno explícito:
+> const titulosOk1 = notas.map((n) => { return n.title; });
+> 
+> // ✅ Correcto con retorno implícito de una sola línea:
+> const titulosOk2 = notas.map((n) => n.title);
+> ```
 
 ---
 
