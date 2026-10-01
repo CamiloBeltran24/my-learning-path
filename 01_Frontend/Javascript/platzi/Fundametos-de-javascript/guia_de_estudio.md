@@ -22,8 +22,12 @@ Esta guía contiene los apuntes de estudio, explicaciones detalladas y conceptos
 - [Clase 14: Arreglos / Arrays (Estructura, Acceso por Índice y Operaciones CRUD Mutables)](#clase-14-arreglos--arrays-estructura-acceso-por-índice-y-operaciones-crud-mutables)
 - [Clase 15: Objetos Literales (Acceso, Optional Chaining, Desestructuración, Spread Operator y Métodos Estáticos)](#clase-15-objetos-literales-acceso-optional-chaining-desestructuración-spread-operator-y-métodos-estáticos)
 - [Clase 16: Métodos de Arreglos de Orden Superior (`map`, `filter`, `find`, `reduce`)](#clase-16-métodos-de-arreglos-de-orden-superior-map-filter-find-reduce)
+- [Clase 17: Manipulación del DOM: Selección, Creación y Renderizado Dinámico](#clase-17-manipulación-del-dom-selección-creación-y-renderizado-dinámico)
+- [Clase 18: Eventos del DOM y Manejo de Estado (`addEventListener`)](#clase-18-eventos-del-dom-y-manejo-de-estado-addeventlistener)
 
 ---
+
+
 
 ## Clase 01: Variables (`var`, `let`, `const`) y Hoisting
 
@@ -2549,6 +2553,401 @@ console.log(sumatoria);
 > // ✅ Correcto con retorno implícito de una sola línea:
 > const titulosOk2 = notas.map((n) => n.title);
 > ```
+
+---
+
+## Clase 17: Manipulación del DOM: Selección, Creación y Renderizado Dinámico
+
+👉 [Ver código de selección](./curso/src/dom/01-seleccionar-elementos.js) | [Ver código de renderizado dinámico](./curso/src/dom/app.js)
+
+El **DOM** (_Document Object Model_ o Modelo de Objetos del Documento) es la interfaz de programación que representa cualquier documento HTML en memoria como un **árbol estructurado de nodos y objetos**. Gracias al DOM, JavaScript puede conectarse con la página web para leer, agregar, modificar o eliminar contenido, atributos, estilos y responder a eventos del usuario en tiempo real.
+
+---
+
+### 🌳 La Analogía del Plano Arquitectónico y la Maqueta Inteligente
+
+- **El archivo HTML (El Plano de Construcción en Papel)**: Es el código estático escrito en el archivo `.html`. Solo contiene texto y etiquetas que describen cómo debería ser la estructura.
+- **El DOM (La Maqueta Inteligente en la Sala de Control)**: Cuando el navegador carga el HTML, construye una maqueta 3D interactiva en memoria. Cada etiqueta (`<html>`, `<header>`, `<button>`) se convierte en un nodo u objeto con propiedades y métodos.
+- **JavaScript (El Operador de la Maqueta)**: A través de JavaScript seleccionamos partes de esa maqueta (usando `document.querySelector` o `getElementById`) y al encender una luz o mover una pared en la maqueta, el navegador refleja el cambio inmediatamente en la pantalla.
+
+```
+                   document (Raíz del DOM)
+                             │
+                      ┌──────┴──────┐
+                      │             │
+                document.head  document.body
+                                    │
+                         ┌──────────┼──────────┐
+                         │          │          │
+                     <header>    <main>     <footer>
+                         │          │
+                     <nav>     <section>
+                                    │
+                                 <article> (.producto)
+                                    │
+                          ┌─────────┼─────────┐
+                          │         │         │
+                         <h3>      <p>    <button> (#btn-comprar)
+```
+
+---
+
+### 🔑 1. Puntos de Entrada Globales del Objeto `document`
+
+El objeto global `document` es la puerta de entrada a todo el árbol del DOM:
+
+| Propiedad | Descripción | Retorno |
+| :--- | :--- | :--- |
+| **`document`** | Representa la totalidad del documento web cargado. | `HTMLDocument` |
+| **`document.head`** | Acceso directo a la etiqueta `<head>` (metadatos, estilos, enlaces de fuentes, etc.). | `HTMLHeadElement` |
+| **`document.body`** | Acceso directo al cuerpo visible `<body>` de la página. | `HTMLBodyElement` |
+
+---
+
+### 🎯 2. Métodos Modernos de Selección (Selectores CSS)
+
+Son los métodos estándar y más recomendados en el desarrollo moderno debido a su flexibilidad, ya que aceptan cualquier selector de CSS válido (por ID, clase, etiqueta, pseudo-clase o combinadores):
+
+#### A. `document.querySelector(selectorCSS)`
+- **Qué hace**: Busca en el árbol y devuelve **el primer elemento** que coincida con el selector especificado.
+- **Si no encuentra coincidencias**: Retorna `null`.
+
+```javascript
+// Selección por ID (usando prefijo '#')
+const header = document.querySelector("#header");
+
+// Selección por Clase (usando prefijo '.') -> Retorna solo el PRIMER elemento que tenga esa clase
+const primerProducto = document.querySelector(".producto");
+
+// Selección por Nombre de Etiqueta HTML
+const primerTitulo = document.querySelector("h1");
+
+// Selectores CSS avanzados / combinados
+const botonComprarEnCard = document.querySelector(".card .producto-btn");
+const productoConSku = document.querySelector('article[data-sku="NOVA-001"]');
+```
+
+#### B. `document.querySelectorAll(selectorCSS)`
+- **Qué hace**: Busca y devuelve **todos los elementos** que coincidan con el selector especificado.
+- **Retorno**: Una lista de nodos estática (**`NodeList`**).
+- **Si no encuentra coincidencias**: Retorna un `NodeList` vacío (`length === 0`), nunca `null`.
+
+```javascript
+// Obtiene todos los elementos con la clase '.producto'
+const todosLosProductos = document.querySelectorAll(".producto");
+
+console.log(todosLosProductos.length); // 3 (según el HTML)
+
+// NodeList incluye soporte directo para el método .forEach()
+todosLosProductos.forEach((producto) => {
+  console.log(producto);
+});
+```
+
+---
+
+### 🏛️ 3. Métodos Tradicionales / Específicos
+
+Son métodos más antiguos pero aún ampliamente utilizados y muy rápidos para búsquedas directas:
+
+#### A. `document.getElementById(id)`
+- Busca un único elemento por su atributo `id`.
+- **Nota**: Se pasa el nombre limpio del ID **sin el símbolo `#`**.
+- Retorna el elemento HTML o `null` si no existe.
+
+```javascript
+const botonComprar = document.getElementById("btn-comprar");
+```
+
+#### B. `document.getElementsByClassName(className)`
+- Busca todos los elementos que contengan la clase indicada.
+- **Nota**: Se pasa el nombre de la clase **sin el punto `.`**.
+- Retorna una colección viva (**`HTMLCollection`**).
+
+```javascript
+const botonesComprar = document.getElementsByClassName("btn-comprar");
+```
+
+#### C. `document.getElementsByTagName(tagName)`
+- Busca todos los elementos que compartan la etiqueta HTML especificada (ej. `"button"`, `"div"`, `"a"`, `"h2"`).
+- Retorna una colección viva (**`HTMLCollection`**).
+
+```javascript
+const todosLosBotones = document.getElementsByTagName("button");
+```
+
+---
+
+### 📊 Tabla Comparativa de Métodos de Selección
+
+| Método | Tipo de Selector | Retorno | Tipo de Dato | ¿Soporta `.forEach()` directo? |
+| :--- | :--- | :--- | :--- | :---: |
+| **`querySelector`** | Selector CSS (`#id`, `.clase`, `tag`) | **1er elemento** o `null` | `Element` \| `null` | N/A |
+| **`querySelectorAll`** | Selector CSS (`#id`, `.clase`, `tag`) | **Todos** los coincidentes | `NodeList` (Estático) | ✅ Sí |
+| **`getElementById`** | Nombre de ID (`"id"`) | **1er elemento** o `null` | `HTMLElement` \| `null` | N/A |
+| **`getElementsByClassName`** | Nombre de Clase (`"clase"`) | **Todos** los coincidentes | `HTMLCollection` (Vivo) | ❌ No |
+| **`getElementsByTagName`** | Nombre de Etiqueta (`"tag"`) | **Todos** los coincidentes | `HTMLCollection` (Vivo) | ❌ No |
+
+---
+
+### ⚡ 4. Diferencia Crucial: `NodeList` vs. `HTMLCollection`
+
+| Característica | `NodeList` (de `querySelectorAll`) | `HTMLCollection` (de `getElementsBy...`) |
+| :--- | :--- | :--- |
+| **Naturaleza** | **Estática (Snapshot)**: Toma una "fotografía" del DOM en el instante de la consulta. Si se agregan nuevos elementos después, la lista no cambia. | **Viva (Live)**: Se mantiene sincronizada automáticamente en tiempo real si se agregan o eliminan elementos del DOM. |
+| **Tipos de Nodos** | Puede contener elementos HTML, nodos de texto y comentarios. | Solo contiene elementos HTML (`Element`). |
+| **Iteración Nativa** | ✅ Posee método `.forEach()` incorporado. | ❌ No posee `.forEach()`. Requiere conversión o bucle `for...of`. |
+| **Conversión a Array** | `[...nodeList]` o `Array.from(nodeList)` | `[...htmlCollection]` o `Array.from(htmlCollection)` |
+
+```javascript
+// 💡 Cómo iterar sobre un HTMLCollection convirtiéndolo a un Array real:
+const coleccionBotones = document.getElementsByTagName("button");
+
+// Opción A: Con Spread Operator [...]
+[...coleccionBotones].forEach((btn) => console.log(btn));
+
+// Opción B: Con Array.from()
+Array.from(coleccionBotones).map((btn) => btn.textContent);
+```
+
+---
+
+### 💻 Código de la Clase Ilustrado y Comentado Paso a Paso
+
+```javascript
+// ==========================================
+// 1. Puntos de Entrada Principales del DOM
+// ==========================================
+console.log(document);       // 👉 Muestra la estructura completa del documento HTML
+console.log(document.body);  // 👉 Accede al nodo <body> con todo su contenido visible
+console.log(document.head);  // 👉 Accede al nodo <head> (metadatos, scripts, estilos)
+
+// ==========================================
+// 2. Selección con querySelector (Primer Coincidencia)
+// ==========================================
+// Selección por ID con selector CSS '#':
+const header = document.querySelector("#header");
+console.log(header); // 👉 <header id="header">...</header>
+
+// Selección por Clase con selector CSS '.':
+// Retorna ÚNICAMENTE la primera tarjeta de producto encontrada:
+const primerProducto = document.querySelector(".producto");
+console.log(primerProducto); // 👉 <article class="card producto" data-sku="NOVA-001">...</article>
+
+// Selección por Etiqueta HTML:
+const tituloPrincipal = document.querySelector("h1");
+console.log(tituloPrincipal); // 👉 <h1>Productos útiles, entrega rápida.</h1>
+
+// ==========================================
+// 3. Selección Múltiple con querySelectorAll
+// ==========================================
+// Retorna un NodeList con las 3 tarjetas de productos:
+const listaProductos = document.querySelectorAll(".producto");
+console.log(listaProductos); 
+// 👉 NodeList(3) [ article.card.producto, article.card.producto, article.card.producto ]
+
+// ==========================================
+// 4. Métodos Tradicionales Específicos
+// ==========================================
+// Por ID (sin el caracter '#'):
+const btnComprar = document.getElementById("btn-comprar");
+console.log(btnComprar); // 👉 <button class="btn" id="btn-comprar">Ver ofertas</button>
+
+// Por Clase (sin el caracter '.'):
+// Retorna un HTMLCollection con los elementos que tengan esa clase:
+const botonesPorClase = document.getElementsByClassName("btn-comprar");
+console.log(botonesPorClase); // 👉 HTMLCollection [ button#btn-comprar.btn ]
+
+// Por Nombre de Etiqueta:
+// Retorna un HTMLCollection con todos los <button> del documento:
+const todosLosBotones = document.getElementsByTagName("button");
+console.log(todosLosBotones); 
+// 👉 HTMLCollection(4) [ button#btn-comprar.btn, button.btn.secondary.producto-btn, ... ]
+```
+
+---
+
+### 🧱 5. Creación y Renderizado Dinámico de Elementos
+
+Manipular el DOM también implica **crear nuevos nodos desde JavaScript** e insertarlos en la interfaz:
+
+| Método / Propiedad | Propósito | Ejemplo |
+| :--- | :--- | :--- |
+| **`document.createElement(tag)`** | Crea un nuevo nodo en memoria (sin insertar aún). | `const card = document.createElement('article');` |
+| **`element.textContent`** | Asigna texto seguro (evita inyecciones XSS). | `nombre.textContent = "María";` |
+| **`element.classList.add(clase)`** | Agrega una clase CSS al elemento. | `card.classList.add('opinion');` |
+| **`element.dataset.propiedad`** | Maneja atributos personalizados `data-*`. | `card.dataset.id = 'op-1'; // data-id="op-1"` |
+| **`parent.appendChild(child)`** | Inserta el nodo hijo al final del contenedor. | `contenedor.appendChild(card);` |
+| **`parent.replaceChildren()`** | Limpia rápidamente todos los hijos del contenedor. | `contenedor.replaceChildren();` |
+
+#### 💻 Código de Creación y Renderizado (Component Pattern)
+
+```javascript
+// 1. Función constructora del elemento (Componente)
+function createOpinionElement(opinion) {
+  const article = document.createElement('article');
+  article.classList.add('opinion');
+  article.dataset.id = opinion.id;
+
+  const header = document.createElement('header');
+  const meta = document.createElement('div');
+  meta.classList.add('meta');
+
+  const nombre = document.createElement('strong');
+  nombre.textContent = opinion.nombre;
+
+  const rating = document.createElement('span');
+  rating.textContent = `★ ${opinion.rating}/5`;
+
+  meta.appendChild(nombre);
+  meta.appendChild(rating);
+
+  const fecha = document.createElement('small');
+  fecha.classList.add('muted');
+  fecha.textContent = opinion.fecha;
+
+  header.appendChild(meta);
+  header.appendChild(fecha);
+
+  const comentario = document.createElement('p');
+  comentario.textContent = opinion.comentario;
+
+  article.appendChild(header);
+  article.appendChild(comentario);
+
+  return article;
+}
+
+// 2. Función de renderizado en el contenedor
+function renderOpinions(list) {
+  const contenedor = document.querySelector('#opiniones');
+  contenedor.replaceChildren(); // Limpia render previo
+
+  list.forEach((opinion) => {
+    const element = createOpinionElement(opinion);
+    contenedor.appendChild(element);
+  });
+}
+```
+
+---
+
+## Clase 18: Eventos del DOM y Manejo de Estado (`addEventListener`)
+
+👉 [Ver código de la clase](./curso/src/events/app.js)
+
+Los **eventos** son acciones que ocurren en el navegador (como clics, movimientos del ratón o teclas pulsadas) que JavaScript puede escuchar y responder mediante **manejadores de eventos** (_event listeners_).
+
+---
+
+### 🔑 1. Escuchadores de Eventos (`addEventListener`)
+
+Permite suscribir una función que se ejecutará cada vez que ocurra el evento especificado:
+
+```javascript
+elemento.addEventListener('tipoEvento', (event) => {
+  // Acción en respuesta al evento
+});
+```
+
+#### Eventos Principales Utilizados:
+- **`'click'`**: Se dispara al presionar y soltar un botón del mouse sobre el elemento.
+- **`'mouseenter'`**: Se activa cuando el cursor entra en los límites del elemento.
+- **`'mouseleave'`**: Se activa cuando el cursor sale del elemento.
+- **`'keydown'`**: Se dispara al presionar cualquier tecla en el teclado. El objeto `event.key` contiene la tecla presionada.
+
+---
+
+### 🔄 2. Patrón de Arquitectura: Estado $\rightarrow$ Eventos $\rightarrow$ Render
+
+En aplicaciones interactivas, la mejor práctica es **separar los datos (estado) de la interfaz (DOM)**:
+
+1. **Estado (`state`)**: Objeto JavaScript con los datos dinámicos.
+2. **Eventos**: Modifican únicamente los datos del `state`.
+3. **Render (`render`)**: Actualiza la pantalla para reflejar el estado actual.
+
+```
+[ Usuario interactúa ] ──► [ Event Listener ] ──► [ Modifica state ] ──► [ render() ] ──► [ DOM Actualizado ]
+```
+
+---
+
+### 🛠️ 3. Métodos y Propiedades Clave en la Interfaz
+
+- **`element.classList.toggle('clase', boolean)`**: Agrega la clase si la condición es `true` y la remueve si es `false`.
+- **`button.disabled = boolean`**: Habilita o deshabilita un botón.
+- **`element.style.propiedad = valor`**: Modifica estilos inline directamente (ej. `btnReset.style.opacity = '0.55'`).
+
+---
+
+### 💻 Código de la Clase Ilustrado y Comentado
+
+```javascript
+// 1. Estado Central de la Aplicación
+const state = {
+  likes: 0,
+  isHovering: false,
+};
+
+// 2. Función de Renderizado (Actualiza el DOM según el Estado)
+function render() {
+  const status = document.querySelector('#status');
+  const btnReset = document.querySelector('#btn-reset');
+  const hoverZone = document.querySelector('#hover-zone');
+  const hoverPill = document.querySelector('#hover-pill');
+
+  // Actualizar textos
+  status.textContent = state.likes === 0 ? 'Aún no hay likes' : `Tienes ${state.likes} Likes`;
+
+  // Deshabilitar botón y cambiar estilo
+  btnReset.disabled = state.likes === 0;
+  btnReset.style.opacity = state.likes === 0 ? '0.55' : '1';
+
+  // Alternar clase CSS con toggle
+  hoverZone.classList.toggle('is-hover', state.isHovering);
+  hoverPill.textContent = state.isHovering ? 'mouse: dentro' : 'mouse: fuera';
+}
+
+// 3. Configuración de Eventos de Mouse
+function setupEvents() {
+  const btnLike = document.querySelector('#btn-like');
+  const btnReset = document.querySelector('#btn-reset');
+  const hoverZone = document.querySelector('#hover-zone');
+
+  btnLike.addEventListener('click', () => {
+    state.likes += 1;
+    render();
+  });
+
+  btnReset.addEventListener('click', () => {
+    state.likes = 0;
+    render();
+  });
+
+  hoverZone.addEventListener('mouseenter', () => {
+    state.isHovering = true;
+    render();
+  });
+
+  hoverZone.addEventListener('mouseleave', () => {
+    state.isHovering = false;
+    render();
+  });
+}
+
+// 4. Configuración de Eventos de Teclado (Tecla 'L' para Like)
+function setupKeyBoardLike() {
+  document.addEventListener('keydown', (event) => {
+    if (event.key?.toLowerCase() !== 'l') return;
+    state.likes += 1;
+    render();
+  });
+}
+
+// Inicialización
+setupEvents();
+setupKeyBoardLike();
+```
 
 ---
 
