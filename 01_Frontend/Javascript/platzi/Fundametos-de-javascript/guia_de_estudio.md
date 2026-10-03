@@ -24,6 +24,7 @@ Esta guía contiene los apuntes de estudio, explicaciones detalladas y conceptos
 - [Clase 16: Métodos de Arreglos de Orden Superior (`map`, `filter`, `find`, `reduce`)](#clase-16-métodos-de-arreglos-de-orden-superior-map-filter-find-reduce)
 - [Clase 17: Manipulación del DOM: Selección, Creación y Renderizado Dinámico](#clase-17-manipulación-del-dom-selección-creación-y-renderizado-dinámico)
 - [Clase 18: Eventos del DOM y Manejo de Estado (`addEventListener`)](#clase-18-eventos-del-dom-y-manejo-de-estado-addeventlistener)
+- [Clase 19: Formularios (`FormData`, `submit`, `preventDefault`) y Persistencia con `localStorage`](#clase-19-formularios-formdata-submit-preventdefault-y-persistencia-con-localstorage)
 
 ---
 
@@ -2951,10 +2952,226 @@ setupKeyBoardLike();
 
 ---
 
+## Clase 19: Formularios (`FormData`, `submit`, `preventDefault`) y Persistencia con `localStorage`
+
+👉 [Ver código de la clase (JavaScript)](./curso/src/form/app.js) | [Ver interfaz (HTML)](./curso/src/form/index.html)
+
+En esta clase se aborda uno de los flujos más comunes en el desarrollo web frontend: **la interacción con formularios de usuario**, el procesamiento de sus datos sin recargar la página y la **persistencia local en el navegador** utilizando la API de `localStorage`.
+
+---
+
+### 📬 La Analogía del Buzón Tradicional vs. La Libreta en el Escritorio
+
+- **El comportamiento por defecto del formulario (El Buzón Tradicional)**: Antiguamente, al enviar un formulario (`<form>`), el navegador empaquetaba los datos y refrescaba toda la página para mandarle una petición HTTP al servidor. En aplicaciones modernas (_SPA_ o interfaces dinámicas), este refresco interrumpe la experiencia del usuario.
+- **`event.preventDefault()` (El Mensajero Local)**: Es como interceptar la carta antes de que salga al buzón. Le decimos al navegador: *"Detén el envío tradicional, yo me encargo de leer la información con JavaScript en el cliente"*.
+- **`localStorage` (La Libreta de Notas Permanente en el Escritorio)**: Las variables en JavaScript viven en la memoria RAM; si el usuario recarga la página (`F5`) o cierra el navegador, las variables se destruyen. `localStorage` es como anotar los datos en una libreta física que se queda guardada en el disco del navegador: **permanece intacta aunque se cierre la pestaña o se apague la computadora**.
+
+---
+
+### 🔑 Conceptos Clave
+
+#### 1. Manejo del Evento `'submit'` y `event.preventDefault()`
+
+El evento adecuado para capturar el envío de un formulario es siempre **`'submit'` sobre la etiqueta `<form>`** (y no un evento `'click'` en el botón). Esto asegura que funcione tanto al hacer clic en el botón como al presionar la tecla `Enter` dentro de un campo de texto:
+
+```javascript
+const contactForm = document.querySelector('#contact-form');
+
+contactForm.addEventListener('submit', (event) => {
+  // 🛑 Evita que el navegador recargue la página o intente enviar una petición GET/POST síncrona
+  event.preventDefault();
+
+  // Aquí procesamos los datos con JavaScript
+});
+```
+
+---
+
+#### 2. Extracción de Datos con la API `FormData`
+
+La interfaz nativa `FormData` permite recolectar de forma automática todos los valores de los campos de un `<form>` mediante el atributo `name` de cada `<input>`, `<textarea>` o `<select>`:
+
+```javascript
+const form = event.target; // El formulario HTML que disparó el submit
+const formData = new FormData(form);
+
+// Obtenemos el valor de cada campo usando su atributo 'name'
+const name = String(formData.get('name'));
+const message = String(formData.get('message'));
+```
+
+> [!IMPORTANT]
+> Para que `FormData.get('clave')` funcione, los elementos de entrada del HTML **deben tener definido el atributo `name`**:
+> ```html
+> <input type="text" name="name" required />
+> <textarea name="message" required></textarea>
+> ```
+
+---
+
+#### 3. ¿Qué es `localStorage` y cómo funciona?
+
+`localStorage` es una propiedad del objeto global `window` que implementa la **Web Storage API**. Permite almacenar pares clave-valor en el navegador web con persistencia indefinida (no expira con el tiempo).
+
+| Método | Descripción | Ejemplo |
+| :--- | :--- | :--- |
+| **`localStorage.setItem(key, value)`** | Guarda o actualiza un valor asociado a una clave. | `localStorage.setItem('form', jsonString);` |
+| **`localStorage.getItem(key)`** | Obtiene el valor de una clave. Retorna `null` si no existe. | `const raw = localStorage.getItem('form');` |
+| **`localStorage.removeItem(key)`** | Elimina una clave y su valor asociado. | `localStorage.removeItem('form');` |
+| **`localStorage.clear()`** | Borra **todas** las claves almacenadas para el origen actual. | `localStorage.clear();` |
+| **`localStorage.length`** | Retorna el número total de elementos almacenados. | `console.log(localStorage.length);` |
+
+---
+
+#### 4. Serialización y Deserialización con JSON (`JSON.stringify` y `JSON.parse`)
+
+> [!WARNING]
+> **`localStorage` solo almacena strings (cadenas de texto plano).**
+> Si intentas guardar un objeto directamente:
+> ```javascript
+> localStorage.setItem('usuario', { nombre: 'Ana' });
+> localStorage.getItem('usuario'); // 👉 "[object Object]" ❌ ¡Datos perdidos!
+> ```
+
+Para guardar y recuperar objetos o arreglos sin perder su estructura, debemos utilizar **JSON**:
+
+1. **Serializar al Guardar (`JSON.stringify`)**: Convierte un objeto/arreglo JavaScript a un `string` con formato JSON.
+   ```javascript
+   const payload = { name: 'María', message: 'Excelente servicio' };
+   localStorage.setItem('form', JSON.stringify(payload));
+   // En localStorage se guarda: '{"name":"María","message":"Excelente servicio"}'
+   ```
+
+2. **Deserializar al Leer (`JSON.parse`)**: Convierte el `string` JSON recuperado de vuelta a un objeto JavaScript real.
+   ```javascript
+   const raw = localStorage.getItem('form'); // String o null
+   if (raw) {
+     const data = JSON.parse(raw); // Objeto JS: { name: 'María', message: '...' }
+     console.log(data.name);       // 'María'
+   }
+   ```
+
+---
+
+#### 5. Tabla Comparativa: Mecanismos de Almacenamiento en el Cliente
+
+| Característica | `localStorage` | `sessionStorage` | `Cookies` |
+| :--- | :--- | :--- | :--- |
+| **Persistencia** | Permanente (hasta que se borre por código o usuario) | Se destruye al cerrar la pestaña/ventana | Configurable mediante fecha de expiración (`Expires` / `Max-Age`) |
+| **Capacidad** | $\approx 5\text{MB} - 10\text{MB}$ | $\approx 5\text{MB}$ | $\approx 4\text{KB}$ |
+| **Envío al Servidor** | ❌ No (solo vive en el cliente) | ❌ No (solo vive en el cliente) | ✅ Sí (se envía automáticamente en cada cabecera HTTP) |
+| **Ámbito (_Scope_)** | Mismo Origen (Protocolo + Dominio + Puerto) | Misma pestaña y mismo origen | Mismo dominio / rutas configuradas |
+| **Uso Típico** | Preferencias, carritos de compra offline, borradores | Datos temporales de una sola sesión de navegación | Sesiones de autenticación, tokens de seguridad (`HttpOnly`) |
+
+---
+
+#### 6. 🔍 Dónde Inspeccionar `localStorage` en el Navegador (DevTools)
+
+Para verificar y depurar los datos almacenados:
+
+```
+[ F12 o Clic Derecho -> Inspeccionar ] 
+  └──► Pestaña "Application" (Chrome / Edge) o "Almacenamiento" (Firefox)
+        └──► Menú Lateral "Storage" -> "Local Storage"
+              └──► Seleccionar tu dominio (ej. http://127.0.0.1:5500 o file://)
+```
+
+Desde este panel puedes:
+- Ver todas las claves (`Key`) y sus valores (`Value`).
+- Editar manualmente cualquier valor haciendo doble clic.
+- Eliminar claves individuales o vaciar todo el almacenamiento con el botón 🚫 (_Clear All_).
+
+---
+
+### 💻 Código de la Clase Ilustrado y Comentado Paso a Paso
+
+```javascript
+// ==========================================
+// 1. Constante para la Clave de Almacenamiento
+// ==========================================
+// 💡 Buena práctica: Usar constantes para evitar errores tipográficos en las keys
+const CONTACT_STORAGE_KEY = 'form';
+
+// ==========================================
+// 2. Función de Renderizado del Mensaje Guardado
+// ==========================================
+function renderSavedMessage() {
+  const box = document.querySelector('#mensaje-guardado');
+  if (!box) return;
+
+  // 1. Obtener la cadena cruda desde localStorage
+  const raw = localStorage.getItem(CONTACT_STORAGE_KEY);
+  if (!raw) return;
+
+  // 2. Deserializar la cadena JSON a un objeto JavaScript
+  const data = JSON.parse(raw);
+
+  // 3. Mostrar la caja en el DOM removiendo la clase 'hidden'
+  box.classList.remove('hidden');
+
+  // 4. Inyectar el contenido con los datos recuperados
+  box.innerHTML = `
+    <p><strong>Último mensaje guardado:</strong></p>
+    <p><strong>Nombre:</strong> ${data.name}</p>
+    <p><strong>Mensaje:</strong> ${data.message}</p>
+    <p><small class="muted">Fecha: ${new Date(data.date).toLocaleString()}</small></p>
+  `;
+}
+
+// ==========================================
+// 3. Manejador del Evento Submit del Formulario
+// ==========================================
+function handleContactSubmit(event) {
+  // 🛑 1. Prevenir la recarga de página por defecto del navegador
+  event.preventDefault();
+
+  // 📋 2. Extraer datos con la API FormData
+  const form = event.target;
+  const formData = new FormData(form);
+
+  const name = String(formData.get('name')).trim();
+  const message = String(formData.get('message')).trim();
+
+  // 📦 3. Construir el objeto de datos (Payload) con metadatos útiles
+  const payload = {
+    name,
+    message,
+    date: new Date().toISOString(),
+  };
+
+  console.log('Guardando payload:', payload);
+
+  // 💾 4. Serializar y guardar en localStorage
+  localStorage.setItem(CONTACT_STORAGE_KEY, JSON.stringify(payload));
+
+  // 🖥️ 5. Actualizar la interfaz con los nuevos datos guardados
+  renderSavedMessage();
+
+  // 🧹 6. Limpiar los campos del formulario para nueva entrada
+  form.reset();
+}
+
+// ==========================================
+// 4. Inicialización y Suscripción de Eventos
+// ==========================================
+const contactForm = document.querySelector('#contact-form');
+
+if (contactForm) {
+  contactForm.addEventListener('submit', handleContactSubmit);
+}
+
+// 🔄 Al cargar la página, verificamos si ya existía un mensaje previo guardado
+renderSavedMessage();
+```
+
+---
+
+> [!TIP]
+> **Mejores Prácticas al Trabajar con `localStorage` y Formularios:**
+> 1. **Manejo de Errores con `try...catch`**: En modos de navegación privada o cuando el disco está lleno, `localStorage.setItem()` puede arrojar una excepción `QuotaExceededError`. Envolver la lectura/escritura en bloques `try...catch` previene caídas de la aplicación.
+> 2. **No Guardar Información Sensible**: Nunca almacenes contraseñas, datos bancarios ni tokens de autenticación altamente sensibles en `localStorage`, ya que es accesible por cualquier script que se ejecute en el mismo dominio (vulnerable a ataques _XSS_).
+> 3. **Usar `form.reset()`**: Proporciona una forma limpia y estándar de vaciar todos los campos del formulario tras un envío exitoso.
+
+---
+
 _Hecho con ☕ y 💻 para el Curso de Fundamentos de JavaScript - Platzi_
-
-
-
-
-
-
