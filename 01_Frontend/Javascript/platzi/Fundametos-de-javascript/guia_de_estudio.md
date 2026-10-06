@@ -25,6 +25,8 @@ Esta guía contiene los apuntes de estudio, explicaciones detalladas y conceptos
 - [Clase 17: Manipulación del DOM: Selección, Creación y Renderizado Dinámico](#clase-17-manipulación-del-dom-selección-creación-y-renderizado-dinámico)
 - [Clase 18: Eventos del DOM y Manejo de Estado (`addEventListener`)](#clase-18-eventos-del-dom-y-manejo-de-estado-addeventlistener)
 - [Clase 19: Formularios (`FormData`, `submit`, `preventDefault`) y Persistencia con `localStorage`](#clase-19-formularios-formdata-submit-preventdefault-y-persistencia-con-localstorage)
+- [Clase 20: Módulos en JavaScript (ES Modules: `import` / `export`, Named vs. Default y Arquitectura Modular)](#clase-20-módulos-en-javascript-es-modules-import--export-named-vs-default-y-arquitectura-modular)
+- [Proyecto Integrador: Sistema de Gestión de Notas en Markdown (`notes-md`)](#proyecto-integrador-sistema-de-gestión-de-notas-en-markdown-notes-md)
 
 ---
 
@@ -3174,4 +3176,578 @@ renderSavedMessage();
 
 ---
 
+## Clase 20: Módulos en JavaScript (ES Modules: `import` / `export`, Named vs. Default y Arquitectura Modular)
+
+👉 [Ver código de ESM Básico](./curso/src/17-modules.js) | [Ver módulo matemático de utilidades](./curso/src/math.js) | [Ver punto de entrada modular](./curso/src/modules/app.js) | [Ver módulo de opiniones](./curso/src/modules/opinions.js) | [Ver módulo de contacto](./curso/src/modules/contact.js)
+
+A medida que una aplicación web crece en complejidad, mantener todo el código en un solo archivo o enlazar decenas de etiquetas `<script>` desordenadas en el HTML se vuelve insostenible. 
+
+Los **Módulos de ECMAScript (ES Modules o ESM)** introducidos en ES6 (2015) representan el estándar oficial y nativo del lenguaje para dividir aplicaciones en piezas pequeñas, independientes, reutilizables y con su propio ámbito cerrado (*file-level scope*).
+
+---
+
+### 🏢 La Analogía del Taller Desorganizado vs. La Red de Especialistas
+
+- **JavaScript Clásico sin Módulos (El Galpón Desorganizado)**: Imagina un taller gigante donde todos los artesanos trabajan en el mismo salón y dejan sus herramientas tiradas en el mismo suelo (`window` global). Si dos personas nombran una herramienta `calcularTotal()`, una romperá el trabajo de la otra por accidente (_colisión de nombres_).
+- **ES Modules (La Red de Talleres Especializados)**: Cada módulo es un taller independiente con puertas y paredes blindadas. Lo que ocurre dentro del módulo se queda dentro. Si un taller desea compartir una herramienta, la coloca en una ventanilla oficial etiquetada (**`export`**). Cualquier otro taller que la necesite puede solicitarla explícitamente (**`import`**), conociendo su origen exacto.
+
+```mermaid
+flowchart LR
+    subgraph MATH ["📦 math.js (Módulo de Utilidades)"]
+        PI["const PI = 3.14159"]
+        sumar["function sumar(a, b)"]
+        restar["function restar(a, b)"]
+    end
+
+    subgraph APP ["🚀 app.js (Módulo Principal)"]
+        use["import { PI, sumar } from './math.js'"]
+    end
+
+    MATH -->|export { PI, sumar }| APP
+```
+
+---
+
+### 🔑 Conceptos Clave
+
+#### 1. Ámbito de Módulo (_Module Scope_) vs. Ámbito Global
+
+Al usar módulos, las variables y funciones declaradas con `const`, `let`, `var` o `function` en el archivo **NO se agregan al objeto global `window`** del navegador. Tienen un ámbito léxico exclusivo del archivo.
+
+```javascript
+// math.js
+const SECRETO = 'clave_interna'; // 🔒 Privado, nadie fuera de este archivo puede verlo
+export const PI = 3.14159;       // 🌐 Público, disponible para importar
+```
+
+---
+
+#### 2. Exportaciones Nombradas (_Named Exports_)
+
+Permiten exportar múltiples variables, constantes o funciones desde un mismo archivo anteponiendo la palabra clave `export` o mediante una lista al final del archivo:
+
+```javascript
+// 📁 math.js
+export const PI = 3.14159;
+
+export function sumar(a, b) {
+  return a + b;
+}
+
+export function restar(a, b) {
+  return a - b;
+}
+```
+
+##### ¿Cómo se importan las exportaciones nombradas?
+Se deben importar **envolviendo los nombres exactos entre llaves `{}`**:
+
+```javascript
+// 📁 17-modules.js
+import { PI, sumar, restar } from "./math.js";
+
+console.log(PI);           // 3.14159
+console.log(sumar(5, 2));  // 7
+console.log(restar(3, 2)); // 1
+```
+
+> [!NOTE]
+> **Uso de Alias con `as`**: Si necesitas renombrar una función importada para evitar colisiones con variables locales, puedes usar la palabra clave `as`:
+> ```javascript
+> import { sumar as sumarValores } from "./math.js";
+> ```
+
+---
+
+#### 3. Exportaciones por Defecto (_Default Exports_) vs. Nombradas
+
+| Característica | Exportaciones Nombradas (`Named`) | Exportaciones por Defecto (`Default`) |
+| :--- | :--- | :--- |
+| **Sintaxis de Exportación** | `export const valor = 10;` / `export { a, b };` | `export default function miFuncion() {}` |
+| **Cantidad por Módulo** | Múltiples por archivo | **Solo una** por archivo |
+| **Sintaxis de Importación** | Con llaves obligatorias: `import { valor } from './mod.js'` | Sin llaves y con cualquier nombre: `import miAlias from './mod.js'` |
+| **Caso de Uso Ideal** | Librerías con muchas utilidades (ej. operaciones matemáticas, formatters) | Componentes principales, clases maestras o servicios centrales |
+
+---
+
+#### 4. Uso de Módulos en el Navegador (`type="module"`)
+
+Para que el navegador ejecute archivos con sintaxis `import` y `export`, debemos indicarle explícitamente el atributo `type="module"` en la etiqueta `<script>`:
+
+```html
+<!-- Carga el punto de entrada de la aplicación modular -->
+<script type="module" src="./src/modules/app.js"></script>
+```
+
+##### Propiedades clave de `<script type="module">`:
+1. **Modo Estricto Automático**: Todo el código se ejecuta bajo `"use strict"` por defecto.
+2. **Carga Diferida (`defer` automático)**: El navegador no bloquea el parseo del HTML mientras descarga los módulos; se ejecutan en orden una vez que el documento HTML está completamente parseado.
+3. **Manejo de CORS**: Por seguridad, los módulos ESM deben servirse bajo el protocolo `http://` o `https://` (ej. usando un servidor local como Live Server, Vite o Node.js). Intentar cargarlos con el protocolo `file:///` arrojará un error de CORS.
+4. **Rutas Relativas Explícitas**: Los navegadores exigen que las rutas comiencen con `./`, `../` o `/`, e incluyan la extensión `.js`.
+
+---
+
+#### 5. Configuración en Node.js (`package.json`)
+
+Para habilitar la sintaxis de ES Modules de forma nativa en Node.js (sin necesidad de herramientas de compilación como Babel), se añade la propiedad `"type": "module"` en el archivo `package.json`:
+
+```json
+{
+  "name": "curso",
+  "version": "1.0.0",
+  "type": "module"
+}
+```
+
+---
+
+#### 6. Inspección de Persistencia en las DevTools del Navegador
+
+Al trabajar con `localStorage`, `sessionStorage` y cookies en aplicaciones modulares, la consola del navegador incluye herramientas visuales dedicadas:
+
+```
+Pestaña 'Application' (o 'Almacenamiento') en Chrome / Firefox DevTools:
+├── Storage
+│   ├── Local Storage (https://tudominio.com)
+│   │   ├── Key: 'form'  | Value: {"name":"Christian","message":"Hola","date":"..."}
+│   │   └── Key: 'notas' | Value: [...]
+│   ├── Session Storage
+│   ├── IndexedDB
+│   └── Cookies
+```
+
+> [!TIP]
+> Puedes inspeccionar, editar manualmente o limpiar todas las claves guardadas en tiempo real desde la pestaña **Application $\rightarrow$ Storage $\rightarrow$ Local Storage** sin necesidad de reiniciar tu aplicación.
+
+---
+
+### 🏗️ Patrón de Arquitectura Modular: Orquestador y Módulos de Dominio
+
+Una arquitectura de software limpia en JavaScript divide las responsabilidades en capas claras:
+
+```mermaid
+flowchart TD
+    HTML["📄 index.html (<script type='module' src='./app.js'>)"] --> APP["🚀 app.js (Orquestador / Entry Point)"]
+    
+    APP -->|import { initOpinions }| OPINIONS["💬 opinions.js (Módulo de Opiniones y Reseñas)"]
+    APP -->|import { initContact }| CONTACT["📬 contact.js (Módulo de Formulario y Persistencia)"]
+    
+    OPINIONS --> DOM_OP["🖼️ Renderizado de Lista de Reseñas en el DOM"]
+    CONTACT --> DOM_CT["💾 Captura FormData + LocalStorage + Renderizado de Confirmación"]
+```
+
+---
+
+### 💻 Código de la Clase Ilustrado y Comentado
+
+#### 1. Módulo de Utilidades Matemáticas (`math.js`)
+```javascript
+// 📁 curso/src/math.js
+export const PI = 3.14159;
+
+export function sumar(a, b) {
+  return a + b;
+}
+
+export function restar(a, b) {
+  return a - b;
+}
+```
+
+#### 2. Módulo Encapsulado de Opiniones (`opinions.js`)
+```javascript
+// 📁 curso/src/modules/opinions.js
+
+// Datos privados del módulo (No accesibles desde fuera)
+const opiniones = [
+  {
+    id: 'op-1',
+    nombre: 'María',
+    rating: 5,
+    comentario: 'Llegó rápido y la calidad es excelente.',
+    fecha: '2025-01-10',
+  },
+  {
+    id: 'op-2',
+    nombre: 'Carlos',
+    rating: 4,
+    comentario: 'Buen producto. El empaque podría mejorar.',
+    fecha: '2025-01-22',
+  },
+  {
+    id: 'op-3',
+    nombre: 'Luisa',
+    rating: 5,
+    comentario: 'Muy cómodo. Compraría de nuevo.',
+    fecha: '2025-02-03',
+  },
+  {
+    id: 'op-5',
+    nombre: 'Oscar',
+    rating: 5,
+    comentario: 'Muy cómodo. Compraría de nuevo.',
+    fecha: '2025-02-03',
+  },
+];
+
+// Función auxiliar de creación de nodo (Privada)
+function createOpinionElement(opinion) {
+  const article = document.createElement('article');
+  article.classList.add('opinion');
+  article.dataset.id = opinion.id;
+
+  const header = document.createElement('header');
+  const meta = document.createElement('div');
+  meta.classList.add('meta');
+
+  const nombre = document.createElement('strong');
+  nombre.textContent = opinion.nombre;
+
+  const rating = document.createElement('span');
+  rating.textContent = `★ ${opinion.rating}/5`;
+
+  meta.appendChild(nombre);
+  meta.appendChild(rating);
+
+  const fecha = document.createElement('small');
+  fecha.classList.add('muted');
+  fecha.textContent = opinion.fecha;
+
+  header.appendChild(meta);
+  header.appendChild(fecha);
+
+  const comentario = document.createElement('p');
+  comentario.textContent = opinion.comentario;
+
+  article.appendChild(header);
+  article.appendChild(comentario);
+
+  return article;
+}
+
+// Función de renderizado (Privada)
+function renderOpinions(list) {
+  const contenedor = document.querySelector('#opiniones');
+  if (!contenedor) return;
+
+  contenedor.replaceChildren(); // Limpia los hijos previos eficientemente
+
+  list.forEach((opinion) => {
+    const element = createOpinionElement(opinion);
+    contenedor.appendChild(element);
+  });
+}
+
+// Función pública exportada para inicializar el módulo
+export function initOpinions(list = opiniones) {
+  renderOpinions(list);
+}
+```
+
+#### 3. Módulo Encapsulado de Formulario y Persistencia (`contact.js`)
+```javascript
+// 📁 curso/src/modules/contact.js
+const CONTACT_STORAGE_KEY = 'form';
+
+function renderSavedMessage() {
+  const box = document.querySelector('#mensaje-guardado');
+  if (!box) return;
+
+  const raw = localStorage.getItem(CONTACT_STORAGE_KEY);
+  if (!raw) return;
+
+  const data = JSON.parse(raw);
+
+  box.classList.remove('hidden');
+  box.innerHTML = `
+    <p><strong>Último mensaje guardado:</strong></p>
+    <p><strong>Nombre:</strong> ${data.name}</p>
+    <p><strong>Mensaje:</strong> ${data.message}</p>
+  `;
+}
+
+function handleContactSubmit(event) {
+  event.preventDefault();
+
+  const form = event.target;
+  const formData = new FormData(form);
+
+  const name = String(formData.get('name') || '').trim();
+  const message = String(formData.get('message') || '').trim();
+
+  const payload = {
+    name,
+    message,
+    date: new Date().toISOString(),
+  };
+
+  console.log('Guardando payload en localStorage:', payload);
+  localStorage.setItem(CONTACT_STORAGE_KEY, JSON.stringify(payload));
+
+  renderSavedMessage();
+  form.reset();
+}
+
+// Inicializador público del módulo
+export function initContact() {
+  const contactForm = document.querySelector('#contact-form');
+  if (contactForm) {
+    contactForm.addEventListener('submit', handleContactSubmit);
+  }
+  renderSavedMessage();
+}
+```
+
+#### 4. Punto de Entrada Principal / Orquestador (`app.js`)
+```javascript
+// 📁 curso/src/modules/app.js
+import { initOpinions } from "./opinions.js";
+import { initContact } from "./contact.js";
+
+// Inicializamos los módulos de forma desacoplada
+initOpinions();
+initContact();
+```
+
+---
+
+## 🚀 Proyecto Integrador: Sistema de Gestión de Notas en Markdown (`notes-md`)
+
+👉 [Ver lógica de la aplicación](./notes-md/src/app.js) | [Ver interfaz HTML](./notes-md/src/index.html) | [Ver hoja de estilos](./notes-md/src/styles.css)
+
+El proyecto **`notes-md`** es una aplicación web completa que consolida todos los conceptos aprendidos a lo largo del curso:
+- **Tipos de datos y operadores**: Manejo de valores primitivos, comparaciones estrictas y coerción.
+- **Procesamiento de strings y algoritmos**: Detección de saltos de línea, normalización con `.toLowerCase()` y truncado de texto.
+- **Closures y Patrón Factory**: Encapsulación de estado privado mediante `createPersistentNotesStore()`.
+- **Inmutabilidad y Métodos de Orden Superior**: Uso extensivo de `.map()`, `.filter()`, `.find()` y `.sort()`.
+- **Persistencia en el navegador**: Serialización/deserialización con `localStorage` y `JSON`.
+- **Manipulación avanzada del DOM**: Creación semántica de nodos, gestión de listas reactivas, estados vacíos y atributos de accesibilidad (`aria-current`).
+
+```mermaid
+flowchart TD
+    UI["🖥️ Interfaz de Usuario (HTML/CSS)"]
+    EVENT["⚡ Eventos de Usuario (Click, Input, Search)"]
+    STORE["🔒 createPersistentNotesStore (Closure con Estado Privado)"]
+    STORAGE["💾 LocalStorage ('markdown-notes')"]
+    RENDER["🎨 renderNoteList() / showEditorAndPreview()"]
+
+    UI --> EVENT
+    EVENT --> STORE
+    STORE <-->|loadFromStorage / saveToStorage| STORAGE
+    STORE -->|Estado actualizado (getAllNotes, search)| RENDER
+    RENDER --> UI
+```
+
+---
+
+### 🧩 Desglose Técnico de la Arquitectura de `notes-md`
+
+#### 1. Algoritmos de Utilidad de Texto
+- **`deriveTitle(content)`**: Recorre el texto caracter por caracter hasta encontrar el primer salto de línea `\n`, extrayendo la primera línea como título. Si excede los 50 caracteres, trunca la cadena y agrega una elipsis `...`.
+- **`deriveExcerpt(content, maxLen)`**: Genera un resumen limpio para mostrar en la barra lateral sin sobrecargar la vista.
+
+```javascript
+function deriveTitle(content) {
+  if (!content || typeof content !== 'string') return 'Sin título';
+  const cleanContent = content.trim();
+  if (cleanContent === '') return 'Sin título';
+
+  let firstLine = '';
+  for (let i = 0; i < cleanContent.length; i++) {
+    if (cleanContent[i] === '\n') break;
+    firstLine += cleanContent[i];
+  }
+
+  if (firstLine.trim() === '') return 'Sin título';
+  return firstLine.length > 50 ? firstLine.slice(0, 50).trim() + '...' : firstLine.trim();
+}
+```
+
+---
+
+#### 2. Generación de IDs y Modelo de Datos
+- **`generateId()`**: Utiliza `Date.now()` para producir marcas de tiempo numéricas únicas en milisegundos.
+- **Estructura de una Nota**:
+  ```javascript
+  {
+    id: 1738790400000,
+    title: "Apuntes de JavaScript",
+    excerpt: "Los closures permiten encapsular datos...",
+    content: "Los closures permiten encapsular datos de forma privada.",
+    createdAt: 1738790400000,
+    updatedAt: 1738790400000,
+    favorite: false
+  }
+  ```
+
+---
+
+#### 3. El Store Persistente (`createPersistentNotesStore`)
+
+Aplica el **patrón Factory con Closures** para aislar el array de notas `let notes = loadFromStorage();` en un entorno léxico protegido, impidiendo manipulaciones accidentales desde la consola global:
+
+```javascript
+function createPersistentNotesStore() {
+  let notes = loadFromStorage(); // Estado privado e inaccesible desde fuera
+
+  return {
+    // ➕ Agregar nota
+    addNote(content, title) {
+      if (!content || content.trim() === '') {
+        return { success: false, message: 'El contenido no puede estar vacío' };
+      }
+      const newNote = createNote(content, title);
+      notes.push(newNote);
+      saveToStorage(notes);
+      return { success: true, note: newNote };
+    },
+
+    // 📋 Obtener todas (Retorna copias inmutables)
+    getAllNotes() {
+      return notes.map((note) => ({ ...note }));
+    },
+
+    // 🔍 Buscar por ID
+    getNoteById(noteId) {
+      const found = notes.find((note) => note.id === noteId);
+      return found ? { ...found } : null;
+    },
+
+    // ✏️ Actualizar nota
+    updateNote(noteId, updates) {
+      const noteToUpdate = notes.find((note) => note.id === noteId);
+      if (!noteToUpdate) return { success: false, message: 'Nota no encontrada' };
+
+      if (updates.content !== undefined) {
+        if (updates.content.trim() === '') {
+          return { success: false, message: 'El contenido no puede estar vacío' };
+        }
+        noteToUpdate.content = updates.content;
+        noteToUpdate.title = deriveTitle(updates.content);
+        noteToUpdate.excerpt = deriveExcerpt(updates.content, 100);
+      }
+
+      if (updates.title) noteToUpdate.title = updates.title;
+      if (updates.favorite !== undefined) noteToUpdate.favorite = updates.favorite;
+
+      noteToUpdate.updatedAt = Date.now();
+      saveToStorage(notes);
+      return { success: true, note: { ...noteToUpdate } };
+    },
+
+    // 🗑️ Eliminar nota
+    deleteNote(noteId) {
+      const initialLen = notes.length;
+      notes = notes.filter((note) => note.id !== noteId);
+      if (notes.length === initialLen) {
+        return { success: false, message: 'Nota no encontrada' };
+      }
+      saveToStorage(notes);
+      return { success: true, message: 'Nota eliminada exitosamente' };
+    },
+
+    // 🔎 Búsqueda de texto en título o contenido
+    searchNotes(query) {
+      if (!query || query.trim() === '') return [];
+      const q = query.toLowerCase().trim();
+      return notes
+        .filter((note) => note.title.toLowerCase().includes(q) || note.content.toLowerCase().includes(q))
+        .map((note) => ({ ...note }));
+    },
+
+    // 📅 Ordenar por fecha más reciente
+    getNotesOrderedByDate() {
+      return notes.map((note) => ({ ...note })).sort((a, b) => b.updatedAt - a.updatedAt);
+    },
+
+    // ⭐ Filtrar favoritas
+    getFavoriteNotes() {
+      return notes.filter((note) => note.favorite).map((note) => ({ ...note }));
+    },
+
+    // 🔢 Contador total
+    getNotesCount() {
+      return notes.length;
+    },
+  };
+}
+```
+
+---
+
+#### 4. Renderizado Dinámico y Accesibilidad en el DOM
+
+La función `renderNoteList(notes)` reconstruye la lista lateral aplicando buenas prácticas de desarrollo web:
+
+1. **Limpieza Segura del Contenedor**: Uso de un bucle `while (container.firstChild)` para evitar fugas de memoria o acumulación de elementos huérfanos.
+2. **Manejo de Estado Vacío (_Empty State_)**: Si el array no contiene elementos, inyecta un componente con mensaje orientativo.
+3. **Identificación por `dataset`**: Asigna `item.dataset.id = String(note.id)` para facilitar la delegación de eventos.
+4. **Accesibilidad Semántica**: Elementos `<time>` con formato de fecha legible (`toLocaleString()`) y atributos `aria-current="true"` en la nota seleccionada activamente.
+
+```javascript
+function renderNoteList(notes) {
+  const container = document.querySelector('#note-list');
+  if (!container) return;
+
+  // 1. Limpiar contenedor
+  while (container.firstChild) {
+    container.removeChild(container.firstChild);
+  }
+
+  // 2. Estado vacío
+  if (!Array.isArray(notes) || notes.length === 0) {
+    const emptyState = document.createElement('div');
+    emptyState.className = 'empty-state';
+    emptyState.textContent = 'No hay notas aún. Crea una nota para empezar.';
+    container.appendChild(emptyState);
+    return;
+  }
+
+  // 3. Renderizar cada tarjeta
+  notes.forEach((note) => {
+    const item = document.createElement('div');
+    item.className = 'note-item';
+    item.dataset.id = String(note.id);
+
+    const titleEl = document.createElement('h3');
+    titleEl.className = 'note-title';
+    titleEl.textContent = note.title || deriveTitle(note.content);
+
+    const excerptEl = document.createElement('p');
+    excerptEl.className = 'note-excerpt';
+    excerptEl.textContent = note.excerpt || deriveExcerpt(note.content, 100);
+
+    const dateEl = document.createElement('time');
+    dateEl.className = 'note-date';
+    dateEl.textContent = new Date(note.updatedAt || note.createdAt).toLocaleString();
+
+    item.appendChild(titleEl);
+    item.appendChild(excerptEl);
+    item.appendChild(dateEl);
+
+    if (String(note.id) === String(currentNoteId)) {
+      item.classList.add('active');
+      item.setAttribute('aria-current', 'true');
+    }
+
+    container.appendChild(item);
+  });
+}
+```
+
+---
+
+### 🏆 Resumen Final del Curso
+
+| Pilar de JavaScript | Conceptos Dominados |
+| :--- | :--- |
+| **Bases del Lenguaje** | Variables (`let`/`const`), Tipos Primitivos vs Referencia, Operadores, Coerción, Hoisting |
+| **Estructuras de Flujo** | Condicionales (`if`/`switch`/ternario), Bucles (`for`/`for...of`/`while`), Funciones puras y Arrow Functions |
+| **Arquitectura de Memoria** | Scope léxico, Cadena de Scope, Closures, Garbage Collector y Patrón Module/Factory |
+| **Estructuras de Datos** | Arrays, Objetos Literales, Inmutabilidad, Destructuring, Spread Operator y Métodos de Orden Superior (`map`, `filter`, `find`, `reduce`) |
+| **Interacción con el Navegador** | Selección del DOM, Event Listeners (`click`, `submit`, `keydown`), `FormData`, `localStorage` y ES Modules (`import`/`export`) |
+
+---
+
 _Hecho con ☕ y 💻 para el Curso de Fundamentos de JavaScript - Platzi_
+
