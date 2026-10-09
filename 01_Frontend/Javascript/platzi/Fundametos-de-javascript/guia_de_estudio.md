@@ -26,6 +26,7 @@ Esta guía contiene los apuntes de estudio, explicaciones detalladas y conceptos
 - [Clase 18: Eventos del DOM y Manejo de Estado (`addEventListener`)](#clase-18-eventos-del-dom-y-manejo-de-estado-addeventlistener)
 - [Clase 19: Formularios (`FormData`, `submit`, `preventDefault`) y Persistencia con `localStorage`](#clase-19-formularios-formdata-submit-preventdefault-y-persistencia-con-localstorage)
 - [Clase 20: Módulos en JavaScript (ES Modules: `import` / `export`, Named vs. Default y Arquitectura Modular)](#clase-20-módulos-en-javascript-es-modules-import--export-named-vs-default-y-arquitectura-modular)
+- [Clase 21: Asincronismo en JavaScript (Event Loop, Callbacks, Promesas y Async / Await)](#clase-21-asincronismo-en-javascript-event-loop-callbacks-promesas-y-async--await)
 - [Proyecto Integrador: Sistema de Gestión de Notas en Markdown (`notes-md`)](#proyecto-integrador-sistema-de-gestión-de-notas-en-markdown-notes-md)
 
 ---
@@ -3511,6 +3512,458 @@ initContact();
 
 ---
 
+## Clase 21: Asincronismo en JavaScript (Event Loop, Callbacks, Promesas y Async / Await)
+
+👉 [Ver código de la clase](./curso/src/18-async.js)
+
+En JavaScript tradicional, el código se ejecuta de forma **síncrona y secuencial**: una instrucción detrás de otra sobre un **único hilo de ejecución** (*Single Thread*). Sin embargo, muchas operaciones cotidianas en la web toman tiempo impredecible (como consultar una base de datos remota, pedir datos a una API con `fetch`, leer un archivo del disco o esperar un temporizador con `setTimeout`). 
+
+Si JavaScript esperara de forma congelada a que cada petición terminara, **toda la interfaz de usuario se bloquearía por completo** (los botones no responderían, las animaciones se congelarían y el usuario pensaría que la página se rompió). Aquí es donde entra en juego el **Asincronismo**.
+
+---
+
+### ☕ La Analogía de la Cafetería y el Zumbador Electrónico
+
+Imagina que entras a una cafetería muy concurrida a pedir un café especial:
+
+#### ❌ El Enfoque Síncrono y Bloqueante:
+1. Llegas a la caja, pides tu café.
+2. El cajero deja su puesto, va a la cocina, muele los granos, calienta la leche y prepara el café durante **10 minutos**.
+3. Mientras tanto, el cajero **no atiende a nadie más**. Los 40 clientes en la fila están congelados esperando sin poder hacer nada.
+
+#### ✅ El Enfoque Asíncrono de JavaScript:
+1. Llegas a la caja, pides tu café.
+2. El cajero te cobra de inmediato y te entrega un **ticket o zumbador electrónico** (la **Promesa**).
+3. La cocina (**Web API / Sistema en segundo plano**) se encarga de preparar el café.
+4. El cajero **atiende inmediatamente al siguiente cliente en la fila** sin perder un solo segundo (*Single Thread no bloqueante*).
+5. Cuando tu café está listo, el zumbador vibra y emite luz (**`resolve`**). Te acercas a la barra y disfrutas tu café (**`.then()`**). Si se terminó la leche de avena, el zumbador suena con alarma roja (**`reject`**) y te dan una solución alternativa (**`.catch()`**).
+
+```mermaid
+flowchart LR
+    subgraph Sincrono ["❌ Modelo Síncrono (Bloqueante)"]
+        direction TB
+        A1["👤 Pedir Café"] --> A2["⏳ Esperar 10 min (Fila Congelada ⛔)"] --> A3["☕ Recibir Café"]
+    end
+
+    subgraph Asincrono ["✅ Modelo Asíncrono (No Bloqueante)"]
+        direction TB
+        B1["👤 Pedir Café"] --> B2["📟 Recibir Zumbador (Promesa)"]
+        B2 --> B3["🚶 Seguir con tu vida / Atender fila"]
+        B2 -.->|Cocina termina| B4["⚡ Zumbador vibra (resolve) ➔ ☕ Recoger"]
+    end
+```
+
+---
+
+### ⚙️ El Motor Interno: ¿Cómo funciona el Event Loop?
+
+Para entender por qué el código asíncrono no se ejecuta en el orden visual de arriba a abajo, debemos conocer las **4 piezas del motor de JavaScript**:
+
+```
+ ┌────────────────────────────────────────────────────────┐
+ │                      MOTOR JAVASCRIPT                  │
+ │                                                        │
+ │   ┌──────────────────────┐    ┌────────────────────┐   │
+ │   │      CALL STACK      │    │     WEB APIs       │   │
+ │   │  (Pila de Ejecución) │    │ (Node / Browser)   │   │
+ │   │  ──────────────────  │    │ ────────────────── │   │
+ │   │  console.log('1')    │    │ setTimeout(...)    │   │
+ │   │  console.log('3')    │    │ fetch() / DOM      │   │
+ │   └──────────┬───────────┘    └────────┬───────────┘   │
+ │              │                         │               │
+ │              │                         ▼               │
+ │              │                ┌────────────────────┐   │
+ │              │   EVENT LOOP   │   CALLBACK QUEUE   │   │
+ │              │ ┌────────────┐ │   (Cola de Tareas) │   │
+ │              └─┤ ¿Stack     │ │ ────────────────── │   │
+ │                │  Vacío?    ├─┤ Callback timeout   │   │
+ │                └────────────┘ └────────────────────┘   │
+ └────────────────────────────────────────────────────────┘
+```
+
+1. **Call Stack (Pila de Ejecución)**: Es la estructura donde se colocan las funciones que se están ejecutando en el instante presente (*LIFO: Last In, First Out*).
+2. **Web APIs (Entorno del Navegador / Node.js)**: Los temporizadores (`setTimeout`), peticiones de red (`fetch`), o eventos del DOM viven aquí en segundo plano fuera del hilo principal.
+3. **Callback Queue (Cola de Tareas / Macrotask Queue)**: Cuando una Web API concluye su tiempo o descarga sus datos, coloca su función de respuesta (*callback*) en una fila de espera.
+4. **Event Loop (El Vigilante del Tráfico)**: Revisa constantemente el Call Stack. **Solo cuando el Call Stack está 100% vacío**, toma la primera tarea de la Callback Queue y la empuja al Call Stack para ser ejecutada.
+
+#### 🧪 Demostración con `setTimeout`:
+
+```javascript
+console.log('1. Inicio');
+
+setTimeout(() => {
+  console.log('2. Timeout Ejecutado');
+}, 1000);
+
+console.log('3. Fin');
+```
+
+**Salida en consola:**
+```text
+1. Inicio
+3. Fin
+2. Timeout Ejecutado
+```
+
+> [!IMPORTANT]
+> **¿Por qué `3. Fin` sale antes que `2. Timeout Ejecutado`?**
+> Porque `setTimeout` entrega la tarea a la Web API y sale inmediatamente del Call Stack. JavaScript continúa ejecutando `console.log('3. Fin')`. Aunque el tiempo fuera `0` milisegundos (`setTimeout(..., 0)`), el callback debe pasar obligatoriamente por la Callback Queue y esperar a que el Call Stack termine todas sus tareas síncronas.
+
+---
+
+### 📞 1. Callbacks (Funciones de Retorno)
+
+Un **Callback** es una función que se pasa como argumento a otra función con el fin de ser invocada (_llamada de vuelta_) una vez que se complete una operación asíncrona.
+
+```javascript
+function obtenerDatos(callback) {
+  setTimeout(() => {
+    callback('datos obtenidos');
+  }, 2000);
+}
+
+obtenerDatos((resultado) => {
+  console.log(resultado); // 👉 "datos obtenidos" (después de 2s)
+});
+```
+
+---
+
+### 🌋 El Problema del Callback Hell (La Pirámide de la Muerte)
+
+Cuando varias operaciones asíncronas dependen una del resultado de la anterior (por ejemplo: *1. Obtener usuario $\to$ 2. Obtener notas del usuario $\to$ 3. Procesar esas notas*), los callbacks deben anidarse sucesivamente uno dentro del otro:
+
+```javascript
+// ❌ CALLBACK HELL: Código en forma de pirámide '> > >'
+obtenerUsuario((usuario) => {
+  obtenerNotas(usuario.id, (notas) => {
+    procesarNotas(notas, (resultado) => {
+      console.log('Usuario:', usuario.nombre);
+      console.log('Resultado:', resultado);
+      // Si agregamos 3 pasos más, el código se vuelve ilegible e imposible de mantener
+    });
+  });
+});
+```
+
+#### Desventajas del Callback Hell:
+- **Pésima Legibilidad**: El código crece horizontalmente hacia la derecha en lugar de hacia abajo.
+- **Manejo de Errores Complejo**: Se debe manejar el error manualmente en cada uno de los niveles con `if (err)`.
+- **Falta de Composición**: Es difícil coordinar múltiples tareas en paralelo.
+
+---
+
+### 🤝 2. Promesas (`Promise`): La Evolución Moderna
+
+Una **Promesa (`Promise`)** es un objeto especial de JavaScript que representa un valor que puede estar disponible **ahora, en el futuro o nunca**.
+
+#### 🚦 Los 3 Estados Fundamentales de una Promesa:
+
+```mermaid
+flowchart LR
+    P["⏳ PENDING\n(En proceso / Esperando)"]
+    P -->|resolve(valor)| F["✅ FULFILLED\n(Cumplida con éxito)"]
+    P -->|reject(error)| R["❌ REJECTED\n(Rechazada con error)"]
+
+    F --> T["👉 .then(valor => ...)"]
+    R --> C["👉 .catch(error => ...)"]
+```
+
+1. **`pending` (Pendiente)**: Estado inicial. La operación asíncrona se está ejecutando en segundo plano.
+2. **`fulfilled` (Cumplida / Resuelta)**: La operación finalizó con éxito. Se dispara llamando a `resolve(resultado)`.
+3. **`rejected` (Rechazada / Fallida)**: La operación fracasó. Se dispara llamando a `reject(error)`.
+
+---
+
+#### 🛠️ Cómo Crear y Consumir una Promesa:
+
+```javascript
+// 1. Creación con el constructor 'new Promise':
+const miPromesa = new Promise((resolve, reject) => {
+  const exito = true;
+
+  setTimeout(() => {
+    if (exito) {
+      resolve('Operacion Exitosa'); // ✅ Cumplida
+    } else {
+      reject(new Error('Algo malio sal')); // ❌ Rechazada
+    }
+  }, 1000);
+});
+
+// 2. Consumo con .then() y .catch():
+miPromesa
+  .then((mensaje) => {
+    console.log(mensaje); // 👉 "Operacion Exitosa"
+  })
+  .catch((error) => {
+    console.error(error.message);
+  })
+  .finally(() => {
+    console.log('Operación concluida (se ejecuta siempre)');
+  });
+```
+
+---
+
+#### ⛓️ Encadenamiento de Promesas (_Promise Chaining_)
+
+Las promesas resuelven el *Callback Hell* al permitir encadenar operaciones secuenciales de forma plana y elegante:
+
+```javascript
+function esperar(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function obtenerUsuario() {
+  return esperar(200).then(() => ({ id: 1, nombre: 'Ada' }));
+}
+
+function obtenerNotas(userId) {
+  return esperar(200).then(() => ['nota 1', 'nota 2']);
+}
+
+function procesarNotas(notas) {
+  return esperar(200).then(() => notas.map((n) => n.toUpperCase()));
+}
+
+// ✅ ENCADENAMIENTO PLANO: Fluye limpiamente de arriba a abajo
+obtenerUsuario()
+  .then((usuario) => obtenerNotas(usuario.id))
+  .then((notas) => procesarNotas(notas))
+  .then((resultado) => console.log('Resultado:', resultado))
+  .catch((error) => console.error('Error en algún paso:', error.message));
+```
+
+> [!TIP]
+> **Manejo Centralizado de Errores con `.catch()`:**
+> En una cadena de promesas, un solo `.catch()` al final es suficiente para capturar cualquier error ocurrido en **cualquiera de los eslabones anteriores**.
+
+---
+
+### ✨ 3. `async` y `await`: La Cúspide de la Legibilidad
+
+Introducidos en **ES2017 (ES8)**, las palabras clave `async` y `await` son una capa de "azúcar sintáctico" sobre las Promesas que nos permite escribir código asíncrono con la misma simplicidad y estructura visual que el código síncrono.
+
+#### 📌 Las 2 Reglas de Oro:
+
+1. **`async` antepuesto a una función**:
+   - Transforma automáticamente el valor retornado por la función en una **Promesa resuelta**.
+   - Habilita el uso de la palabra clave `await` en su interior.
+2. **`await` antes de una Promesa**:
+   - **Pausa la ejecución interna de esa función** de forma no bloqueante hasta que la promesa se resuelva o sea rechazada.
+   - Desempaqueta el valor resuelto directamente sin necesidad de llamar a `.then()`.
+
+---
+
+#### 🛡️ Manejo de Errores con `try...catch`
+
+Al usar `async/await`, el manejo de errores se realiza con los bloques estándar `try...catch` del lenguaje:
+
+```javascript
+async function cargarDatos() {
+  try {
+    const usuario = await obtenerUsuario();
+    const notas = await obtenerNotas(usuario.id);
+    const resultado = await procesarNotas(notas);
+
+    console.log('Usuario:', usuario.nombre);
+    console.log('Resultado:', resultado);
+  } catch (error) {
+    // Si cualquiera de los 3 await falla, el control salta inmediatamente aquí
+    console.log('Error:', error.message);
+  }
+}
+
+cargarDatos();
+```
+
+---
+
+### 📊 Comparativa Definitiva: Callbacks vs. Promesas vs. Async / Await
+
+| Característica | Callbacks | Promesas (`Promise`) | `async` / `await` |
+| :--- | :--- | :--- | :--- |
+| **Estándar** | JavaScript Inicial | ES6 (2015) | ES8 (2017) |
+| **Sintaxis** | Funciones anidadas | Métodos `.then()` y `.catch()` | Palabras clave `async` y `await` |
+| **Legibilidad** | 🔴 Mala (Callback Hell) | 🟡 Buena (Encadenamiento lineal) | 🟢 Excelente (Se lee como código síncrono) |
+| **Manejo de Errores** | Manual en cada nivel (`if (err)`) | Centralizado con `.catch()` | Estándar con `try...catch` |
+| **Retorno** | No retorna nada (`undefined`) | Objeto `Promise` | Objeto `Promise` |
+| **Facilidad de Depuración** | Compleja (pilas de llamadas partidas) | Moderada | Muy sencilla con breakpoints paso a paso |
+
+---
+
+### 💻 Código de la Clase Ilustrado y Comentado Paso a Paso
+
+A continuación se presenta el código completo de la clase con anotaciones pedagógicas:
+
+```javascript
+// ==========================================
+// 1. Demostración del Event Loop y Asincronía Básica
+// ==========================================
+console.log('1. Inicio');
+
+// Delegación a la Web API con retraso de 1000ms
+setTimeout(() => {
+  console.log('2. Timeout Ejecutado');
+}, 1000);
+
+console.log('3. Fin');
+// 👉 Salida en consola:
+// "1. Inicio"
+// "3. Fin"
+// "2. Timeout Ejecutado" (1 segundo después)
+
+// ==========================================
+// 2. Callbacks Tradicionales
+// ==========================================
+// Función que recibe un callback para retornar datos cuando estén listos
+function obtenerDatos(callback) {
+  setTimeout(() => {
+    callback('datos obtenidos');
+  }, 2000);
+}
+
+obtenerDatos((resultado) => {
+  console.log(resultado); // 👉 "datos obtenidos"
+});
+
+// ==========================================
+// 3. El Problema del Callback Hell
+// ==========================================
+function obtenerUsuarioCallback(cb) {
+  setTimeout(() => cb({ id: 1, nombre: 'Ada' }), 300);
+}
+
+function obtenerNotasCallback(userId, cb) {
+  setTimeout(() => cb(['nota 1', 'nota 2']), 300);
+}
+
+function procesarNotasCallback(notas, cb) {
+  setTimeout(() => cb(notas.map((n) => n.toUpperCase())), 300);
+}
+
+// Anidamiento en cascada:
+obtenerUsuarioCallback((usuario) => {
+  obtenerNotasCallback(usuario.id, (notas) => {
+    procesarNotasCallback(notas, (resultado) => {
+      console.log('Usuario:', usuario.nombre);
+      console.log('Resultado:', resultado);
+      // 👉 Usuario: Ada
+      // 👉 Resultado: [ 'NOTA 1', 'NOTA 2' ]
+    });
+  });
+});
+
+// ==========================================
+// 4. Promesas: Creación y Manejo de Estados
+// ==========================================
+const promesa = new Promise((resolve, reject) => {
+  const exito = true;
+
+  setTimeout(() => {
+    if (exito) {
+      resolve('Operacion Exitosa');
+    } else {
+      reject(new Error('Algo malio sal'));
+    }
+  }, 1000);
+});
+
+promesa
+  .then((mensaje) => {
+    console.log(mensaje); // 👉 "Operacion Exitosa"
+  })
+  .catch((error) => console.log(error.message));
+
+// ==========================================
+// 5. Encadenamiento de Promesas (Promise Chaining)
+// ==========================================
+// Función auxiliar que convierte setTimeout en una Promesa reutilizable
+function esperar(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function obtenerUsuario() {
+  return esperar(200).then(() => ({ id: 1, nombre: 'Ada' }));
+}
+
+function obtenerNotas(userId) {
+  return esperar(200).then(() => ['nota 1', 'nota 2']);
+}
+
+function procesarNotas(notas) {
+  return esperar(200).then(() => notas.map((n) => n.toUpperCase()));
+}
+
+obtenerUsuario()
+  .then((usuario) => obtenerNotas(usuario.id))
+  .then((notas) => procesarNotas(notas))
+  .then((resultado) => console.log('Resultado Promesas:', resultado))
+  .catch((error) => console.error('Error en algún paso:', error.message));
+
+// ==========================================
+// 6. Solución Moderna: async / await con try...catch
+// ==========================================
+async function obtenerUsuarioAsync() {
+  await esperar(200);
+  return { id: 1, nombre: 'Ada' };
+}
+
+async function cargarDatos() {
+  try {
+    const usuario = await obtenerUsuarioAsync();
+    const notas = await obtenerNotas(usuario.id);
+    const resultado = await procesarNotas(notas);
+
+    console.log('Usuario:', usuario.nombre);
+    console.log('Resultado:', resultado);
+    // 👉 Usuario: Ada
+    // 👉 Resultado: [ 'NOTA 1', 'NOTA 2' ]
+  } catch (error) {
+    console.log('Error capturado en bloque catch:', error.message);
+  }
+}
+
+// Invocación de la función asíncrona
+cargarDatos();
+```
+
+---
+
+### ⚠️ Errores Comunes y Buenas Prácticas
+
+> [!IMPORTANT]
+> **1. Olvidar la palabra clave `await`:**
+> Si llamas a una función asíncrona sin `await`, JavaScript no esperará a que termine y te devolverá la promesa en estado pendiente en lugar del valor real:
+> ```javascript
+> // ❌ Error común:
+> const usuario = obtenerUsuario(); // usuario es Promise { <pending> }
+> console.log(usuario.nombre);     // undefined 💥
+> 
+> // ✅ Correcto:
+> const usuario = await obtenerUsuario();
+> console.log(usuario.nombre);     // 'Ada'
+> ```
+
+> [!TIP]
+> **2. Tareas en Paralelo con `Promise.all()`:**
+> Si tienes varias promesas independientes que no necesitan esperar el resultado de las otras, ejecutarlas una por una con `await` secuencial ralentiza el programa. Usa `Promise.all()` para dispararlas al mismo tiempo en paralelo:
+> ```javascript
+> // ⏱️ Tarda 200ms + 200ms = 400ms (Secuencial)
+> const u = await obtenerUsuario();
+> const conf = await obtenerConfiguracion();
+> 
+> // ⚡ Tarda solo 200ms en total (En paralelo)
+> const [usuario, config] = await Promise.all([obtenerUsuario(), obtenerConfiguracion()]);
+> ```
+
+> [!WARNING]
+> **3. Siempre maneja los rechazos de promesas:**
+> En Node.js y navegadores modernos, dejar una promesa rechazada sin un `.catch()` o bloque `try...catch` produce un error `UnhandledPromiseRejectionWarning` que en versiones recientes de Node.js detiene el proceso completo de la aplicación.
+
+---
+
 ## 🚀 Proyecto Integrador: Sistema de Gestión de Notas en Markdown (`notes-md`)
 
 👉 [Ver lógica de la aplicación](./notes-md/src/app.js) | [Ver interfaz HTML](./notes-md/src/index.html) | [Ver hoja de estilos](./notes-md/src/styles.css)
@@ -3746,6 +4199,7 @@ function renderNoteList(notes) {
 | **Arquitectura de Memoria** | Scope léxico, Cadena de Scope, Closures, Garbage Collector y Patrón Module/Factory |
 | **Estructuras de Datos** | Arrays, Objetos Literales, Inmutabilidad, Destructuring, Spread Operator y Métodos de Orden Superior (`map`, `filter`, `find`, `reduce`) |
 | **Interacción con el Navegador** | Selección del DOM, Event Listeners (`click`, `submit`, `keydown`), `FormData`, `localStorage` y ES Modules (`import`/`export`) |
+| **Asincronismo y Event Loop** | Single-thread no bloqueante, Call Stack, Web APIs, Task Queue, Callbacks, Callback Hell, Promesas (`resolve`/`reject`/`then`/`catch`), y `async`/`await` con `try...catch` |
 
 ---
 

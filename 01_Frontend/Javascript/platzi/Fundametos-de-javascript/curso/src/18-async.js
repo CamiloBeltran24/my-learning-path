@@ -90,3 +90,21 @@ obtenerUsuario()
 
 
   // ASYNC y AWAIT
+  async function obtenerUsuario() {
+    await esperar(200);
+    return{}
+  }
+
+  async function cargarDatos(){
+    try {
+      const usuario = await obtenerUsuario();
+      const notas = await obtenerNotas(usuario);
+      const resultado = await obtenerNotas(notas);
+      console.log('Usuario: ', usuario.nombre);
+      console.log('Resultado: ', resultado);
+    } catch (error) {
+      console.log('Error: ', error.message);
+    }
+  }
+
+cargarDatos()
