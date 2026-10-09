@@ -27,6 +27,7 @@ Esta guía contiene los apuntes de estudio, explicaciones detalladas y conceptos
 - [Clase 19: Formularios (`FormData`, `submit`, `preventDefault`) y Persistencia con `localStorage`](#clase-19-formularios-formdata-submit-preventdefault-y-persistencia-con-localstorage)
 - [Clase 20: Módulos en JavaScript (ES Modules: `import` / `export`, Named vs. Default y Arquitectura Modular)](#clase-20-módulos-en-javascript-es-modules-import--export-named-vs-default-y-arquitectura-modular)
 - [Clase 21: Asincronismo en JavaScript (Event Loop, Callbacks, Promesas y Async / Await)](#clase-21-asincronismo-en-javascript-event-loop-callbacks-promesas-y-async--await)
+- [Clase 22: Peticiones HTTP y la Fetch API (GET, POST, Headers, JSON y Manejo de Errores)](#clase-22-peticiones-http-y-la-fetch-api-get-post-headers-json-y-manejo-de-errores)
 - [Proyecto Integrador: Sistema de Gestión de Notas en Markdown (`notes-md`)](#proyecto-integrador-sistema-de-gestión-de-notas-en-markdown-notes-md)
 
 ---
@@ -3964,6 +3965,280 @@ cargarDatos();
 
 ---
 
+## Clase 22: Peticiones HTTP y la Fetch API (GET, POST, Headers, JSON y Manejo de Errores)
+
+👉 [Ver código de la clase](./curso/src/19-http.js)
+
+En las aplicaciones web modernas, el navegador (cliente) rara vez trabaja de forma aislada. Necesita comunicarse constantemente con servidores remotos para **obtener información** (como un catálogo de productos o perfiles de usuario) o **enviar nueva información** (como guardar una orden de compra o autenticar un usuario).
+
+Esta comunicación se realiza siguiendo el protocolo **HTTP** (_HyperText Transfer Protocol_) mediante el modelo **Cliente - Servidor**, y en JavaScript moderno se gestiona de forma nativa a través de la **Fetch API** (`fetch()`).
+
+---
+
+### 🍽️ La Analogía del Restaurante, el Menú y el Mesero
+
+Para visualizar cómo interactúan el cliente, HTTP y el servidor:
+
+- **Tú en la mesa (El Cliente / Frontend)**: Decides qué deseas comer o qué cambios quieres hacer.
+- **La Cocina (El Servidor / Backend & Base de Datos)**: Donde se preparan los platos y se guardan los ingredientes. Tú no puedes entrar directamente a la cocina por motivos de seguridad y orden.
+- **La Carta o Menú (La API REST / Endpoints)**: Define exactamente qué platos están disponibles (`/products`, `/users`, `/categories`) y cómo puedes pedirlos.
+- **El Mesero (La Petición HTTP / `fetch`)**:
+  1. Lleva tu orden a la cocina en una comanda con detalles específicos (**Request: Método, Headers y Body**).
+  2. Espera a que la cocina procese el pedido de forma asíncrona.
+  3. Regresa a tu mesa con el plato servido o con una explicación si algo salió mal (**Response: Código de Estado y Datos**).
+
+```mermaid
+flowchart LR
+    subgraph CLIENTE ["💻 Cliente (Frontend / Navegador)"]
+        direction TB
+        UI["Interfaz de Usuario"]
+        FETCH["fetch(URL, opciones)"]
+    end
+
+    subgraph RED ["🌐 Protocolo HTTP (Internet)"]
+        REQ["📤 Request:\n• Método (GET, POST)\n• Headers (Content-Type)\n• Body (JSON)"]
+        RES["📥 Response:\n• Status (200, 201, 404)\n• Headers\n• Data (JSON)"]
+    end
+
+    subgraph SERVIDOR ["🏢 Servidor Remoto (API REST + DB)"]
+        API["https://api.escuelajs.co"]
+        DB[(Base de Datos)]
+    end
+
+    FETCH -->|Envía Petición| REQ --> API
+    API <--> DB
+    API -->|Envía Respuesta| RES --> FETCH
+```
+
+---
+
+### 🔑 1. Los 4 Métodos HTTP Principales (Operaciones CRUD)
+
+Las APIs REST asignan una acción o intención específica a cada **Verbo o Método HTTP**:
+
+| Método HTTP | Operación CRUD | Propósito | ¿Lleva `body`? | Ejemplo de Endpoint |
+| :--- | :--- | :--- | :---: | :--- |
+| **`GET`** | **Read** (Leer) | Solicitar y consultar recursos del servidor sin modificarlos. | ❌ No | `GET /api/v1/products` |
+| **`POST`** | **Create** (Crear) | Enviar nuevos datos para que el servidor cree un recurso. | ✅ Sí | `POST /api/v1/products` |
+| **`PUT` / `PATCH`** | **Update** (Actualizar) | Modificar un recurso existente (`PUT` completo, `PATCH` parcial). | ✅ Sí | `PUT /api/v1/products/1` |
+| **`DELETE`** | **Delete** (Eliminar) | Borrar un recurso existente del servidor. | ❌ Rara vez | `DELETE /api/v1/products/1` |
+
+---
+
+### 📦 2. Anatomía de una Petición HTTP
+
+Toda petición HTTP configurada con `fetch()` se compone de 4 partes esenciales:
+
+1. **URL / Endpoint**: La dirección del servicio al que apuntamos (ej. `https://api.escuelajs.co/api/v1/products`).
+2. **Método (`method`)**: El verbo HTTP (`'GET'`, `'POST'`, `'PUT'`, `'DELETE'`). Por defecto, `fetch()` utiliza `'GET'` si no se especifica otro.
+3. **Cabeceras (`headers`)**: Metadatos que describen el contenido del mensaje:
+   - `'Content-Type': 'application/json'`: Le indica al servidor *"los datos que te estoy mandando en el cuerpo están en formato JSON"*.
+   - `'Accept': 'application/json'`: Le indica al servidor *"espero que me respondas con formato JSON"*.
+   - `'Authorization': 'Bearer <token>'`: Credenciales o tokens de seguridad.
+4. **Cuerpo (`body`)**: Los datos que enviamos al servidor. Debe ser una cadena de texto (string), por lo que objetos JavaScript deben transformarse usando `JSON.stringify({...})`.
+
+---
+
+### 🚦 3. Códigos de Estado HTTP (_HTTP Status Codes_)
+
+Cuando el servidor responde, envía un código numérico de 3 dígitos que describe el resultado de la operación:
+
+| Rango | Significado | Ejemplos Comunes |
+| :--- | :--- | :--- |
+| **`2xx`** | **Éxito (Success)** | • `200 OK`: Petición exitosa (típico de `GET`).<br>• `201 Created`: Recurso creado exitosamente (típico de `POST`). |
+| **`3xx`** | **Redirección** | • `301 Moved Permanently`: El recurso cambió de dirección. |
+| **`4xx`** | **Error del Cliente** | • `400 Bad Request`: Datos mal formados o faltantes.<br>• `401 Unauthorized`: No autenticado / falta token.<br>• `404 Not Found`: El recurso o URL no existe. |
+| **`5xx`** | **Error del Servidor** | • `500 Internal Server Error`: El servidor tuvo un fallo interno o se cayó la base de datos. |
+
+---
+
+### 🔍 4. ¿Cómo funciona la función nativa `fetch()`? (El Proceso de 2 Fases)
+
+Una de las dudas más frecuentes al aprender `fetch()` es: **¿Por qué necesitamos dos `.then()` o dos `await`?**
+
+```javascript
+fetch(url)
+  .then(response => response.json()) // 👈 Fase 1: Llega la respuesta y convertimos a JSON
+  .then(data => console.log(data));   // 👈 Fase 2: Recibimos los datos ya parseados
+```
+
+```mermaid
+flowchart TD
+    A["🚀 fetch(url)"] -->|Fase 1: Promesa 1| B["📦 Objeto Response (status, ok, headers)"]
+    B -->|response.json(): Promesa 2| C["✨ Datos JavaScript (Array / Object)"]
+```
+
+#### ¿Por qué en dos fases?
+1. **Fase 1 (`fetch(url)` $\to$ `Response`)**: La primera promesa se resuelve apenas el servidor envía las **cabeceras HTTP** y el código de estado (muy rápido), pero los datos del cuerpo (_payload_) aún pueden estar descargándose en trozos (_stream_).
+2. **Fase 2 (`response.json()` $\to$ `data`)**: La segunda promesa lee el flujo completo del cuerpo de la respuesta y lo transforma de texto JSON crudo a un objeto o arreglo utilizable en JavaScript.
+
+---
+
+### ⚠️ La Gran Trampa de `fetch()`: La Propiedad `response.ok`
+
+> [!CAUTION]
+> **`fetch()` NO salta al `.catch()` ante un error 404 o 500.**
+> A diferencia de librerías como Axios, la promesa de `fetch()` **solo se rechaza si hay un fallo de conexión a nivel de red** (por ejemplo, si no tienes internet, el servidor no existe o hay un bloqueo por CORS).
+> 
+> Si el servidor responde con un código de error como `404 Not Found` o `500 Server Error`, `fetch()` considerará que la comunicación HTTP se completó y resolverá la promesa con éxito.
+
+#### ✅ La Solución Correcta: Validar siempre `response.ok`
+
+El objeto `Response` incluye una propiedad booleana **`response.ok`**, que vale `true` si el código de estado está en el rango exitoso (`200` al `299`), y `false` si es cualquier código de error:
+
+```javascript
+// ✅ Validación robusta de peticiones:
+async function obtenerProductosSeguro(url) {
+  try {
+    const response = await fetch(url);
+
+    // 🛑 Si el status es 404, 500, etc., lanzamos un error explícito
+    if (!response.ok) {
+      throw new Error(`Error HTTP: ${response.status} - ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Fallo en la petición:', error.message);
+  }
+}
+```
+
+---
+
+### 💻 Código de la Clase Ilustrado y Comentado Paso a Paso
+
+A continuación se explica línea por línea el código de la clase [curso/src/19-http.js](./curso/src/19-http.js):
+
+#### 1. Petición `GET` (Consultar Productos con Promesas)
+
+```javascript
+// 🌐 Endpoint de la Fake API de Platzi (EscuelaJS)
+const FAKEAPI = 'https://api.escuelajs.co/api/v1/products';
+
+// Por defecto, fetch ejecuta una petición con método 'GET'
+fetch(FAKEAPI)
+  .then((response) => {
+    // 1. response es un objeto Response con metadatos (status, ok, headers)
+    console.log('Status de la respuesta:', response.status); // 200
+    console.log('¿Petición exitosa?:', response.ok);          // true
+    
+    // Convertimos el stream de datos a JSON (retorna una nueva promesa)
+    return response.json();
+  })
+  .then((data) => {
+    // 2. data es el arreglo de productos parseado
+    console.log('Productos recibidos:', data);
+  })
+  .catch((error) => {
+    // Se ejecuta ante fallos de conexión a internet o red
+    console.error('Error de conexión:', error);
+  });
+```
+
+---
+
+#### 2. Petición `POST` (Crear un Nuevo Producto con Headers y Body)
+
+```javascript
+const FAKEAPI_POST = 'https://api.escuelajs.co/api/v1/products';
+
+// Objeto de configuración con method, headers y body
+fetch(FAKEAPI_POST, {
+  method: 'POST', // Indicamos que vamos a crear un nuevo recurso
+  headers: {
+    'Content-Type': 'application/json', // Tipo de contenido que enviamos
+    Accept: 'application/json',          // Tipo de contenido que esperamos recibir
+  },
+  // Serializamos el objeto JS a una cadena de texto JSON
+  body: JSON.stringify({
+    title: 'Producto de prueba',
+    price: 999,
+    description: 'Creado desde fetch',
+    categoryId: 1,
+    images: ['https://placeimg.com/640/480/any'],
+  }),
+})
+  .then((response) => response.json())
+  .then((nuevoProducto) => {
+    console.log('Producto creado exitosamente:', nuevoProducto);
+  })
+  .catch((error) => {
+    console.error('Error al crear producto:', error);
+  });
+```
+
+---
+
+#### 3. Implementación Moderna con `async` / `await`
+
+La forma más legible y estándar en la industria para realizar peticiones HTTP en aplicaciones reales:
+
+```javascript
+// Función asíncrona para consultar un producto por ID
+async function getProduct(id) {
+  try {
+    const response = await fetch(`https://api.escuelajs.co/api/v1/products/${id}`);
+    
+    if (!response.ok) {
+      throw new Error(`No se pudo encontrar el producto con ID ${id}`);
+    }
+
+    const product = await response.json();
+    return product;
+  } catch (error) {
+    console.error('Error en getProduct:', error.message);
+    return null;
+  }
+}
+
+// Función asíncrona para registrar un nuevo producto
+async function createProduct(newProductData) {
+  try {
+    const response = await fetch('https://api.escuelajs.co/api/v1/products', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newProductData),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error al crear producto: ${response.status}`);
+    }
+
+    const created = await response.json();
+    return created;
+  } catch (error) {
+    console.error('Error en createProduct:', error.message);
+    throw error;
+  }
+}
+```
+
+---
+
+### 🛡️ Mejores Prácticas al Consumir APIs con `fetch`
+
+> [!TIP]
+> **1. Siempre serializa el cuerpo con `JSON.stringify()`:**
+> Si envías un objeto plano directamente en `body: { title: 'Hola' }`, el navegador enviará `[object Object]` y el servidor responderá con un error `400 Bad Request`.
+> ```javascript
+> // ❌ Incorrecto: body: { title: 'Zapato' }
+> // ✅ Correcto:   body: JSON.stringify({ title: 'Zapato' })
+> ```
+
+> [!IMPORTANT]
+> **2. No olvides la cabecera `Content-Type: application/json` en peticiones `POST`/`PUT`:**
+> Sin este encabezado, la mayoría de los servidores de backend (Express, Django, NestJS, Spring) no sabrán cómo parsear el cuerpo recibido y lo interpretarán como vacío o texto sin formato.
+
+> [!TIP]
+> **3. Usa variables para URLs base (`BASE_URL`):**
+> Centralizar la URL de la API en una constante facilita el cambio entre entornos de desarrollo (`localhost`), pruebas y producción.
+
+---
+
 ## 🚀 Proyecto Integrador: Sistema de Gestión de Notas en Markdown (`notes-md`)
 
 👉 [Ver lógica de la aplicación](./notes-md/src/app.js) | [Ver interfaz HTML](./notes-md/src/index.html) | [Ver hoja de estilos](./notes-md/src/styles.css)
@@ -4200,6 +4475,7 @@ function renderNoteList(notes) {
 | **Estructuras de Datos** | Arrays, Objetos Literales, Inmutabilidad, Destructuring, Spread Operator y Métodos de Orden Superior (`map`, `filter`, `find`, `reduce`) |
 | **Interacción con el Navegador** | Selección del DOM, Event Listeners (`click`, `submit`, `keydown`), `FormData`, `localStorage` y ES Modules (`import`/`export`) |
 | **Asincronismo y Event Loop** | Single-thread no bloqueante, Call Stack, Web APIs, Task Queue, Callbacks, Callback Hell, Promesas (`resolve`/`reject`/`then`/`catch`), y `async`/`await` con `try...catch` |
+| **Comunicación HTTP y APIs** | Protocolo HTTP, Métodos (GET, POST, PUT, DELETE), Fetch API nativa, Headers (`Content-Type`), JSON (`stringify`/`parse`), Códigos de Estado (2xx, 4xx, 5xx) y validación de `response.ok` |
 
 ---
 
